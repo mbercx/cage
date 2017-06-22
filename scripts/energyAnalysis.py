@@ -1,4 +1,5 @@
 # Encoding utf-8
+# Written for Python 3.6
 
 import sys
 import pymatgen.io.nwchem as nwchem

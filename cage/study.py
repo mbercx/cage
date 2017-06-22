@@ -37,10 +37,10 @@ class Study(MSONable):
         :param software: String that describes the code to use for the calculations
         """
         self._structures = structures
-        self._comp_dict = classify_by_composition(structures)
         self._tasks = tasks
         self._software = software
         self._options = options
+        self._comp_dict = classify_by_composition(structures)
 
     @property
     def structures(self):
@@ -58,7 +58,7 @@ class Study(MSONable):
     def options(self):
         return self.options
 
-    def set_up_input(self, directory):
+    def set_up_input(self, directory, sort_comp=False):
         """
         Set up all of the input files for the calculations and systems.
 
@@ -66,6 +66,7 @@ class Study(MSONable):
         should be set up.
         :return:
         """
+        #TODO Let the script set up the directory in case it does not exist
 
         # Get the absolute path to the directory
         abs_dir = os.path.abspath(directory)
@@ -79,12 +80,15 @@ class Study(MSONable):
             # Set up the directory tree and input files
             for comp in self._comp_dict.keys():
 
-                comp_dir = str(comp).replace(' ','')
+                if sort_comp:
+                    comp_dir = str(comp).replace(' ','')
 
-                try:
-                    os.mkdir(os.path.join(abs_dir,comp_dir))
-                except:
-                    print(comp_dir + ' exists, skipping...')
+                    try:
+                        os.mkdir(os.path.join(abs_dir,comp_dir))
+                    except FileExistsError:
+                        print(comp_dir + ' exists, skipping...')
+                else:
+                    comp_dir = ''
 
                 geo_number = 1
 

@@ -1,6 +1,7 @@
-#!/g/g91/bercx1/venv/pymatgen/bin/python3
 # encoding: utf-8
+# Written for Python 3.6
 
+import sys
 import cage
 import numpy as np
 import pymatgen as pmg
@@ -15,6 +16,8 @@ molecule, defined by a VASP POSCAR file in the pwd.
 This script was written quite quickly, so the code is downright dirty.
 """
 
+filename = sys.argv[1]
+
 # Parameters
 LINE = [2, 5]
 BASIS = {'*': "aug-pcseg-1"}
@@ -25,7 +28,7 @@ setup = {'dft': {'iterations': '100',
 # BASIS = {'C':'6-311g','B':'6-311g','H':'6-311g'}
 
 # Load the POSCAR into a Cage
-mol = cage.facetsym.Cage.from_poscar('POSCAR')
+mol = cage.facetsym.Cage.from_poscar(filename)
 
 # Find the non-equivalent facets
 facets = mol.find_noneq_facets()
@@ -76,16 +79,13 @@ for neq_facet in facets:
     # Set up the input files, and place the geometry files in a subdirectory
     # of the composition directory
     study = cage.study.Study(structures, tasks)
-    study.set_up_input('.')
+    study.set_up_input('.',sort_comp=False)
 
-    comp_dir = os.path.join(os.path.abspath('.'),
-                            str(mol.composition).replace(' ','') + 'Li+1')
-
-    facet_dir = os.path.join(comp_dir, 'facet' + str(facetnumber))
+    facet_dir = 'facet' + str(facetnumber)
     os.mkdir(facet_dir)
 
     for i in range(len(structures)):
-        shutil.move(os.path.join(comp_dir,'geo' + str(i + 1)),
+        shutil.move(os.path.join('geo' + str(i + 1)),
                     os.path.join(facet_dir, 'geo' + str(i + 1)))
 
     facetnumber += 1
