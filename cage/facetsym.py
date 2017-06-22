@@ -3,9 +3,10 @@
 
 import pymatgen as pmg
 import pymatgen.symmetry.analyzer as syman
-
-from itertools import combinations
 import numpy as np
+
+from pymatgen.core.structure import SiteCollection, Molecule
+from itertools import combinations
 from math import pi
 
 """
@@ -20,7 +21,7 @@ __status__ = "nowhere"
 __date__ = "14 JUN 2017"
 
 
-class Cage(pmg.Molecule):
+class Cage(Molecule):
     """
     A Cage is a molecule that is sort of shaped as a fullerene, based of the Molecule class from pymatgen.
     """
@@ -171,7 +172,15 @@ class Cage(pmg.Molecule):
 
         return facets_noneq
 
-class Facet(object):
+    def find_facet_paths(self):
+        """
+        Find the pathways between connected facets of the cage molecule. The
+        facets can be connected by sharing an edge, or a vertex.
+        :return:
+        """
+        pass
+
+class Facet(SiteCollection):
     """
     Facet of a Molecule object, defined by a list of Sites
     """

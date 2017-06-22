@@ -11,21 +11,26 @@ import shutil
 
 """
 Script to set up the calculations for all the non-equivalent facets of a cage
-molecule, defined by a VASP POSCAR file in the pwd.
+molecule, defined by a VASP POSCAR file provided as an argument.
 
 This script was written quite quickly, so the code is downright dirty.
+
+:argument filename: The filename of the VASP 
 """
 
 filename = sys.argv[1]
 
 # Parameters
-LINE = [2, 5]
+LINE = [2, 5] # Distance from the center of the molecule for the Lithium
+
 BASIS = {'*': "aug-pcseg-1"}
-setup = {'dft': {'iterations': '100',
+
+ALT_SETUP = {'dft': {'iterations': '100',
                  'xc': 'xpbe96 xpbe96',
                  'direct': '',
                  'convergence': 'energy 1e-6'}}
-# BASIS = {'C':'6-311g','B':'6-311g','H':'6-311g'}
+
+GEO_SETUP = {'noautoz', 'nocenter', "units angstroms"}
 
 # Load the POSCAR into a Cage
 mol = cage.facetsym.Cage.from_poscar(filename)
@@ -70,16 +75,16 @@ for neq_facet in facets:
 
     # Calculate the constraints on the atoms, and add them to the setup
     constraints = {'fix atom': site_numbers}
-    setup['constraints'] = constraints
+    ALT_SETUP['constraints'] = constraints
 
     # Set up the task for the calculations
     tasks = [nwchem.NwTask(-1, None, BASIS, theory='dft', operation='optimize',
-                           alternate_directives=setup)]
+                           alternate_directives=ALT_SETUP)]
 
     # Set up the input files, and place the geometry files in a subdirectory
     # of the composition directory
     study = cage.study.Study(structures, tasks)
-    study.set_up_input('.',sort_comp=False)
+    study.set_up_input('.', sort_comp=False, geometry_options=GEO_SETUP)
 
     facet_dir = 'facet' + str(facetnumber)
     os.mkdir(facet_dir)

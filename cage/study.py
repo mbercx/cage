@@ -27,19 +27,18 @@ class Study(MSONable):
     Structures.
     """
 
-    def __init__(self, structures, tasks, software='nwchem', options = None):
+    def __init__(self, structures, tasks, software='nwchem'):
         """
         Initialise the Study.
 
         :param systems: List of IStructures to study
-        :param tasks: List of NwTasks
+        :param tasks: List of NwTasks or whatever we will use for VASP
         :param options: Dictionary of options to apply to calculations
         :param software: String that describes the code to use for the calculations
         """
         self._structures = structures
         self._tasks = tasks
         self._software = software
-        self._options = options
         self._comp_dict = classify_by_composition(structures)
 
     @property
@@ -54,11 +53,7 @@ class Study(MSONable):
     def software(self):
         return self._software
 
-    @property
-    def options(self):
-        return self.options
-
-    def set_up_input(self, directory, sort_comp=False):
+    def set_up_input(self, directory, sort_comp=False, **kwargs):
         """
         Set up all of the input files for the calculations and systems.
 
@@ -103,7 +98,8 @@ class Study(MSONable):
 
                     # Set up the input file
                     nwinput = nwchem.NwInput(structure, self.tasks,
-                                             directives=self._options)
+                                             directives=self._options,
+                                             **kwargs)
                     nwinput.write_file(os.path.join(abs_dir,
                                                     comp_dir, geo_dir,'input'))
 
@@ -112,6 +108,8 @@ class Study(MSONable):
         ############
         #   VASP   #
         ############
+
+        #TODO Add functionality for VASP studies
 
         elif self.software == 'vasp':
             raise IOError("Currently, vasp inputs are not implemented yet.")
