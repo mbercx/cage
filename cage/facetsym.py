@@ -35,10 +35,12 @@ class Cage(Molecule):
         :param species:
         :param coords:
         """
-        super(Cage, self).__init__(species, coords)
+        super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
+                                   validate_proximity, site_properties)
         self._center()
-        self._pointgroup = None
         self._facets = self._find_surface_facets()
+        self._pointgroup = None
+        self._symmops = None
 
     def _center(self):
         """
@@ -114,7 +116,22 @@ class Cage(Molecule):
         :return:
         """
         return self._facets
-
+    
+    @property
+    def symmops(self):
+        """
+        The symmetry operations of the Cage.
+        :return: List of 
+        """
+        if not self._symmops:
+            # Set up the point group analyzer
+            pgan = syman.PointGroupAnalyzer(self)
+    
+            # Find the full set of symmetry operations
+            self._symmops = syman.generate_full_symmops(pgan.symmops, 0.01)
+        
+        return self._symmops
+        
     @classmethod
     def from_poscar(cls, filename):
         """
@@ -128,6 +145,23 @@ class Cage(Molecule):
         cage = cls(structure.species, structure.cart_coords)
 
         return cage
+    
+    def append(self, species, coords, validate_proximity=True,
+               properties=None):
+        """
+        Overwrite the append method of the Molecule class, in order to
+        remove the symmetry operations after the site has been appended.
+        :param species:
+        :param coords: 
+        :param validate_proximity: 
+        :param properties: 
+        :return: 
+        """
+        super(Cage, self).append(species, coords, validate_proximity,
+               properties)
+        self._symmops = None
+
+        # TODO Add parameter descriptions.
 
     def to_poscar(self, filename='POSCAR'):
         """
@@ -146,23 +180,17 @@ class Cage(Molecule):
         """
         Find all of the nonequivalent facets of the Cage.
 
-        First try: just
-        :return:
+        :return: List of Facets
         """
-        # Set up the point group analyzer
-        pgan = syman.PointGroupAnalyzer(self)
-
-        # Find the full set of symmetry operations
-        symmops = syman.generate_full_symmops(pgan.symmops,0.01)
 
         # Find all the non-equivalent facets
         facets_noneq = []
-        for facet in self._facets:
+        for facet in self.facets:
             nonequivalent = True
             # Check to see if the facet is equivalent to one in the
             # nonequivalent list
             for facet_noneq in facets_noneq:
-                for symm in symmops:
+                for symm in self.symmops:
                     symm_facet_center = symm.operate(facet.center.tolist())
                     if np.linalg.norm(symm_facet_center - facet_noneq.center)\
                             < 1e-2:
@@ -174,13 +202,45 @@ class Cage(Molecule):
 
     def find_facet_paths(self):
         """
-        Find the pathways between connected facets of the cage molecule. The
-        facets can be connected by sharing an edge, or a vertex.
+        Find the non equivalent pathways between connected facets of the
+        cage molecule. The facets can be connected by sharing an edge,
+        or a vertex.
         :return:
         """
-        pass
 
-class Facet(SiteCollection):
+        # Find all paths, i.e. possible combinations of surface facets
+        paths = list(combinations(self.facets,2))
+
+        # Find the paths that share a vertex (this automatically finds those
+        # that share an edge as well).
+        vertex_sharing_paths = []
+        for path in paths:
+            cross_section = set(path[0].sites) & set(path[1].sites)
+            if cross_section:
+                vertex_sharing_paths.append(path)
+
+        # Find the vertex sharing paths that are non equivalent
+        non_eq_paths = []
+        for path in vertex_sharing_paths:
+            nonequivalent = True
+            # Check to see if the path is equivalent with a path in the List of
+            # non-equivalent paths
+            for non_eq_path in non_eq_paths:
+                for symm in self.symmops:
+                    path_center = (path[0].center + path[1].center)/2
+                    non_eq_path_center = (non_eq_path[0].center +
+                                          non_eq_path[1].center)/2
+                    symm_path_center = symm.operate(path_center)
+                    if np.linalg.norm(symm_path_center - non_eq_path_center) \
+                        < 1e-2:
+                        nonequivalent = False
+            if nonequivalent == True:
+                non_eq_paths.append(path)
+
+        return non_eq_paths
+
+
+class Facet(object):
     """
     Facet of a Molecule object, defined by a list of Sites
     """

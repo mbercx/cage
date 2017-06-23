@@ -128,12 +128,6 @@ class Study(MSONable):
         """
         pass
 
-    def add_restraint(self):
-        """
-        Add a restraint to the list of restraints on the calculations.
-        """
-        pass
-
     def change_software(self):
         """
         Change the software being used for the calculations.
