@@ -18,6 +18,8 @@ This script was written quite quickly, so the code is downright dirty.
 :argument filename: The filename of the VASP 
 """
 
+#TODO Change the line algorithm back to the one where it actually starts from the center of the facet!
+
 filename = sys.argv[1]
 
 # Parameters
