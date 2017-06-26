@@ -100,3 +100,5 @@ for neq_facet in facets:
                     os.path.join(facet_dir, 'geo' + str(i + 1)))
 
     facetnumber += 1
+
+    # Write out a

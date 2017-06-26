@@ -14,6 +14,8 @@ selection of structures. It allows the user to easily set up a lot of
 calculations in a systematic way.
 """
 
+# TODO Check what went wrong with the B12 calculations, and add it to custodian
+
 __author__ = "Marnik Bercx"
 __version__ = "0.1"
 __maintainer__ = ""

@@ -4,32 +4,39 @@
 import pymatgen as pmg
 import pymatgen.symmetry.analyzer as syman
 import numpy as np
+import json
 
-from pymatgen.core.structure import SiteCollection, Molecule
+from pymatgen.core.structure import SiteCollection
+from pymatgen.core.structure import Molecule
+from monty.json import MSONable
 from itertools import combinations
 from math import pi
+from monty.io import zopen
 
 """
-Analysis tools to find the non-equivalent faces of fullerene shaped molecules. Still very much a work in progress.
+Analysis tools to find the non-equivalent faces of fullerene shaped molecules.
+Still very much a work in progress.
 """
 
 __author__ = "Marnik Bercx"
 __version__ = "0.1"
 __maintainer__ = "Marnik Bercx"
 __email__ = "marnik.bercx@uantwerpen.be"
-__status__ = "nowhere"
+__status__ = "initialization"
 __date__ = "14 JUN 2017"
 
 
 class Cage(Molecule):
     """
-    A Cage is a molecule that is sort of shaped as a fullerene, based of the Molecule class from pymatgen.
+    A Cage is a molecule that is sort of shaped as a fullerene, based of the
+    Molecule class from pymatgen.
     """
 
-    def __init__(self, species, coords, charge=0, spin_multiplicity=None, validate_proximity=False,
-                 site_properties=None):
+    def __init__(self, species, coords, charge=0, spin_multiplicity=None,
+                 validate_proximity=False, site_properties=None):
         """
-        Creates a Mutable Molecule Cage, specifically designed to work on the facets etc.
+        Creates a Mutable Molecule Cage, specifically designed to work on the
+        facets etc.
 
         The Cage molecule is automatically centered on its center of mass.
         :param species:
@@ -244,10 +251,12 @@ class Cage(Molecule):
         return non_eq_paths
 
 
-class Facet(object):
+class Facet(SiteCollection, MSONable):
     """
     Facet of a Molecule object, defined by a list of Sites
     """
+
+    #TODO Allow the facet to contain more than three sites
 
     def __init__(self, sites):
         self._sites = sites
@@ -258,6 +267,76 @@ class Facet(object):
         """
         Check if two Facets are the same.
         :param other:
+        :return:
+        """
+        pass #TODO
+
+    @classmethod
+    def from_str(cls, input_string, fmt):
+        """
+
+        :param input_string:
+        :param fmt:
+        :return:
+        """
+        pass #TODO
+
+    @classmethod
+    def from_file(cls, filename):
+        """
+
+        :param filename:
+        :return:
+        """
+        pass #TODO
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+
+        :param d:
+        :return:
+        """
+        pass #TODO
+
+    def to(self, fmt="json", filename=None):
+        """
+
+        :param fmt:
+        :param filename:
+        :return:
+        """
+        if fmt == "json":
+            if filename:
+                with zopen(filename, "wt", encoding='utf8') as file:
+                    return json.dump(self.as_dict(), file)
+            else:
+                return json.dumps(self.as_dict())
+        else:
+            raise NotImplementedError("Currently only json format is "
+                                      "supported.")
+
+    def as_dict(self):
+        """
+
+        :return:
+        """
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "sites": []}
+        for site in self:
+            site_dict = site.as_dict()
+            del site_dict["@module"]
+            del site_dict["@class"]
+            d["sites"].append(site_dict)
+        return d
+
+
+    def get_distance(self, i, j):
+        """
+
+        :param i:
+        :param j:
         :return:
         """
         pass #TODO
