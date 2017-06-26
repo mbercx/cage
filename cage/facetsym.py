@@ -66,11 +66,15 @@ class Cage(Molecule):
         """
         Finds all the surface facets of the Cage object.
 
-        Currently does not expand the facets to 4 sites in case it finds other sites which are in the plane of the site,
-        as defined by 3 site points.
+        Currently does not expand the facets to 4 sites in case it finds other
+        sites which are in the plane of the site, as defined by 3 site points.
+
         :return: List of Facet objects
         """
+
         sites_all = self.sites
+
+        #TODO Make this method more general: i.e. allow any element type to be ignored
 
         # Find all the non Hydrogen sites
         sites_nonH = []
@@ -250,6 +254,14 @@ class Facet(object):
         self._center = siteCenter(tuple(self.sites))
         self._normal = self._find_normal()
 
+    def __eq__(self, other):
+        """
+        Check if two Facets are the same.
+        :param other:
+        :return:
+        """
+        pass #TODO
+
     def _find_normal(self):
         """
         Finds the normal vector of the surface, pointing away from the origin
@@ -334,7 +346,7 @@ def schoenflies_to_HM():
     Function for converting the Schoenflies point group symbol to the Hermann Mangiun one.
     :return:
     """
-    pass
+    pass #TODO
 
 
 # Functions stolen from SO

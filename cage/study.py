@@ -97,11 +97,9 @@ class Study(MSONable):
                         print(geo_dir + ' exists, skipping...')
 
                     # Set up the input file
-                    nwinput = nwchem.NwInput(structure, self.tasks,
-                                             directives=self._options,
-                                             **kwargs)
-                    nwinput.write_file(os.path.join(abs_dir,
-                                                    comp_dir, geo_dir,'input'))
+                    nwinput = nwchem.NwInput(structure, self.tasks, **kwargs)
+                    nwinput.write_file(os.path.join(abs_dir, comp_dir,
+                                                    geo_dir,'input'))
 
                     geo_number += 1
 

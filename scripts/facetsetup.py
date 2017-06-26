@@ -18,12 +18,12 @@ This script was written quite quickly, so the code is downright dirty.
 :argument filename: The filename of the VASP 
 """
 
-#TODO Change the line algorithm back to the one where it actually starts from the center of the facet!
-
 filename = sys.argv[1]
 
 # Parameters
-LINE = [2, 5] # Distance from the center of the molecule for the Lithium
+LINE = [1, 4] # Distance from the center of the facet for the Lithium
+
+DENSITY = 5
 
 BASIS = {'*': "aug-pcseg-1"}
 
@@ -32,7 +32,7 @@ ALT_SETUP = {'dft': {'iterations': '100',
                  'direct': '',
                  'convergence': 'energy 1e-6'}}
 
-GEO_SETUP = {'noautoz', 'nocenter', "units angstroms"}
+GEO_SETUP = {'nocenter', "units angstroms"}
 
 # Load the POSCAR into a Cage
 mol = cage.facetsym.Cage.from_poscar(filename)
@@ -45,9 +45,10 @@ facetnumber = 1
 for neq_facet in facets:
 
     # Define the line on which to place the Lithium
+    center = neq_facet.center
     normal = neq_facet.normal / np.linalg.norm(neq_facet.normal)
-    endpoints = [LINE[0]*normal, LINE[1]*normal]
-    line = cage.landscape.Landscape(endpoints)
+    endpoints = [center + LINE[0]*normal, center + LINE[1]*normal]
+    line = cage.landscape.Landscape(endpoints, DENSITY)
 
     # Create the list of structures with lithium at varying distances to
     # the facet.
@@ -89,7 +90,10 @@ for neq_facet in facets:
     study.set_up_input('.', sort_comp=False, geometry_options=GEO_SETUP)
 
     facet_dir = 'facet' + str(facetnumber)
-    os.mkdir(facet_dir)
+    try:
+        os.mkdir(facet_dir)
+    except FileExistsError:
+        pass
 
     for i in range(len(structures)):
         shutil.move(os.path.join('geo' + str(i + 1)),
