@@ -9,13 +9,14 @@ from pymatgen.io import nwchem
 Script that checks if a calculation has completed successfully from the ouput
 file.
 """
+# TODO Add method of extracting data more quickly
 
 filename = sys.argv[1]
 
 try:
     out = nwchem.NwOutput(filename)
 except:
-    raise NotImplementedError('Other outputs than nwchem not implemented yet.')
+    raise IOError('Could not find proper nwchem output file.')
 
 error = False
 for data in out.data:

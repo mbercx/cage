@@ -101,4 +101,5 @@ for neq_facet in facets:
 
     facetnumber += 1
 
-    # Write out a
+    # Write out a facet json file
+    neq_facet.to(fmt='json',filename=os.path.join(facet_dir,'facet.json'))

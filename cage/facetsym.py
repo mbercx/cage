@@ -257,11 +257,15 @@ class Facet(SiteCollection, MSONable):
     """
 
     #TODO Allow the facet to contain more than three sites
+    #TODO Write those docstrings you lazy bastard!
 
-    def __init__(self, sites):
+    def __init__(self, sites, normal=None):
         self._sites = sites
         self._center = siteCenter(tuple(self.sites))
-        self._normal = self._find_normal()
+        if normal is not None:
+            self._normal = normal # TODO Check if normal makes sense
+        else:
+            self._normal = self._find_normal()
 
     def __eq__(self, other):
         """
@@ -269,17 +273,24 @@ class Facet(SiteCollection, MSONable):
         :param other:
         :return:
         """
-        pass #TODO
+        if (3 == len(set(self.sites) & set(other.sites))) and \
+                (self.normal == other.normal).all():
+            return True
+        else:
+            return False
+
+
 
     @classmethod
-    def from_str(cls, input_string, fmt):
+    def from_str(cls, input_string):
         """
 
         :param input_string:
         :param fmt:
         :return:
         """
-        pass #TODO
+        d = json.loads(input_string)
+        return cls.from_dict(d)
 
     @classmethod
     def from_file(cls, filename):
@@ -288,7 +299,10 @@ class Facet(SiteCollection, MSONable):
         :param filename:
         :return:
         """
-        pass #TODO
+        with zopen(filename) as file:
+            contents = file.read()
+
+        return cls.from_str(contents)
 
     @classmethod
     def from_dict(cls, d):
@@ -297,7 +311,11 @@ class Facet(SiteCollection, MSONable):
         :param d:
         :return:
         """
-        pass #TODO
+        sites = []
+        for site in d['sites']:
+            sites.append(pmg.Site.from_dict(site))
+
+        return cls(sites, normal=np.array(d['normal']))
 
     def to(self, fmt="json", filename=None):
         """
@@ -329,6 +347,7 @@ class Facet(SiteCollection, MSONable):
             del site_dict["@module"]
             del site_dict["@class"]
             d["sites"].append(site_dict)
+        d['normal'] = self.normal.tolist()
         return d
 
 
