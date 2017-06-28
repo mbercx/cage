@@ -1,2 +1,2 @@
-from . import facetsym, landscape, study
-__all__ = [facetsym, landscape, study]
+from . import facetsym, landscape, path, study, utils
+__all__ = [facetsym, landscape, path, study, utils]

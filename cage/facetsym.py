@@ -22,7 +22,7 @@ __author__ = "Marnik Bercx"
 __version__ = "0.1"
 __maintainer__ = "Marnik Bercx"
 __email__ = "marnik.bercx@uantwerpen.be"
-__status__ = "initialization"
+__status__ = "alpha"
 __date__ = "14 JUN 2017"
 
 
@@ -33,7 +33,7 @@ class Cage(Molecule):
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
-                 validate_proximity=False, site_properties=None):
+                 validate_proximity=False, site_properties=None,):
         """
         Creates a Mutable Molecule Cage, specifically designed to work on the
         facets etc.
@@ -41,6 +41,7 @@ class Cage(Molecule):
         The Cage molecule is automatically centered on its center of mass.
         :param species:
         :param coords:
+        :param charge:
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
@@ -65,7 +66,8 @@ class Cage(Molecule):
             prop = None
             if self.site_properties:
                 prop = {k: v[i] for k, v in self.site_properties.items()}
-            sites.append(pmg.Site(self.species[i], new_coords[i], properties=prop))
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
 
         self._sites = sites
 
@@ -77,6 +79,8 @@ class Cage(Molecule):
         Currently does not expand the facets to 4 sites in case it finds other
         sites which are in the plane of the site, as defined by 3 site points.
 
+        :param ignore: Tuple of elements to ignore for the surface facet
+        determination.
         :return: List of Facet objects
         """
 
