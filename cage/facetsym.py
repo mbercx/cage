@@ -69,7 +69,8 @@ class Cage(Molecule):
 
         self._sites = sites
 
-    def _find_surface_facets(self):
+    def _find_surface_facets(self, ignore=(pmg.Element('H'),
+                                           pmg.Element('Li'))):
         """
         Finds all the surface facets of the Cage object.
 
@@ -79,19 +80,15 @@ class Cage(Molecule):
         :return: List of Facet objects
         """
 
-        sites_all = self.sites
+        # Find all the sites which should not be ignored
+        sites_valid = []
+        for site in self.sites:
+            if not site.specie in ignore:
+                sites_valid.append(site)
 
-        #TODO Make this method more general: i.e. allow any element type to be ignored
-
-        # Find all the non Hydrogen sites
-        sites_nonH = []
-        for site in sites_all:
-            if not site.species_string == 'H':
-                sites_nonH.append(site)
-
-        # Find all of the facets from combinations of three Non-H Sites
+        # Find all of the Facets from combinations of three valid Sites
         facets_all = []
-        for combination in combinations(sites_nonH, 3):
+        for combination in combinations(sites_valid, 3):
             facets_all.append(Facet(list(combination)))
 
         # Flip the normal of the facets in case it points to the origin
@@ -103,9 +100,9 @@ class Cage(Molecule):
         facets_surf = []
         for facet in facets_all:
 
-            # Calculate the angles between all nonH sites and the surface normal
+            # Calculate the angles between all valid sites and the surface normal
             site_angles = []
-            for site in sites_nonH:
+            for site in sites_valid:
                 site_angles.append(facet.angle_to_normal(site.coords))
 
             # If all the angles are larger than pi/2, it's a surface site
@@ -156,6 +153,18 @@ class Cage(Molecule):
         cage = cls(structure.species, structure.cart_coords)
 
         return cage
+
+    @classmethod
+    def from_molecule(cls, mol):
+        """
+        Initializes a Cage from a Molecule.
+        :param mol:
+        :return:
+        """
+        assert type(mol) is Molecule
+        return cls(species=mol.species, coords=mol.cart_coords,
+                   charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
+                   site_properties=mol.site_properties)
     
     def append(self, species, coords, validate_proximity=True,
                properties=None):
@@ -178,7 +187,7 @@ class Cage(Molecule):
         """
         Writes the Cage to a POSCAR file.
         """
-        pass
+        pass #TODO
 
     def find_PointGroup(self):
         """
@@ -245,7 +254,7 @@ class Cage(Molecule):
                     if np.linalg.norm(symm_path_center - non_eq_path_center) \
                         < 1e-2:
                         nonequivalent = False
-            if nonequivalent == True:
+            if nonequivalent:
                 non_eq_paths.append(path)
 
         return non_eq_paths
@@ -273,7 +282,7 @@ class Facet(SiteCollection, MSONable):
         :param other:
         :return:
         """
-        if (3 == len(set(self.sites) & set(other.sites))) and \
+        if (len(set(self.sites) & set(other.sites)) == 3) and \
                 (self.normal == other.normal).all():
             return True
         else:
@@ -282,15 +291,19 @@ class Facet(SiteCollection, MSONable):
 
 
     @classmethod
-    def from_str(cls, input_string):
+    def from_str(cls, input_string, fmt="json"):
         """
 
         :param input_string:
         :param fmt:
         :return:
         """
-        d = json.loads(input_string)
-        return cls.from_dict(d)
+        if fmt == "json":
+            d = json.loads(input_string)
+            return cls.from_dict(d)
+        else:
+            raise NotImplementedError('Only json formats have been '
+                                      'implemented.')
 
     @classmethod
     def from_file(cls, filename):
@@ -427,7 +440,7 @@ def siteCenter(sites):
     :return: Array of the cartesian coordinates of the center of the sites
     """
     assert isinstance(sites, tuple)
-    nSites = len(sites)
+    nsites = len(sites)
 
     # Sum the x,y, and z values of the site coordinates
     sum = np.zeros(3)
@@ -436,15 +449,16 @@ def siteCenter(sites):
         sum[1] += site.y
         sum[2] += site.z
 
-    return sum / nSites
+    return sum / nsites
 
 
 def schoenflies_to_HM():
     """
-    Function for converting the Schoenflies point group symbol to the Hermann Mangiun one.
+    Function for converting the Schoenflies point group symbol to the Hermann
+    Mangiun one.
     :return:
     """
-    pass #TODO
+    pass  # TODO
 
 
 # Functions stolen from SO

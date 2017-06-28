@@ -27,14 +27,14 @@ DENSITY = 5
 
 BASIS = {'*': "aug-pcseg-1"}
 
-ALT_SETUP = {'dft': {'iterations': '100',
+ALT_SETUP = {'dft': {'iterations': '300',
                  'xc': 'xpbe96 xpbe96',
                  'direct': '',
                  'convergence': 'energy 1e-6'}}
 
 GEO_SETUP = {'nocenter', "units angstroms"}
 
-# Load the POSCAR into a Cage
+# Load the POSCAR into a Cagel
 mol = cage.facetsym.Cage.from_poscar(filename)
 
 # Find the non-equivalent facets
