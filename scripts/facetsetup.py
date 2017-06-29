@@ -1,14 +1,15 @@
 # encoding: utf-8
 # Written for Python 3.6
 
-import sys
-import cage
 import os
 import shutil
+import sys
 
 import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
+
+import cage
 
 """
 Script to set up the calculations for all the non-equivalent facets of a cage
@@ -39,6 +40,9 @@ THEORY_SETUP = {'iterations': '300',
 
 GEO_SETUP = {'nocenter', "units angstroms"}
 
+ALT_SETUP = {'driver': {'loose':'',
+                        'maxiter': '100'}}
+
 def main():
 
     # Take the filename argument from the user
@@ -48,7 +52,7 @@ def main():
     mol = cage.facetsym.Cage.from_poscar(filename)
 
     # If carbon is in the molecule, the charge is -1, -2 otherwise
-    # TODO Find a good way to calculate the charge
+    # TODO Find a good way to calculate the charge, if possible
     if pmg.Element('C') in [site.specie for site in mol.sites]:
         mol.set_charge_and_spin(charge=-1)
     else:
@@ -65,15 +69,14 @@ def main():
         molecules = set_up_molecules(mol, neq_facet)
 
         # Add the constraints
-        alt_setup = {}
-        alt_setup['constraints'] = find_constraints(mol,neq_facet)
+        ALT_SETUP['constraints'] = find_constraints(mol,neq_facet)
 
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
                                theory='dft',
                                operation='optimize',
                                theory_directives=THEORY_SETUP,
-                               alternate_directives=alt_setup)]
+                               alternate_directives=ALT_SETUP)]
 
         # Set up the input files, and place the geometry files in a subdirectory
         # of the facet directory

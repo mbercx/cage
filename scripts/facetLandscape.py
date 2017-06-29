@@ -1,13 +1,13 @@
 # Encoding: utf-8
 
-import sys
 import os
+import sys
 
-import cage.utils as utils
-import pymatgen.io.nwchem as nwchem
 import matplotlib.pyplot as plt
 import numpy as np
+import pymatgen.io.nwchem as nwchem
 
+import cage.utils as utils
 from cage.facetsym import Cage
 
 """

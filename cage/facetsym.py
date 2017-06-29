@@ -25,6 +25,7 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "14 JUN 2017"
 
+# TODO Remove bias of Cage class to H and Li
 
 class Cage(Molecule):
     """
@@ -33,7 +34,7 @@ class Cage(Molecule):
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
-                 validate_proximity=False, site_properties=None,):
+                 validate_proximity=False, site_properties=None):
         """
         Creates a Mutable Molecule Cage, specifically designed to work on the
         facets etc.
@@ -169,6 +170,17 @@ class Cage(Molecule):
         return cls(species=mol.species, coords=mol.cart_coords,
                    charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
                    site_properties=mol.site_properties)
+
+    def redefine_surface(self, ignore_elements):
+        """
+        The standard surface of the Cage class ignores hydrogen and lithium.
+        This method allows the user to redefine the surface of the Cage, by
+        telling it which elements to ignore in the determination of the
+        surface.
+        :param ignore_elements:
+        :return:
+        """
+        self._facets = self._find_surface_facets(ignore_elements)
     
     def append(self, species, coords, validate_proximity=True,
                properties=None):
