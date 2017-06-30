@@ -30,20 +30,23 @@ __date__ = "14 JUN 2017"
 
 class Cage(Molecule):
     """
-    A Cage is a molecule that is sort of shaped as a fullerene, based of the
-    Molecule class from pymatgen.
+    A Cage is a pymatgen Molecule-derived object for molecules shaped similar to
+    fullerenes.
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
                  validate_proximity=False, site_properties=None):
         """
-        Creates a Mutable Molecule Cage, specifically designed to work on the
-        facets etc.
+        Creates a Mutable Molecule Cage object. The Cage molecule is
+        automatically centered on its center of mass.
 
-        The Cage molecule is automatically centered on its center of mass.
-        :param species:
-        :param coords:
-        :param charge:
+        :param species (list): List of atomic species. Possible kinds of input include
+            a list of dict of elements/species and occupancies, a List of
+            elements/specie specified as actual Element/Specie, Strings
+            ("Fe", "Fe2+") or atomic numbers (1,56).
+        :param coords (3x1 array): list of cartesian coordinates of each
+            species.
+        :param (float): Charge for the molecule. Defaults to 0.
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
@@ -293,7 +296,7 @@ class Facet(SiteCollection, MSONable):
         self._sites = sites
         self._center = site_center(tuple(self.sites))
         if normal is not None:
-            self._normal = normal  # TODO Check if normal makes sense
+            self._normal = normal  # TODO Check if input normal makes sense
         else:
             self._normal = self._find_normal()
 
