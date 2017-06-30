@@ -2,18 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5ee9de5e-62d2-414c-b8df-e54254c4302f" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/cage.iml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/dictionaries/bercx1.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../scripts/quickmethods.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/facetsym.py" afterPath="$PROJECT_DIR$/facetsym.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/landscape.py" afterPath="$PROJECT_DIR$/landscape.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../scripts/__init__.py" afterPath="$PROJECT_DIR$/../scripts/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../scripts/facetLandscape.py" afterPath="$PROJECT_DIR$/../scripts/facetLandscape.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../scripts/pathsetup.py" afterPath="$PROJECT_DIR$/../scripts/pathsetup.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -42,9 +32,11 @@
           <file leaf-file-name="structure.py" pinned="false" current-in-tab="false">
             <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="20925">
-                  <caret line="1406" column="8" lean-forward="false" selection-start-line="1406" selection-start-column="8" selection-end-line="1406" selection-end-column="8" />
-                  <folding />
+                <state relative-caret-position="855">
+                  <caret line="57" column="47" lean-forward="false" selection-start-line="57" selection-start-column="47" selection-end-line="57" selection-end-column="47" />
+                  <folding>
+                    <element signature="e#110#159#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -52,8 +44,8 @@
           <file leaf-file-name="landscape.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="261">
-                  <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+                <state relative-caret-position="270">
+                  <caret line="18" column="27" lean-forward="false" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
                   <folding>
                     <element signature="e#45#76#0" expanded="true" />
                   </folding>
@@ -64,9 +56,11 @@
           <file leaf-file-name="energyAnalysis.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/../scripts/energyAnalysis.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="285">
+                <state relative-caret-position="300">
                   <caret line="20" column="69" lean-forward="false" selection-start-line="20" selection-start-column="69" selection-end-line="20" selection-end-column="69" />
-                  <folding />
+                  <folding>
+                    <element signature="e#43#53#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -115,7 +109,7 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="path_finder.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="path_finder.py" pinned="false" current-in-tab="false">
             <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/analysis/path_finder.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="839">
@@ -125,12 +119,14 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="facetsym.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="facetsym.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/facetsym.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="5940">
-                  <caret line="406" column="21" lean-forward="false" selection-start-line="406" selection-start-column="21" selection-end-line="406" selection-end-column="21" />
-                  <folding />
+                <state relative-caret-position="45">
+                  <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+                  <folding>
+                    <element signature="e#45#67#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -203,6 +199,86 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 3.6.1 virtualenv at ~/python/envs/custodian &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="cage" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 3.6.1 virtualenv at ~/python/envs/custodian &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python3.6" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="cage" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 3.6.1 virtualenv at ~/python/envs/custodian &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python3.6" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="cage" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="External Libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="&lt; Python 3.6.1 virtualenv at ~/python/envs/custodian &gt;" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="python3.6" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="site-packages" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="monty" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="cage" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="CageStudy" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewModuleNode" />
             </PATH_ELEMENT>
@@ -213,7 +289,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="FullScreen" value="true" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -311,7 +387,14 @@
       <option name="project" value="LOCAL" />
       <updated>1498757152622</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Changes:&#10;#1 Added extend_by_rotation and rotation_matrix to allow us to set up&#10;convenient Landscapes for studing the energy landscape around CBxHy's.&#10;#2 Restructured and finished the pathsetup.py script. It's not working&#10;properly though.&#10;#3 Added a 'quickmethods.py' module. But this probably needs to be&#10;handled better, i.e. put all small, independent methods somewhere in&#10;a importable module.">
+      <created>1498837845840</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1498837845840</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TodoView">
@@ -325,15 +408,16 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="2560" height="1440" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2084988" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2084988" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.49789536" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329927" sideWeight="0.52462274" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329927" sideWeight="0.51826847" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.4930848" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329927" sideWeight="0.4753773" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.4753773" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16600476" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.48346362" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329927" sideWeight="0.48173153" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -351,7 +435,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Changes:&#10;#1 Added method redefine_surfaces to Cage class&#10;#2 Added drive loose directive to setup of facetsetup.py&#10;#3 Added beginning attempt for processouput.py script" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changes:&#10;#1 Added method redefine_surfaces to Cage class&#10;#2 Added drive loose directive to setup of facetsetup.py&#10;#3 Added beginning attempt for processouput.py script" />
+    <MESSAGE value="Changes:&#10;#1 Added extend_by_rotation and rotation_matrix to allow us to set up&#10;convenient Landscapes for studing the energy landscape around CBxHy's.&#10;#2 Restructured and finished the pathsetup.py script. It's not working&#10;properly though.&#10;#3 Added a 'quickmethods.py' module. But this probably needs to be&#10;handled better, i.e. put all small, independent methods somewhere in&#10;a importable module." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes:&#10;#1 Added extend_by_rotation and rotation_matrix to allow us to set up&#10;convenient Landscapes for studing the energy landscape around CBxHy's.&#10;#2 Restructured and finished the pathsetup.py script. It's not working&#10;properly though.&#10;#3 Added a 'quickmethods.py' module. But this probably needs to be&#10;handled better, i.e. put all small, independent methods somewhere in&#10;a importable module." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -372,7 +457,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21090">
           <caret line="1406" column="8" lean-forward="false" selection-start-line="1406" selection-start-column="8" selection-end-line="1406" selection-end-column="8" />
-          <folding />
+          <folding>
+            <element signature="e#110#159#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -380,7 +467,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="20" column="69" lean-forward="true" selection-start-line="20" selection-start-column="69" selection-end-line="20" selection-end-column="69" />
-          <folding />
+          <folding>
+            <element signature="e#43#53#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -430,7 +519,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5940">
           <caret line="406" column="21" lean-forward="true" selection-start-line="406" selection-start-column="21" selection-end-line="406" selection-end-column="21" />
-          <folding />
+          <folding>
+            <element signature="e#45#67#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -479,14 +570,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/facetsym.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5940">
-          <caret line="406" column="21" lean-forward="false" selection-start-line="406" selection-start-column="21" selection-end-line="406" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../scripts/facetsetup.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -507,22 +590,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
           <caret line="3" column="23" lean-forward="false" selection-start-line="3" selection-start-column="23" selection-end-line="3" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="20925">
-          <caret line="1406" column="8" lean-forward="false" selection-start-line="1406" selection-start-column="8" selection-end-line="1406" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../scripts/energyAnalysis.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="20" column="69" lean-forward="false" selection-start-line="20" selection-start-column="69" selection-end-line="20" selection-end-column="69" />
           <folding />
         </state>
       </provider>
@@ -553,10 +620,40 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="855">
+          <caret line="57" column="47" lean-forward="false" selection-start-line="57" selection-start-column="47" selection-end-line="57" selection-end-column="47" />
+          <folding>
+            <element signature="e#110#159#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/facetsym.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="0" lean-forward="false" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding>
+            <element signature="e#45#67#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../scripts/energyAnalysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="20" column="69" lean-forward="false" selection-start-line="20" selection-start-column="69" selection-end-line="20" selection-end-column="69" />
+          <folding>
+            <element signature="e#43#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/landscape.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="261">
-          <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
+        <state relative-caret-position="270">
+          <caret line="18" column="27" lean-forward="false" selection-start-line="18" selection-start-column="27" selection-end-line="18" selection-end-column="27" />
           <folding>
             <element signature="e#45#76#0" expanded="true" />
           </folding>
