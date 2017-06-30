@@ -1,4 +1,4 @@
 from . import checkCalc, energyAnalysis, facetLandscape, facetsetup,\
-    pathsetup, testsuite
+    pathsetup, testsuite, quickmethods
 __all__ = [checkCalc, energyAnalysis, facetLandscape, facetsetup, pathsetup,
-           testsuite]
+           testsuite, quickmethods]

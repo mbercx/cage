@@ -400,6 +400,16 @@ class Facet(SiteCollection, MSONable):
 
         return normal
 
+    def is_equivalent(self, other, symmops):
+        """
+        Check if a Facet is equivalent to another Facet based on a list of
+        symmetry operations,
+        :param other:
+        :param symmops:
+        :return:
+        """
+        pass #TODO
+
     @property
     def sites(self):
         """

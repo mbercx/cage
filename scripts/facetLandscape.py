@@ -85,7 +85,5 @@ plt.subplot(212)
 plt.ylabel('Total Energy')
 plt.xlabel('Distance to relaxed facet')
 plt.plot(results[:,1],results[:,2])
-#plt.show()
-
-print(results)
+plt.show()
 
