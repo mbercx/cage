@@ -46,17 +46,13 @@ ALT_SETUP = {'driver': {'loose':'',
 def main():
 
     # Take the filename argument from the user
-    filename = sys.argv[1]
+    try:
+        filename = sys.argv[1]
+    except IndexError:
+        raise IOError('No POSCAR file provided.')
 
     # Load the POSCAR into a Cage
     mol = cage.facetsym.Cage.from_poscar(filename)
-
-    # If carbon is in the molecule, the charge is -1, -2 otherwise
-    # TODO Find a good way to calculate the charge, if possible
-    if pmg.Element('C') in [site.specie for site in mol.sites]:
-        mol.set_charge_and_spin(charge=-1)
-    else:
-        mol.set_charge_and_spin(charge=-2)
 
     # Find the non-equivalent facets
     facets = mol.find_noneq_facets()
@@ -90,8 +86,7 @@ def main():
             pass
 
         for i in range(len(molecules)):
-            shutil.move(os.path.join('geo' + str(i + 1)),
-                        os.path.join(facet_dir, 'geo' + str(i + 1)))
+            shutil.move(os.path.join('geo' + str(i + 1)), facet_dir)
 
         facetnumber += 1
 
@@ -119,6 +114,13 @@ def set_up_molecules(mol, facet):
     molecules = []
     for point in line.points:
         configuration = mol.copy()
+        # If carbon is in the molecule, the charge is -1, -2 otherwise
+        # TODO Find a good way to calculate the charge, if possible
+        if pmg.Element('C') in [site.specie for site in configuration.sites]:
+            configuration.set_charge_and_spin(charge=0)
+        else:
+            configuration.set_charge_and_spin(charge=-1)
+
         configuration.append(li, point)
         molecules.append(configuration)
 
