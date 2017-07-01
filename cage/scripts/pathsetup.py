@@ -4,6 +4,8 @@ import pymatgen as pmg
 import numpy as np
 import sys
 
+import pymatgen.io.vasp as vasp
+
 from cage.facetsym import Cage
 from pymatgen.analysis import path_finder
 
@@ -24,19 +26,28 @@ def main():
     filename = sys.argv[1]
     mol = Cage.from_poscar(filename)
 
+    # Read the charge density from the CHGCAR
+    filename = sys.argv[2]
+    charge_density = vasp.Chgcar.from_file(filename)
+
     # Set up the structure for the initial pathfinder
     struc = set_up_structure(mol)
 
     # Use the pymatgen.analysis.path_finder FreeVolumePotential to find the
     # potential field of the molecule.
-    potential = path_finder.FreeVolumePotential(struc, [50, 50, 50]).get_v()
+    # potential = path_finder.FreeVolumePotential(struc, [50, 50, 50]).get_v()
+    # Since this doesn't seem to work, fuck it
+
+    # Use the pymatgen.analysis.path_finder ChgcarPotential to find the
+    # potential field of the molecule.
+    potential = path_finder.ChgcarPotential(charge_density).get_v()
 
     paths = mol.find_facet_paths()
 
     # Set up the docking points of the facets
     # TODO Load the optimal docking points, calculated using NwChem
 
-    dock_points = [(facet, facet.center + 1.5*facet.normal)
+    dock_points = [(facet, facet.center + 1.2*facet.normal)
                    for facet in mol.facets]
 
     path_number = 1
