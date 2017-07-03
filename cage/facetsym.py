@@ -508,38 +508,3 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
-
-# Other functions, might be deprecated
-
-def molecule_from_poscar(filename):
-    """
-    Import a molecule object from a VASP POSCAR file and centers it at the
-    center of mass.
-    :param filename: Filename of the POSCAR file
-    :return: Generated molecule
-    """
-
-    # Import the structure from the POSCAR file
-    structure = pmg.Structure.from_file(filename)
-
-    # Generate the molecule object from the structure sites
-    mol = pmg.Molecule.from_sites(structure.sites)
-
-    # Center molecule on center of mass
-    mol = mol.get_centered_molecule()
-
-    return mol
-
-
-def find_all_symmops(mol):
-    """
-    Find all the symmetry operations of a molecule.
-    :param mol: Molecule object
-    :return: List of symmetry operations
-    """
-
-    # Find the point group of the molecule
-    pgan = syman.PointGroupAnalyzer(mol)
-
-    # Find all the symmetry operations of point group
-    return syman.generate_full_symmops(pgan.symmops, 0.1)

@@ -9,6 +9,7 @@ import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
+import math
 import cage
 
 """
@@ -108,6 +109,23 @@ def set_up_molecules(mol, facet):
     endpoints = [center + LINE[0] * normal, center + LINE[1] * normal]
     line = cage.landscape.Landscape(endpoints, DENSITY)
 
+    # If Carbon is in the molecule, expand the energy landscape
+    # TODO: Make this less specific to carbon. This whole module will probably need an overhaul for that.
+    if pmg.Element('C') in [site.specie for site in mol.sites]:
+        # Find the rotation axis
+        C_site = [site for site in mol.sites
+                  if site.specie == pmg.Element('C')][0]
+        connection_vector = C_site.coords - facet.center
+        axis = np.cross(facet.normal, connection_vector)
+        axis = axis/np.linalg.norm(axis)
+        print('Connection Vector = ' + str(connection_vector))
+        print('Axis = ' + str(axis))
+
+        # Overestimate rotation angle and remove landscape points that are
+        # closer to another facet.
+        angle = math.pi/8
+        line.extend_by_rotation(angle*axis)
+
     # Create the list of molecules with lithium at varying distances to
     # the facet.
     li = pmg.Specie('Li', +1)
@@ -121,8 +139,12 @@ def set_up_molecules(mol, facet):
         else:
             configuration.set_charge_and_spin(charge=-1)
 
-        configuration.append(li, point)
-        molecules.append(configuration)
+        try:
+            configuration.append(li, point)
+            molecules.append(configuration)
+        except ValueError:
+            print('ValueError detected when appending the Li site. '
+                  'Ignoring this point in the energy landscape.')
 
     return molecules
 
@@ -147,8 +169,9 @@ def find_constraints(mol, neq_facet):
             site_numbers.append(str(i + 1) + ' ')
 
     # If there is carbon in the molecule, only fix one atom
-    if pmg.Element('C') in [site.specie for site in mol.sites]:
-        site_numbers = site_numbers[0:1]
+    # if pmg.Element('C') in [site.specie for site in mol.sites]:
+    #    site_numbers = site_numbers[0:1]
+    # Left here for future reference: This does not work.
 
     site_numbers.append(str(len(mol.sites) + 1))  # Add the lithium site
     site_numbers = ''.join(site_numbers)
