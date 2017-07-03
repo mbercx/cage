@@ -5,6 +5,7 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 import cage.utils as utils
@@ -54,7 +55,8 @@ for facet in cage_init.facets:
             utils.distance(facet_init.center, cage_init.cart_coords[-1]):
         facet_init = facet
 
-# Get the distance to the facet and the energy for each result
+# Get the distance to the facet, the angle between the normal, and the energy
+# for each result
 results = []
 for data in output:
 
@@ -71,7 +73,16 @@ for data in output:
     dist_Li_init = utils.distance(facet_init.center, final_Li_coord)
     dist_Li_final = utils.distance(facet_final.center, final_Li_coord)
 
-    results.append([dist_Li_init, dist_Li_final, final_energy])
+
+    if pmg.Element('C') in cage_init.species:
+        angle_Li_init = utils.angle_between(facet_init.center, final_Li_coord)
+        angle_Li_final =utils.angle_between(facet_final.center, final_Li_coord)
+
+        results.append([dist_Li_init, dist_Li_final, angle_Li_init,
+                        angle_Li_final, final_energy])
+    else:
+        results.append([dist_Li_init, dist_Li_final, final_energy])
+
 
 results = np.array(sorted(results, key=lambda results: results[0]))
 

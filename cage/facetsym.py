@@ -1,17 +1,19 @@
 # encoding: utf-8
 # Copyright (c) Uncle Sam
 
-import pymatgen as pmg
-import pymatgen.symmetry.analyzer as syman
-import numpy as np
 import json
-
-from pymatgen.core.structure import SiteCollection
-from pymatgen.core.structure import Molecule
-from monty.json import MSONable
 from itertools import combinations
 from math import pi
+
+import numpy as np
 from monty.io import zopen
+from monty.json import MSONable
+
+import pymatgen as pmg
+import pymatgen.symmetry.analyzer as syman
+from cage.utils import angle_between
+from pymatgen.core.structure import Molecule
+from pymatgen.core.structure import SiteCollection
 
 """
 Analysis tools to find the non-equivalent faces of fullerene shaped molecules.
@@ -491,20 +493,3 @@ def schoenflies_to_hm():
     :return:
     """
     pass  # TODO
-
-
-# Functions stolen from SO
-
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
-
-
-def angle_between(v1, v2):
-    """
-    Returns the angle in radians between vectors 'v1' and 'v2'::
-    """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-

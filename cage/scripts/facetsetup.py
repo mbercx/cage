@@ -118,8 +118,6 @@ def set_up_molecules(mol, facet):
         connection_vector = C_site.coords - facet.center
         axis = np.cross(facet.normal, connection_vector)
         axis = axis/np.linalg.norm(axis)
-        print('Connection Vector = ' + str(connection_vector))
-        print('Axis = ' + str(axis))
 
         # Overestimate rotation angle and remove landscape points that are
         # closer to another facet.
@@ -156,6 +154,7 @@ def find_constraints(mol, neq_facet):
     """
     # Find the facet that is the farthest away from the facet being studied
     distance = 0
+    far_facet = None
     for facet in mol.facets:
         newdistance = np.linalg.norm(neq_facet.center - facet.center)
         if newdistance > distance:

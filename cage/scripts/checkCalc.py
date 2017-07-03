@@ -24,4 +24,9 @@ for data in out.data:
         error = True
 
 print('File: ' + os.path.abspath(filename))
-print('Calculation has error = ' + str(error))
+if data['task_time'] != 0:
+    print('Calculation completed in ' + str(data['task_time']) + 's')
+else:
+    print('No timing information found. Calculation might not have completed '
+          'successfully.')
+print('Calculation has error: ' + str(error))
