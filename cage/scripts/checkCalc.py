@@ -4,6 +4,7 @@ import sys
 import os
 
 from pymatgen.io import nwchem
+from json import JSONDecodeError
 
 """
 Script that checks if a calculation has completed successfully from the ouput
@@ -14,9 +15,12 @@ file.
 filename = sys.argv[1]
 
 try:
-    out = nwchem.NwOutput(filename)
-except:
-    raise IOError('Could not find proper nwchem output file.')
+    out = nwchem.NwOutput(filename, fmt='json')
+except JSONDecodeError:
+    try:
+        out = nwchem.NwOutput(filename)
+    except:
+        raise IOError('File not found.')
 
 error = False
 for data in out.data:
