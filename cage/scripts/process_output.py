@@ -11,4 +11,4 @@ try:
 except:
     raise IOError('Could not find proper nwchem output file.')
 
-# TODO Finish this script once the NwOutput is MSONable
+output.to_file('data.json')
