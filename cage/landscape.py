@@ -48,7 +48,7 @@ class Landscape(MSONable):
         """
 
         if len(self.vertices) == 1:
-            raise IOError("Number of vertices must be at least one.")
+            raise IOError("Number of vertices must be at least two.")
         elif len(self.vertices) == 2:
             if np.linalg.norm(self.vertices[1] - self.vertices[0]) < 1e-3:
                 raise IOError("User provided two vertices that are too close"
@@ -114,6 +114,32 @@ class Landscape(MSONable):
         """
         return self._points
 
+    def extend_by_rotation(self, axis, density=10):
+        """
+        Extends the landscape using a axis vector and turning all the vertices
+        in the landscape around the origin by a value and direction determined
+        by the axis vector.
+        :param vector:
+        :return:
+        """
+
+        # Find the rotation matrices
+        rotation_matrices = []
+
+        for i in range(int(density)):
+            angle = np.linalg.norm(axis)*(i+1)/int(density)
+            rotation_matrices.append(rotation_matrix(axis, angle))
+
+        # Add all the points TODO This might be done more quickly
+        points = self.points.copy()
+        for matrix in rotation_matrices:
+            for point in self.points:
+                newpoint = point.dot(matrix)
+                if not (newpoint == np.array([0, 0, 0])).all():
+                    points.append(newpoint)
+
+        self._points = points.copy()
+
 
 # Functions stolen from SO
 
@@ -130,4 +156,17 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
-
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+    """
+    axis = np.asarray(axis)
+    axis = axis/math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta/2.0)
+    b, c, d = -axis*math.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])

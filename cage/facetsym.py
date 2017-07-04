@@ -1,17 +1,19 @@
 # encoding: utf-8
 # Copyright (c) Uncle Sam
 
-import pymatgen as pmg
-import pymatgen.symmetry.analyzer as syman
-import numpy as np
 import json
-
-from pymatgen.core.structure import SiteCollection
-from pymatgen.core.structure import Molecule
-from monty.json import MSONable
 from itertools import combinations
 from math import pi
+
+import numpy as np
 from monty.io import zopen
+from monty.json import MSONable
+
+import pymatgen as pmg
+import pymatgen.symmetry.analyzer as syman
+from cage.utils import angle_between
+from pymatgen.core.structure import Molecule
+from pymatgen.core.structure import SiteCollection
 
 """
 Analysis tools to find the non-equivalent faces of fullerene shaped molecules.
@@ -25,23 +27,28 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "14 JUN 2017"
 
+# TODO Remove bias of Cage class to H and Li
+
 
 class Cage(Molecule):
     """
-    A Cage is a molecule that is sort of shaped as a fullerene, based of the
-    Molecule class from pymatgen.
+    A Cage is a pymatgen Molecule-derived object for molecules shaped similar to
+    fullerenes.
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
-                 validate_proximity=False, site_properties=None,):
+                 validate_proximity=False, site_properties=None):
         """
-        Creates a Mutable Molecule Cage, specifically designed to work on the
-        facets etc.
+        Creates a Mutable Molecule Cage object. The Cage molecule is
+        automatically centered on its center of mass.
 
-        The Cage molecule is automatically centered on its center of mass.
-        :param species:
-        :param coords:
-        :param charge:
+        :param species (list): List of atomic species. Possible kinds of input include
+            a list of dict of elements/species and occupancies, a List of
+            elements/specie specified as actual Element/Specie, Strings
+            ("Fe", "Fe2+") or atomic numbers (1,56).
+        :param coords (3x1 array): list of cartesian coordinates of each
+            species.
+        :param (float): Charge for the molecule. Defaults to 0.
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
@@ -87,7 +94,7 @@ class Cage(Molecule):
         # Find all the sites which should not be ignored
         sites_valid = []
         for site in self.sites:
-            if not site.specie in ignore:
+            if site.specie not in ignore:
                 sites_valid.append(site)
 
         # Find all of the Facets from combinations of three valid Sites
@@ -104,7 +111,7 @@ class Cage(Molecule):
         facets_surf = []
         for facet in facets_all:
 
-            # Calculate the angles between all valid sites and the surface normal
+            # Calculate the angles between all valid sites and surface normal
             site_angles = []
             for site in sites_valid:
                 site_angles.append(facet.angle_to_normal(site.coords))
@@ -128,7 +135,18 @@ class Cage(Molecule):
         :return:
         """
         return self._facets
-    
+
+    @property
+    def pointgroup(self):
+        """
+        Find the Schoenflies PointGroup of the Cage molecule.
+        :return: PointGroup object
+        """
+        if not self._pointgroup:
+            self._pointgroup = syman.PointGroupAnalyzer(self).get_pointgroup()
+
+        return self._pointgroup
+
     @property
     def symmops(self):
         """
@@ -169,6 +187,17 @@ class Cage(Molecule):
         return cls(species=mol.species, coords=mol.cart_coords,
                    charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
                    site_properties=mol.site_properties)
+
+    def redefine_surface(self, ignore_elements):
+        """
+        The standard surface of the Cage class ignores hydrogen and lithium.
+        This method allows the user to redefine the surface of the Cage, by
+        telling it which elements to ignore in the determination of the
+        surface.
+        :param ignore_elements:
+        :return:
+        """
+        self._facets = self._find_surface_facets(ignore_elements)
     
     def append(self, species, coords, validate_proximity=True,
                properties=None):
@@ -182,7 +211,7 @@ class Cage(Molecule):
         :return: 
         """
         super(Cage, self).append(species, coords, validate_proximity,
-               properties)
+                                 properties)
         self._symmops = None
 
         # TODO Add parameter descriptions.
@@ -191,14 +220,7 @@ class Cage(Molecule):
         """
         Writes the Cage to a POSCAR file.
         """
-        pass #TODO
-
-    def find_PointGroup(self):
-        """
-        Find the Schoenflies PointGroup of the Cage molecule.
-        :return: PointGroup object
-        """
-        return syman.PointGroupAnalyzer(self).get_pointgroup()
+        pass  # TODO
 
     def find_noneq_facets(self):
         """
@@ -210,7 +232,7 @@ class Cage(Molecule):
         # Find all the non-equivalent facets
         facets_noneq = []
         for facet in self.facets:
-            nonequivalent = True
+            facet_is_nonequivalent = True
             # Check to see if the facet is equivalent to one in the
             # nonequivalent list
             for facet_noneq in facets_noneq:
@@ -218,8 +240,8 @@ class Cage(Molecule):
                     symm_facet_center = symm.operate(facet.center.tolist())
                     if np.linalg.norm(symm_facet_center - facet_noneq.center)\
                             < 1e-2:
-                        nonequivalent = False
-            if nonequivalent == True:
+                        facet_is_nonequivalent = False
+            if facet_is_nonequivalent:
                 facets_noneq.append(facet)
 
         return facets_noneq
@@ -233,7 +255,7 @@ class Cage(Molecule):
         """
 
         # Find all paths, i.e. possible combinations of surface facets
-        paths = list(combinations(self.facets,2))
+        paths = list(combinations(self.facets, 2))
 
         # Find the paths that share a vertex (this automatically finds those
         # that share an edge as well).
@@ -256,7 +278,7 @@ class Cage(Molecule):
                                           non_eq_path[1].center)/2
                     symm_path_center = symm.operate(path_center)
                     if np.linalg.norm(symm_path_center - non_eq_path_center) \
-                        < 1e-2:
+                            < 1e-2:
                         nonequivalent = False
             if nonequivalent:
                 non_eq_paths.append(path)
@@ -266,7 +288,7 @@ class Cage(Molecule):
 
 class Facet(SiteCollection, MSONable):
     """
-    Facet of a Molecule object, defined by a list of Sites
+    Facet of a Molecule object, defined by a list of Sites.
     """
 
     #TODO Allow the facet to contain more than three sites
@@ -274,9 +296,9 @@ class Facet(SiteCollection, MSONable):
 
     def __init__(self, sites, normal=None):
         self._sites = sites
-        self._center = siteCenter(tuple(self.sites))
+        self._center = site_center(tuple(self.sites))
         if normal is not None:
-            self._normal = normal # TODO Check if normal makes sense
+            self._normal = normal  # TODO Check if input normal makes sense
         else:
             self._normal = self._find_normal()
 
@@ -291,8 +313,6 @@ class Facet(SiteCollection, MSONable):
             return True
         else:
             return False
-
-
 
     @classmethod
     def from_str(cls, input_string, fmt="json"):
@@ -367,7 +387,6 @@ class Facet(SiteCollection, MSONable):
         d['normal'] = self.normal.tolist()
         return d
 
-
     def get_distance(self, i, j):
         """
 
@@ -375,7 +394,7 @@ class Facet(SiteCollection, MSONable):
         :param j:
         :return:
         """
-        pass #TODO
+        pass  #TODO
 
     def _find_normal(self):
         """
@@ -387,6 +406,16 @@ class Facet(SiteCollection, MSONable):
         normal /= 2  # Make the length of the normal equal to the surface area
 
         return normal
+
+    def is_equivalent(self, other, symmops):
+        """
+        Check if a Facet is equivalent to another Facet based on a list of
+        symmetry operations,
+        :param other:
+        :param symmops:
+        :return:
+        """
+        pass  #TODO
 
     @property
     def sites(self):
@@ -428,8 +457,9 @@ class Facet(SiteCollection, MSONable):
 
     def angle_to_normal(self, coordinate):
         """
-        Find the angle between the vector that connects the center and the coordinate and the normal.
-        :param Site: 1x3 Array
+        Find the angle between the vector that connects the center and the
+        coordinate and the normal.
+        :param coordinate:
         :return: angle value (in radians)
         """
         return angle_between(coordinate - self._center, self._normal)
@@ -437,7 +467,7 @@ class Facet(SiteCollection, MSONable):
 
 # Utility functions that may be useful across classes
 
-def siteCenter(sites):
+def site_center(sites):
     """
     Find the center of a collection of sites. Not particularly fast nor clever.
     :param sites: Tuple of Site objects
@@ -447,71 +477,19 @@ def siteCenter(sites):
     nsites = len(sites)
 
     # Sum the x,y, and z values of the site coordinates
-    sum = np.zeros(3)
+    sum_coords = np.zeros(3)
     for site in sites:
-        sum[0] += site.x
-        sum[1] += site.y
-        sum[2] += site.z
+        sum_coords[0] += site.x
+        sum_coords[1] += site.y
+        sum_coords[2] += site.z
 
-    return sum / nsites
+    return sum_coords / nsites
 
 
-def schoenflies_to_HM():
+def schoenflies_to_hm():
     """
     Function for converting the Schoenflies point group symbol to the Hermann
     Mangiun one.
     :return:
     """
     pass  # TODO
-
-
-# Functions stolen from SO
-
-def unit_vector(vector):
-    """ Returns the unit vector of the vector.  """
-    return vector / np.linalg.norm(vector)
-
-
-def angle_between(v1, v2):
-    """
-    Returns the angle in radians between vectors 'v1' and 'v2'::
-    """
-    v1_u = unit_vector(v1)
-    v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
-
-
-# Other functions, might be deprecated
-
-def molecule_from_poscar(filename):
-    """
-    Import a molecule object from a VASP POSCAR file and centers it at the
-    center of mass.
-    :param filename: Filename of the POSCAR file
-    :return: Generated molecule
-    """
-
-    # Import the structure from the POSCAR file
-    structure = pmg.Structure.from_file(filename)
-
-    # Generate the molecule object from the structure sites
-    mol = pmg.Molecule.from_sites(structure.sites)
-
-    # Center molecule on center of mass
-    mol = mol.get_centered_molecule()
-
-    return mol
-
-
-def find_all_symmops(mol):
-    """
-    Find all the symmetry operations of a molecule.
-    :param mol: Molecule object
-    :return: List of symmetry operations
-    """
-
-    # Find the point group of the molecule
-    pgan = syman.PointGroupAnalyzer(mol)
-
-    # Find all the symmetry operations of point group
-    return syman.generate_full_symmops(pgan.symmops, 0.1)

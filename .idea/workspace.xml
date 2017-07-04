@@ -2,11 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scripts/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cage/__init__.py" afterPath="$PROJECT_DIR$/cage/__init__.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cage/facetsym.py" afterPath="$PROJECT_DIR$/cage/facetsym.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/facetsetup.py" afterPath="$PROJECT_DIR$/scripts/facetsetup.py" />
+      <change type="NEW" beforePath="" afterPath="$USER_HOME$/python/cage/cage/.idea/cage.iml" />
+      <change type="MODIFICATION" beforePath="$USER_HOME$/python/cage/cage/.idea/workspace.xml" afterPath="$USER_HOME$/python/cage/cage/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$USER_HOME$/python/cage/cage/cage/facetsym.py" afterPath="$USER_HOME$/python/cage/cage/cage/facetsym.py" />
+      <change type="MODIFICATION" beforePath="$USER_HOME$/python/cage/cage/scripts/facetLandscape.py" afterPath="$USER_HOME$/python/cage/cage/scripts/facetLandscape.py" />
+      <change type="MODIFICATION" beforePath="$USER_HOME$/python/cage/cage/scripts/facetsetup.py" afterPath="$USER_HOME$/python/cage/cage/scripts/facetsetup.py" />
+      <change type="MODIFICATION" beforePath="$USER_HOME$/python/cage/cage/scripts/testsuite.py" afterPath="$USER_HOME$/python/cage/cage/scripts/testsuite.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -31,12 +32,12 @@
             </entry>
           </file>
           <file leaf-file-name="facetsetup.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/scripts/facetsetup.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/scripts/facetsetup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1830">
-                  <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+                <state relative-caret-position="278">
+                  <caret line="63" column="0" lean-forward="false" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
                   <folding>
-                    <element signature="e#44#54#0" expanded="true" />
+                    <element signature="e#44#53#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -46,17 +47,17 @@
             <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="342">
-                  <caret line="3061" column="19" lean-forward="true" selection-start-line="3061" selection-start-column="19" selection-end-line="3061" selection-end-column="19" />
+                  <caret line="3061" column="19" lean-forward="false" selection-start-line="3061" selection-start-column="19" selection-end-line="3061" selection-end-column="19" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
           <file leaf-file-name="facetsym.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/cage/facetsym.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/cage/facetsym.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="569">
-                  <caret line="177" column="23" lean-forward="true" selection-start-line="177" selection-start-column="23" selection-end-line="177" selection-end-column="23" />
+                <state relative-caret-position="270">
+                  <caret line="33" column="7" lean-forward="false" selection-start-line="33" selection-start-column="7" selection-end-line="33" selection-end-column="7" />
                   <folding>
                     <element signature="e#45#67#0" expanded="true" />
                   </folding>
@@ -65,7 +66,7 @@
             </entry>
           </file>
           <file leaf-file-name="landscape.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/cage/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="206">
                   <caret line="20" column="21" lean-forward="false" selection-start-line="20" selection-start-column="14" selection-end-line="20" selection-end-column="21" />
@@ -75,13 +76,11 @@
             </entry>
           </file>
           <file leaf-file-name="testsuite.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/scripts/testsuite.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/scripts/testsuite.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="255">
                   <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-                  <folding>
-                    <element signature="e#0#9#0" expanded="true" />
-                  </folding>
+                  <folding />
                 </state>
               </provider>
             </entry>
@@ -93,15 +92,15 @@
           <file leaf-file-name="nwchem.py" pinned="false" current-in-tab="true">
             <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/io/nwchem.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="763">
-                  <caret line="100" column="46" lean-forward="true" selection-start-line="100" selection-start-column="46" selection-end-line="100" selection-end-column="46" />
+                <state relative-caret-position="765">
+                  <caret line="100" column="46" lean-forward="false" selection-start-line="100" selection-start-column="46" selection-end-line="100" selection-end-column="46" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
           <file leaf-file-name="study.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/cage/study.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/cage/study.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="450">
                   <caret line="30" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
@@ -123,19 +122,17 @@
             </entry>
           </file>
           <file leaf-file-name="facetLandscape.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/scripts/facetLandscape.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/scripts/facetLandscape.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="1150">
                   <caret line="77" column="13" lean-forward="false" selection-start-line="77" selection-start-column="13" selection-end-line="77" selection-end-column="13" />
-                  <folding>
-                    <element signature="e#19#29#0" expanded="true" />
-                  </folding>
+                  <folding />
                 </state>
               </provider>
             </entry>
           </file>
           <file leaf-file-name="utils.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/cage/utils.py">
+            <entry file="file://$USER_HOME$/python/cage/cage/cage/utils.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="165">
                   <caret line="11" column="11" lean-forward="false" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
@@ -208,6 +205,7 @@
         <option value="$PROJECT_DIR$/scripts/__init__.py" />
         <option value="$PROJECT_DIR$/scripts/facetsetup.py" />
         <option value="$PROJECT_DIR$/cage/facetsym.py" />
+        <option value="$USER_HOME$/python/cage/CageStudy/scripts/facetsetup.py" />
       </list>
     </option>
   </component>
@@ -259,7 +257,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="CageStudy" />
+              <option name="myItemId" value="cage" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -269,7 +267,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="CageStudy" />
+              <option name="myItemId" value="cage" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -283,7 +281,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="CageStudy" />
+              <option name="myItemId" value="cage" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -297,12 +295,14 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="preferences.toDoOptions" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.editor" />
     <property name="SearchEverywhereHistoryKey" value="json&#9;null&#9;null&#10;zopen&#9;null&#9;null&#10;listdir&#9;null&#9;null&#10;equivalent_site&#9;null&#9;null&#10;equivalent_&#9;null&#9;null&#10;dataset&#9;null&#9;null&#10;symm_da&#9;FILE&#9;file:///Users/bercx1/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/symm_data.yaml" />
     <property name="FullScreen" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$USER_HOME$/python/" />
+      <recent name="$USER_HOME$/python/cage" />
       <recent name="$PROJECT_DIR$/scripts" />
       <recent name="$PROJECT_DIR$/cage" />
     </key>
@@ -361,14 +361,14 @@
       <option name="PARENT_ENVS" value="true" />
       <envs />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scripts" />
+      <option name="WORKING_DIRECTORY" value="$USER_HOME$/python/cage/cage/scripts" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="FacetSym" />
       <option name="_new_regexPattern" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/scripts/testsuite.py&quot;" />
+      <option name="_new_target" value="&quot;$USER_HOME$/python/cage/cage/scripts/testsuite.py&quot;" />
       <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method />
     </configuration>
@@ -561,7 +561,14 @@
       <option name="project" value="LOCAL" />
       <updated>1498611942509</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Changes:&#10;#1 Large reorganisation of the facetsetup.py script. Also added&#10;functionality to study carbon containing cage molecules.&#10;#2 Changed the __init__.py for the cage and scripts module.">
+      <created>1498691721768</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1498691721768</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TodoView">
@@ -575,15 +582,14 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="2560" height="1440" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1858618" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1858618" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.476017" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329927" sideWeight="0.5099285" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.48330298" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329927" sideWeight="0.48876745" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30145985" sideWeight="0.451946" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12470215" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.12470215" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329927" sideWeight="0.49007148" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -618,7 +624,8 @@
     <MESSAGE value="&#10;#1 'facetsym.py' Made the class Facet a SiteCollection and MSONable,&#10;implementing some of the necessary methods, but not all.&#10;#2 Added the script 'checkcalc.py', which checks if a nwchem calculation&#10;has finished with an error." />
     <MESSAGE value="&#10;#1 Written a bunch of methods for Facet that allow it to be written to&#10;a json file.&#10;#2 Started working on a test suite. Will add more tests as I go along." />
     <MESSAGE value="&#10;#1 Changed the find_surface_facets method of the Cage class to allow a&#10;more general list of elements which should be ignored in the search for&#10;the surface facets.&#10;#2 Added a class method from_molecule to the Cage class&#10;#3 Created a cage.utils module, which will serve to hold small functions&#10;that we need in the main modules.&#10;#4 Implemented the facetLandscape.py script" />
-    <option name="LAST_COMMIT_MESSAGE" value="&#10;#1 Changed the find_surface_facets method of the Cage class to allow a&#10;more general list of elements which should be ignored in the search for&#10;the surface facets.&#10;#2 Added a class method from_molecule to the Cage class&#10;#3 Created a cage.utils module, which will serve to hold small functions&#10;that we need in the main modules.&#10;#4 Implemented the facetLandscape.py script" />
+    <MESSAGE value="Changes:&#10;#1 Large reorganisation of the facetsetup.py script. Also added&#10;functionality to study carbon containing cage molecules.&#10;#2 Changed the __init__.py for the cage and scripts module." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes:&#10;#1 Large reorganisation of the facetsetup.py script. Also added&#10;functionality to study carbon containing cage molecules.&#10;#2 Changed the __init__.py for the cage and scripts module." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -634,7 +641,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/study.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/study.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1140">
           <caret line="81" column="29" lean-forward="true" selection-start-line="81" selection-start-column="29" selection-end-line="81" selection-end-column="29" />
@@ -644,7 +651,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/facetsym.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/facetsym.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="225">
           <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
@@ -741,7 +748,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/symm_conv.yaml">
+    <entry file="file://$USER_HOME$/python/cage/cage/symm_conv.yaml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="11" lean-forward="true" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
@@ -819,7 +826,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/path.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/path.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="375">
           <caret line="25" column="12" lean-forward="false" selection-start-line="25" selection-start-column="12" selection-end-line="25" selection-end-column="12" />
@@ -833,7 +840,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/pathsetup.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/pathsetup.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
           <caret line="26" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
@@ -847,7 +854,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/study.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/study.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
           <caret line="30" column="0" lean-forward="false" selection-start-line="26" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
@@ -896,7 +903,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/checkCalc.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/checkCalc.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
           <caret line="11" column="2" lean-forward="false" selection-start-line="11" selection-start-column="2" selection-end-line="11" selection-end-column="2" />
@@ -906,17 +913,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/testsuite.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/testsuite.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="17" column="0" lean-forward="false" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/utils.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
           <caret line="11" column="11" lean-forward="false" selection-start-line="11" selection-start-column="11" selection-end-line="11" selection-end-column="11" />
@@ -932,7 +937,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/landscape.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="206">
           <caret line="20" column="21" lean-forward="false" selection-start-line="20" selection-start-column="14" selection-end-line="20" selection-end-column="21" />
@@ -940,7 +945,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/energyAnalysis.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/energyAnalysis.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="20" column="33" lean-forward="false" selection-start-line="20" selection-start-column="33" selection-end-line="20" selection-end-column="33" />
@@ -948,17 +953,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/facetLandscape.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/facetLandscape.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1150">
           <caret line="77" column="13" lean-forward="false" selection-start-line="77" selection-start-column="13" selection-end-line="77" selection-end-column="13" />
-          <folding>
-            <element signature="e#19#29#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/__init__.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="53" lean-forward="false" selection-start-line="0" selection-start-column="53" selection-end-line="0" selection-end-column="53" />
@@ -974,7 +977,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/__init__.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
           <caret line="3" column="21" lean-forward="true" selection-start-line="3" selection-start-column="21" selection-end-line="3" selection-end-column="21" />
@@ -990,30 +993,30 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py">
+    <entry file="file://$USER_HOME$/python/cage/cage/cage/facetsym.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="3061" column="19" lean-forward="true" selection-start-line="3061" selection-start-column="19" selection-end-line="3061" selection-end-column="19" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cage/facetsym.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="569">
-          <caret line="177" column="23" lean-forward="true" selection-start-line="177" selection-start-column="23" selection-end-line="177" selection-end-column="23" />
+        <state relative-caret-position="270">
+          <caret line="33" column="7" lean-forward="false" selection-start-line="33" selection-start-column="7" selection-end-line="33" selection-end-column="7" />
           <folding>
             <element signature="e#45#67#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/facetsetup.py">
+    <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1830">
-          <caret line="122" column="0" lean-forward="true" selection-start-line="122" selection-start-column="0" selection-end-line="122" selection-end-column="0" />
+        <state relative-caret-position="342">
+          <caret line="3061" column="19" lean-forward="false" selection-start-line="3061" selection-start-column="19" selection-end-line="3061" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/python/cage/cage/scripts/facetsetup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="278">
+          <caret line="63" column="0" lean-forward="false" selection-start-line="63" selection-start-column="0" selection-end-line="63" selection-end-column="0" />
           <folding>
-            <element signature="e#44#54#0" expanded="true" />
+            <element signature="e#44#53#0" expanded="true" />
           </folding>
         </state>
       </provider>
