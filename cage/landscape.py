@@ -141,6 +141,65 @@ class Landscape(MSONable):
         self._points = points.copy()
 
 
+class LandscapeAnalyzer(MSONable):
+    """
+    An analyzer class for interpreting data from a calculation on a landscape.
+    """
+    def __init__(self):
+        """
+        Initialize an instance of LandscapeAnalyzer.
+        """
+        pass
+
+    def import_data(self, directory, output_file='result.out',
+                    software='nwchem'):
+        """
+        Looks through all subdirectories of 'directory' and looks for output
+        files to extract data from to analyze.
+        :return:
+        """
+        pass
+
+    def plot_landscape(self, property='energies'):
+        """
+        Plot the landscape of a certain property.
+        :return:
+        """
+        pass
+
+    def as_dict(self):
+        """
+        Return a dictionary representing the LandscapeAnalyzer instance.
+        :return:
+        """
+        pass
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Initialize the LandscapeAnalyzer from a dictionary.
+        :param d:
+        :return:
+        """
+        pass
+
+    @classmethod
+    def from_string(cls):
+        """
+        Initialize a LandscapeAnalyzer from a string.
+        :return:
+        """
+        pass
+
+    @classmethod
+    def from_file(cls, fmt='json'):
+        """
+        Initialize an instance of LandscapeAnalyzer from a file.
+        :return:
+        """
+        pass
+
+
 # Functions stolen from SO
 
 def unit_vector(vector):
