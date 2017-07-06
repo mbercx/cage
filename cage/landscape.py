@@ -2,17 +2,24 @@
 # Copyright (c) Uncle Sam
 
 from monty.json import MSONable
+from cage.facetsym import Cage
 
 import math
+import os
 
 from itertools import combinations
-
+import pymatgen as pmg
+import pymatgen.io.nwchem as nw
 import numpy as np
+import cage.utils as utils
 
 """
 Tools to set up and run calculations to study energy landscapes, specifically
 for Cage molecules.
 """
+
+# TODO Landscape should not be defined by vertices, but by points.
+# TODO Instead, make a method 'From vertices' to initialize landscape
 
 __author__ = "Marnik Bercx"
 __version__ = "0.1"
@@ -23,7 +30,7 @@ __date__ = "16 JUN 2017"
 
 class Landscape(MSONable):
     """
-    A line, area or volume that needs to be studied.
+    A line, area or volume that is to be studied.
     """
     def __init__(self, vertices, density=10):
         """
@@ -143,29 +150,110 @@ class Landscape(MSONable):
 
 class LandscapeAnalyzer(MSONable):
     """
-    An analyzer class for interpreting data from a calculation on a landscape.
+    An analyzer class for interpreting data from calculations on a landscape.
     """
-    def __init__(self):
+    def __init__(self, data, software="nwchem"):
         """
-        Initialize an instance of LandscapeAnalyzer.
+        Initialize an instance of LandscapeAnalyzer. This method will rarely
+        be used directly. Usually a LandscapeAnalyzer is initialized from a
+        directory or file.
         """
-        pass
+        self._data = data
+        self._software = software
 
-    def import_data(self, directory, output_file='result.out',
-                    software='nwchem'):
+    @property
+    def data(self):
+        return self._data
+
+    @property
+    def software(self):
+        return self._software
+
+    @classmethod
+    def from_data(cls, directory, output_file='result.out', software='nwchem'):
         """
         Looks through all subdirectories of 'directory' and looks for output
         files to extract data from to analyze.
         :return:
         """
-        pass
 
-    def plot_landscape(self, property='energies'):
+        # TODO Make subdirectory finder recursive?
+
+        if not os.path.isdir(directory):
+            raise IOError("Directory " + directory + " not found.")
+
+        # Find all the subdirectories in the specified directory
+        dir_list = [d for d in os.listdir(directory)
+                   if os.path.isdir(os.path.join(directory, d))]
+
+        # Get all of the output of the calculations in the directory
+        output = []
+        if software == 'nwchem':
+            for dir in dir_list:
+                try:
+                    out = nw.NwOutput(os.path.join(directory, dir,
+                                                      output_file))
+                except FileNotFoundError:
+                    print('Did not find output in directory ' + dir)
+
+                # Check if the output has an error
+                if out.data[-1]['has_error']:
+                    print('Error found in output in directory ' + dir)
+                else:
+                    output.append(out)
+                    print('Grabbed output in directory ' + dir)
+
+            data = [out.data[-1] for out in output]
+
+        else:
+            raise NotImplementedError("Only NwChem is currently supported.")
+
+        return LandscapeAnalyzer(data)
+
+    def plot_facet_landscape(self, coordinates="polar"):
         """
-        Plot the landscape of a certain property.
+        Plot the landscape of a certain property on a facet.
         :return:
         """
-        pass
+        # TODO This method is horrendously specific, but I need to write it quick so I can show some results. Improve this later.
+
+        # Find the initial facet
+        cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
+        facet_init = cage_init.facets[0]
+        for facet in cage_init.facets:
+            if utils.distance(facet.center, cage_init.cart_coords[-1]) < \
+                    utils.distance(facet_init.center,
+                                   cage_init.cart_coords[-1]):
+                facet_init = facet
+
+        datapoints = []
+
+        for data in self.data:
+
+            if coordinates == "polar":
+
+                Li_coord = [site.coords for site in data["molecules"][0].sites
+                            if site.specie == pmg.Element('Li')][0]
+
+                cage_init = Cage.from_molecule(data["molecules"][0])
+                cage_final = Cage.from_molecule(data["molecules"][-1])
+
+                r = np.linalg.norm(Li_coord)
+                theta = angle_between(facet_init.center, Li_coord)
+                if theta > math.pi/8:
+                    theta = math.pi - theta
+                coordinate = [r, theta]
+
+            energy_initial = data['energies'][0]
+            energy_final = data['energies'][-1]
+            coordinate.append(energy_initial)
+
+            datapoints.append(coordinate)
+
+        return datapoints
+
+        # TODO Finish, in case it makes sense
+
 
     def as_dict(self):
         """

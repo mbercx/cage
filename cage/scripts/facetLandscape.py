@@ -17,7 +17,6 @@ analysis.
 """
 
 OUTPUT_FILENAME = 'result.out'
-# TODO it would actually be cool if the script could figure out the output
 
 dirname = os.path.abspath(sys.argv[1])
 if not os.path.isdir(dirname):
@@ -42,6 +41,7 @@ for directory in dirlist:
         print('Output found in directory ' + directory)
     else:
         print('Error found in output in directory ' + directory)
+        output.append(data)
 
 # Note that now only the output is left which did not contain any errors
 
@@ -55,8 +55,8 @@ for facet in cage_init.facets:
             utils.distance(facet_init.center, cage_init.cart_coords[-1]):
         facet_init = facet
 
-# Get the distance to the facet, the angle between the normal, and the energy
-# for each result
+# Get the distance to the facet, the angle between the facet center and the Li
+# position, and the energy for each result
 results = []
 for data in output:
 
@@ -67,34 +67,45 @@ for data in output:
                 utils.distance(facet_final.center, cage_final.cart_coords[-1]):
             facet_final = facet
 
+    init_energy = data['energies'][0]
     final_energy = data['energies'][-1]
     final_Li_coord = cage_final.cart_coords[-1]
 
     dist_Li_init = utils.distance(facet_init.center, final_Li_coord)
     dist_Li_final = utils.distance(facet_final.center, final_Li_coord)
 
-
     if pmg.Element('C') in cage_init.species:
+
         angle_Li_init = utils.angle_between(facet_init.center, final_Li_coord)
         angle_Li_final =utils.angle_between(facet_final.center, final_Li_coord)
 
-        results.append([dist_Li_init, dist_Li_final, angle_Li_init,
-                        angle_Li_final, final_energy])
+        results.append([dist_Li_init, angle_Li_init, final_energy])
     else:
-        results.append([dist_Li_init, dist_Li_final, final_energy])
+        results.append([dist_Li_init, dist_Li_final, init_energy, final_energy])
 
+if pmg.Element('C') in cage_init.species:
 
-results = np.array(sorted(results, key=lambda results: results[0]))
+    pass
 
-plt.figure(1)
-plt.subplot(211)
-plt.ylabel('Total Energy')
-plt.xlabel('Distance to initial facet')
-plt.plot(results[:,0],results[:,2])
+    # Find out how many theta there are
+    # radius = np.array(results)
+    # n_theta = 1
+    # r1 = results[0][0]
+    # rn = results[]
+    # while
 
-plt.subplot(212)
-plt.ylabel('Total Energy')
-plt.xlabel('Distance to relaxed facet')
-plt.plot(results[:,1],results[:,2])
-plt.show()
+else:
+    results = np.array(sorted(results, key=lambda results: results[0]))
+
+    plt.figure(1)
+    plt.subplot(211)
+    plt.ylabel('Total Energy')
+    plt.xlabel('Distance to initial facet')
+    plt.plot(results[:,0],results[:,2])
+
+    plt.subplot(212)
+    plt.ylabel('Total Energy')
+    plt.xlabel('Distance to relaxed facet')
+    plt.plot(results[:,1],results[:,2])
+    plt.show()
 
