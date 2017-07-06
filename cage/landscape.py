@@ -6,6 +6,7 @@ from cage.facetsym import Cage
 
 import math
 import os
+import json
 
 from itertools import combinations
 import pymatgen as pmg
@@ -200,24 +201,31 @@ class LandscapeAnalyzer(MSONable):
                 if out.data[-1]['has_error']:
                     print('Error found in output in directory ' + dir)
                 else:
+                    if out.data[-1]['task_time'] == 0:
+                        print('No timing data found for final task. '
+                              'Calculation might not have completed '
+                              'successfully.')
                     output.append(out)
                     print('Grabbed output in directory ' + dir)
 
+            # TODO This currently only considers the final task. Not a very general approach
             data = [out.data[-1] for out in output]
 
         else:
             raise NotImplementedError("Only NwChem is currently supported.")
 
-        return LandscapeAnalyzer(data)
+        return LandscapeAnalyzer(data, software)
 
-    def plot_facet_landscape(self, coordinates="polar"):
+    def analyze_energies(self, coordinates="polar"):
         """
-        Plot the landscape of a certain property on a facet.
+        Extract the total energies for all the calculations. This function is
+        currently written specifically for the Li landscape defined on a facet.
         :return:
         """
         # TODO This method is horrendously specific, but I need to write it quick so I can show some results. Improve this later.
 
         # Find the initial facet
+        # TODO This should be done by loading the facet in the directory, but nwchem seems to change the coordinates somehow.
         cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
         facet_init = cage_init.facets[0]
         for facet in cage_init.facets:
@@ -235,9 +243,6 @@ class LandscapeAnalyzer(MSONable):
                 Li_coord = [site.coords for site in data["molecules"][0].sites
                             if site.specie == pmg.Element('Li')][0]
 
-                cage_init = Cage.from_molecule(data["molecules"][0])
-                cage_final = Cage.from_molecule(data["molecules"][-1])
-
                 r = np.linalg.norm(Li_coord)
                 theta = angle_between(facet_init.center, Li_coord)
                 if theta > math.pi/8:
@@ -247,6 +252,7 @@ class LandscapeAnalyzer(MSONable):
             energy_initial = data['energies'][0]
             energy_final = data['energies'][-1]
             coordinate.append(energy_initial)
+            coordinate.append(energy_final)
 
             datapoints.append(coordinate)
 
@@ -260,7 +266,30 @@ class LandscapeAnalyzer(MSONable):
         Return a dictionary representing the LandscapeAnalyzer instance.
         :return:
         """
-        pass
+        dict = {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__}
+
+        data_list = []
+        for chunk in self.data:
+            data_dict = chunk.copy()
+
+            if data_dict['structures']:
+                struc_dicts = []
+                for structure in data_dict['structures']:
+                    struc_dicts.append(structure.as_dict())
+                data_dict['structures'] = struc_dicts
+
+            if data_dict['molecules']:
+                mol_dicts = []
+                for molecule in data_dict['molecules']:
+                    mol_dicts.append(molecule.as_dict())
+                data_dict['molecules'] = mol_dicts
+
+            data_list.append(data_dict)
+
+        dict["data"] = data_list
+
+        return dict
 
     @classmethod
     def from_dict(cls, d):
@@ -280,12 +309,49 @@ class LandscapeAnalyzer(MSONable):
         pass
 
     @classmethod
-    def from_file(cls, fmt='json'):
+    def from_file(cls, filename, fmt='json'):
         """
         Initialize an instance of LandscapeAnalyzer from a file.
         :return:
         """
-        pass
+        data = []
+
+        if fmt == "json":
+
+            with open(filename, "r") as f:
+                file_data = json.load(f)
+
+            for chunk in file_data["data"]:
+                data_dict = chunk.copy()
+
+                if data_dict['structures']:
+                    structures = []
+                    for struc_dict in data_dict['structures']:
+                        structures.append(pmg.Structure.from_dict(struc_dict))
+                    data_dict['structures'] = structures
+
+                if data_dict['molecules']:
+                    molecules = []
+                    for mol_dict in data_dict['molecules']:
+                        molecules.append(pmg.Molecule.from_dict(mol_dict))
+                    data_dict['molecules'] = molecules
+
+                data.append(data_dict)
+
+        return LandscapeAnalyzer(data)
+
+    def to(self, filename, fmt="json"):
+        """
+        Write the landscape to a file for quick reading.
+        :return:
+        """
+        if fmt == "json":
+            with open(filename, "w") as f:
+                json.dump(self.as_dict(), f)
+            return
+        else:
+            raise NotImplementedError('Only json formats supported currently.')
+        # TODO Add support for .yaml
 
 
 # Functions stolen from SO
