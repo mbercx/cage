@@ -29,7 +29,8 @@ LINE = [1, 6] # Distance from the center of the facet for the Lithium
 DENSITY = 5
 
 # Calculation parameters
-BASIS = {'*': "aug-pcseg-1"}
+#BASIS = {'*': "aug-pcseg-1"}
+BASIS = {'*': "aug-cc-pVDZ"}
 
 THEORY_SETUP = {'iterations': '300',
                 'xc': 'xpbe96 xpbe96',
@@ -44,13 +45,22 @@ GEO_SETUP = {'nocenter', "units angstroms"}
 ALT_SETUP = {'driver': {'loose':'',
                         'maxiter': '100'}}
 
-def main():
+OPERATION = 'energy'
 
+# Input check
+try:
+    # Take the filename argument from the user
+    filename = sys.argv[2]
+    # Take the operation input
+    OPERATION = sys.argv[1]
+except IndexError:
     # Take the filename argument from the user
     try:
         filename = sys.argv[1]
     except IndexError:
         raise IOError('No POSCAR file provided.')
+
+def main():
 
     # Load the POSCAR into a Cage
     mol = cage.facetsym.Cage.from_poscar(filename)
@@ -71,7 +81,7 @@ def main():
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
                                theory='dft',
-                               operation='optimize',
+                               operation=OPERATION,
                                theory_directives=THEORY_SETUP,
                                alternate_directives=ALT_SETUP)]
 
