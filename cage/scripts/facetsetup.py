@@ -42,8 +42,9 @@ THEORY_SETUP = {'iterations': '300',
 
 GEO_SETUP = {'nocenter', "units angstroms"}
 
-ALT_SETUP = {'driver': {'loose':'',
-                        'maxiter': '100'}}
+ALT_SETUP = {}
+
+DRIVER_SETUP = {'loose':'', 'maxiter': '100'}
 
 OPERATION = 'energy'
 
@@ -75,8 +76,10 @@ def main():
         # Find the molecules for each lithium distance
         molecules = set_up_molecules(mol, neq_facet)
 
-        # Add the constraints
-        ALT_SETUP['constraints'] = find_constraints(mol,neq_facet)
+        if OPERATION == 'optimize':
+            # Add the constraints
+            ALT_SETUP['constraints'] = find_constraints(mol,neq_facet)
+            ALT_SETUP['driver'] = DRIVER_SETUP
 
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
