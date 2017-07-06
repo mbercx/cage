@@ -8,7 +8,8 @@ import math
 import os
 import json
 
-from itertools import combinations
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
 import numpy as np
@@ -161,6 +162,7 @@ class LandscapeAnalyzer(MSONable):
         """
         self._data = data
         self._software = software
+        self._datapoints = None
 
     @property
     def data(self):
@@ -169,6 +171,10 @@ class LandscapeAnalyzer(MSONable):
     @property
     def software(self):
         return self._software
+
+    @property
+    def datapoints(self):
+        return self._datapoints
 
     @classmethod
     def from_data(cls, directory, output_file='result.out', software='nwchem'):
@@ -238,16 +244,28 @@ class LandscapeAnalyzer(MSONable):
 
         for data in self.data:
 
-            if coordinates == "polar":
+            Li_coord = [site.coords for site in data["molecules"][0].sites
+                        if site.specie == pmg.Element('Li')][0]
 
-                Li_coord = [site.coords for site in data["molecules"][0].sites
-                            if site.specie == pmg.Element('Li')][0]
+            if coordinates == "polar":
 
                 r = np.linalg.norm(Li_coord)
                 theta = angle_between(facet_init.center, Li_coord)
                 if theta > math.pi/8:
                     theta = math.pi - theta
                 coordinate = [r, theta]
+
+            if coordinates == "facet_cart":
+
+                Li_vector = Li_coord - facet_init.center
+                theta = angle_between(facet_init.normal, Li_vector)
+                if theta > math.pi / 2:
+                    theta = math.pi - theta
+
+                x = np.linalg.norm(Li_vector)*math.sin(theta)
+                y = np.linalg.norm(Li_vector)*math.cos(theta)
+
+                coordinate = [x, y]
 
             energy_initial = data['energies'][0]
             energy_final = data['energies'][-1]
@@ -256,9 +274,28 @@ class LandscapeAnalyzer(MSONable):
 
             datapoints.append(coordinate)
 
-        return datapoints
+        self._datapoints = datapoints
 
         # TODO Finish, in case it makes sense
+
+    def plot_energies(self, dimension):
+        """
+        Plot the energy landscape from the datapoints.
+        :return:
+        """
+        if not self.datapoints:
+            self.analyze_energies()
+
+        darray = np.array(self.datapoints)
+
+        if dimension == 1:
+            pass
+        if dimension == 2:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            ax.plot_trisurf(darray[:,0], darray[:,1], darray[:,2],
+                            linewidth=0.2, antialiased=True)
+            plt.show()
 
 
     def as_dict(self):
