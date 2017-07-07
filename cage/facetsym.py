@@ -38,7 +38,7 @@ class Cage(Molecule):
                  validate_proximity=False, site_properties=None):
         """
         Create a Mutable Molecule Cage object. The Cage molecule is
-        automatically centered on its center of mass.
+        automatically centered on its geometric center.
 
         :param species (list): List of atomic species. Possible kinds of input
             include a list of dict of elements/species and occupancies, a List
@@ -50,18 +50,23 @@ class Cage(Molecule):
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
-        self._center()
+        self.center()
         self._facets = None
         self._pointgroup = None
         self._symmops = None
 
-    def _center(self):
+    def center(self, point=None):
         """
-        Center the Cage by updating the sites.
+        Center the Cage by updating the sites. In case no point is provided,
+        the molecules is centered on its geometric center.
         """
+        if point:
+            center = point
+        else:
+            # Find the coordinates of the geometric center
+            center = sum([site.coords for site in self.sites])/len(self.sites)
 
-        # Find the new Cartesian coordinates
-        center = self.center_of_mass
+        # Find the new coordinates
         new_coords = np.array(self.cart_coords) - center
 
         # Update the sites
@@ -298,6 +303,11 @@ class Facet(SiteCollection, MSONable):
             self._normal = normal  # TODO Check if input normal makes sense
         else:
             self._normal = self._find_normal()
+
+    def __str__(self):
+        """A string representation of the Facet."""
+        for site in self.sites:
+            print(site)
 
     def __eq__(self, other):
         """

@@ -35,6 +35,7 @@ BASIS = {'*': "aug-cc-pVDZ"}
 THEORY_SETUP = {'iterations': '300',
                 'xc': 'xpbe96 xpbe96',
                 'direct': '',
+                'smear':'0.01',
                 'convergence energy': '1e-4',
                 'convergence density': '1e-2',
                 'convergence gradient': '1e-2',
@@ -113,14 +114,14 @@ def main():
 
 def set_up_molecules(mol, facet):
     """
-    Set up the lithium landscape for a facet.
+    Set up the molecules from the lithium Landscape for a facet.
     :return:
     """
     # Define the line on which to place the Lithium
     center = facet.center
     normal = facet.normal / np.linalg.norm(facet.normal)
     endpoints = [center + LINE[0] * normal, center + LINE[1] * normal]
-    line = cage.landscape.Landscape(endpoints, DENSITY)
+    line = cage.landscape.Landscape.from_vertices(endpoints, DENSITY)
 
     # If Carbon is in the molecule, expand the energy landscape
     # TODO: Make this less specific to carbon. This whole module will probably need an overhaul for that.
