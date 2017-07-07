@@ -222,7 +222,7 @@ class LandscapeAnalyzer(MSONable):
 
         return LandscapeAnalyzer(data, software)
 
-    def analyze_energies(self, coordinates="polar"):
+    def analyze_energies(self, coordinates="polar", facet=None):
         """
         Extract the total energies for all the calculations. This function is
         currently written specifically for the Li landscape defined on a facet.
@@ -230,15 +230,15 @@ class LandscapeAnalyzer(MSONable):
         """
         # TODO This method is horrendously specific, but I need to write it quick so I can show some results. Improve this later.
 
-        # Find the initial facet
-        # TODO This should be done by loading the facet in the directory, but nwchem seems to change the coordinates somehow.
-        cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
-        facet_init = cage_init.facets[0]
-        for facet in cage_init.facets:
-            if utils.distance(facet.center, cage_init.cart_coords[-1]) < \
-                    utils.distance(facet_init.center,
-                                   cage_init.cart_coords[-1]):
-                facet_init = facet
+        if not facet:
+            cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
+            facet_init = cage_init.facets[0]
+            for cage_facet in cage_init.facets:
+                if utils.distance(cage_facet.center,
+                                  cage_init.cart_coords[-1]) \
+                    < utils.distance(facet_init.center,
+                                       cage_init.cart_coords[-1]):
+                    facet = cage_facet
 
         datapoints = []
 
@@ -250,20 +250,22 @@ class LandscapeAnalyzer(MSONable):
             if coordinates == "polar":
 
                 r = np.linalg.norm(Li_coord)
-                theta = angle_between(facet_init.center, Li_coord)
+                theta = angle_between(facet.center, Li_coord)
                 if theta > math.pi/8:
                     theta = math.pi - theta
                 coordinate = [r, theta]
 
             if coordinates == "facet_cart":
 
-                Li_vector = Li_coord - facet_init.center
-                theta = angle_between(facet_init.normal, Li_vector)
+                Li_vector = Li_coord - facet.center
+                theta = angle_between(facet.normal, Li_vector)
+                print(theta)
                 if theta > math.pi / 2:
                     theta = math.pi - theta
 
                 x = np.linalg.norm(Li_vector)*math.sin(theta)
                 y = np.linalg.norm(Li_vector)*math.cos(theta)
+                print((x, y))
 
                 coordinate = [x, y]
 
@@ -286,10 +288,22 @@ class LandscapeAnalyzer(MSONable):
         if not self.datapoints:
             self.analyze_energies()
 
-        darray = np.array(self.datapoints)
+        data_tuples = []
+        for point in self.datapoints:
+            data_tuples.append(tuple(point))
+        dtype = [('Distance', float), ('Angle', float), ('Energy', float),
+                 ('Final_Energy', float)]
+        darray = np.array(data_tuples, dtype=dtype)
+
+        np.sort(darray, order='Distance')
 
         if dimension == 1:
-            pass
+            plt.figure()
+            plt.xlabel('Distance (Angstrom)')
+            plt.ylabel('Energy (eV)')
+            plt.plot(darray['Distance'], darray['Energy'])
+            plt.show()
+
         if dimension == 2:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')

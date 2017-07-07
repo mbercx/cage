@@ -40,7 +40,7 @@ THEORY_SETUP = {'iterations': '300',
                 'convergence gradient': '1e-2',
                 'convergence damp':'70'}
 
-GEO_SETUP = {'nocenter', "units angstroms"}
+GEO_SETUP = {"noautosym", "noautoz", 'nocenter', "units angstroms"}
 
 ALT_SETUP = {}
 
