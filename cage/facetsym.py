@@ -2,16 +2,16 @@
 # Copyright (c) Uncle Sam
 
 import json
-from itertools import combinations
-from math import pi
+import math
 
 import numpy as np
+import pymatgen as pmg
+import cage.utils as utils
+import pymatgen.symmetry.analyzer as syman
+
+from itertools import combinations
 from monty.io import zopen
 from monty.json import MSONable
-
-import pymatgen as pmg
-import pymatgen.symmetry.analyzer as syman
-from cage.utils import angle_between
 from pymatgen.core.structure import Molecule
 from pymatgen.core.structure import SiteCollection
 
@@ -105,7 +105,7 @@ class Cage(Molecule):
 
         # Flip the normal of the facets in case it points to the origin
         for facet in facets_all:
-            if facet.angle_to_normal(self.center_of_mass) < pi/2:
+            if facet.angle_to_normal(self.center_of_mass) < math.pi/2:
                 facet.flip_normal()
 
         # Find all the facets that are "on the surface"
@@ -120,7 +120,7 @@ class Cage(Molecule):
             # If all the angles are larger than pi/2, it's a surface site
             all_angles_smaller = True
             for angle in site_angles:
-                if angle + 0.01 < pi/2:
+                if angle + 0.01 < math.pi/2:
                     all_angles_smaller = False
 
             # In that case, add it to the surface sites
@@ -297,6 +297,11 @@ class Facet(SiteCollection, MSONable):
     #TODO Write those docstrings you lazy bastard!
 
     def __init__(self, sites, normal=None):
+        """
+        Initialize a Facet with the provided sites.
+        :param sites:
+        :param normal:
+        """
         self._sites = sites
         self._center = site_center(tuple(self.sites))
         if normal is not None:
@@ -304,10 +309,23 @@ class Facet(SiteCollection, MSONable):
         else:
             self._normal = self._find_normal()
 
+    def _find_normal(self):
+        """
+        Finds the normal vector of the surface, pointing away from the origin
+        """
+        normal = np.cross(self._sites[0].coords - self._sites[1].coords,
+                          self._sites[0].coords - self._sites[2].coords)
+
+        normal /= 2  # Make the length of the normal equal to the surface area
+
+        return normal
+
     def __str__(self):
-        """A string representation of the Facet."""
+        output = ['Facet with sites:']
         for site in self.sites:
-            print(site)
+            output.append(site.__str__())
+
+        return '\n'.join(output)
 
     def __eq__(self, other):
         """
@@ -361,6 +379,22 @@ class Facet(SiteCollection, MSONable):
 
         return cls(sites, normal=np.array(d['normal']))
 
+    def as_dict(self):
+        """
+
+        :return:
+        """
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "sites": []}
+        for site in self:
+            site_dict = site.as_dict()
+            del site_dict["@module"]
+            del site_dict["@class"]
+            d["sites"].append(site_dict)
+        d['normal'] = self.normal.tolist()
+        return d
+
     def to(self, fmt="json", filename=None):
         """
 
@@ -378,21 +412,78 @@ class Facet(SiteCollection, MSONable):
             raise NotImplementedError("Currently only json format is "
                                       "supported.")
 
-    def as_dict(self):
+    def get_normal_intersection(self, other, method='gonio'):
         """
+        Find the intersection of the normal lines of the Facet and another one.
+
+        Currently only works on an edge sharing Facet.
 
         :return:
         """
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__,
-             "sites": []}
-        for site in self:
-            site_dict = site.as_dict()
-            del site_dict["@module"]
-            del site_dict["@class"]
-            d["sites"].append(site_dict)
-        d['normal'] = self.normal.tolist()
-        return d
+
+        if method == 'gonio':
+
+            edge = set(self.sites) & set(other.sites)
+            if len(edge) != 2:
+                raise ValueError('Provided facet does not share an edge. '
+                                 'Goniometric method will not work.')
+
+            edge_middle = sum([site.coords for site in edge]) / 2
+            print('edge_middle = ' + str(edge_middle))
+
+            y1 = utils.distance(self.center, edge_middle)
+            print('y1 = ' + str(y1))
+            y2 = utils.distance(other.center, edge_middle)
+            print('y2 = ' + str(y2))
+            beta = utils.angle_between(self.normal, other.normal)
+            print('beta = ' + str(beta))
+
+            psi = math.atan2(math.sin(beta), (y1 / y2 + math.cos(beta)))
+            print('psi = ' + str(psi))
+            theta = beta - psi
+            print('theta = ' + str(theta))
+            r = y1 / math.sin(theta)
+            print('r = ' + str(r))
+            r1 = r * math.cos(theta)
+            print('r1 = ' + str(r1))
+            r2 = r * math.cos(psi)
+            print('r2 = ' + str(r2))
+
+            intersection1 = self.center - r1 * utils.unit_vector(self.normal)
+            intersection2 = other.center - r2 * utils.unit_vector(other.normal)
+
+            if utils.distance(intersection1, intersection2) < 1e-4:
+                return intersection1
+            else:
+                print('Could not find intersection. Returned closest results.')
+                return (intersection1, intersection2)
+
+        # Brute method. Currently abandoned
+        #
+        # elif method == 'brute':
+        #     lines = []
+        #     for facet in facets:
+        #         line = Landscape.from_vertices([facet.center,
+        #                                         facet.center - 5 *
+        #                                         facet.normal],
+        #                                        density=int(1e2))
+        #         lines.append(line)
+        #
+        #     intersection = None
+        #     distance = 1e3
+        #     for point1 in lines[0].points:
+        #         for point2 in lines[1].points:
+        #             if utils.distance(point1, point2) < distance:
+        #                 distance = utils.distance(point1, point2)
+        #                 intersection = point1
+        #     if distance < 1e-2:
+        #         return intersection
+        #     else:
+        #         print('Brute force method failed.')
+        #         return None
+
+        else:
+            NotImplementedError("Unknown method.")
 
     def get_distance(self, i, j):
         """
@@ -402,17 +493,6 @@ class Facet(SiteCollection, MSONable):
         :return:
         """
         pass  #TODO
-
-    def _find_normal(self):
-        """
-        Finds the normal vector of the surface, pointing away from the origin
-        """
-        normal = np.cross(self._sites[0].coords - self._sites[1].coords,
-                          self._sites[0].coords - self._sites[2].coords)
-
-        normal /= 2  # Make the length of the normal equal to the surface area
-
-        return normal
 
     def is_equivalent(self, other, symmops):
         """
@@ -448,13 +528,6 @@ class Facet(SiteCollection, MSONable):
         """
         return self._normal
 
-    def __str__(self):
-        output = ['Facet with sites:']
-        for site in self.sites:
-            output.append(site.__str__())
-
-        return '\n'.join(output)
-
     def flip_normal(self):
         """
         Flip the direction of the surface normal of the Facet.
@@ -469,28 +542,18 @@ class Facet(SiteCollection, MSONable):
         :param coordinate:
         :return: angle value (in radians)
         """
-        return angle_between(coordinate - self._center, self._normal)
+        return utils.angle_between(coordinate - self._center, self._normal)
 
 
 # Utility functions that may be useful across classes
 
 def site_center(sites):
     """
-    Find the center of a collection of sites. Not particularly fast nor clever.
+    Find the center of a collection of sites.
     :param sites: Tuple of Site objects
     :return: Array of the cartesian coordinates of the center of the sites
     """
-    assert isinstance(sites, tuple)
-    nsites = len(sites)
-
-    # Sum the x,y, and z values of the site coordinates
-    sum_coords = np.zeros(3)
-    for site in sites:
-        sum_coords[0] += site.x
-        sum_coords[1] += site.y
-        sum_coords[2] += site.z
-
-    return sum_coords / nsites
+    return sum([site.coords for site in sites])/len(sites)
 
 
 def schoenflies_to_hm():
