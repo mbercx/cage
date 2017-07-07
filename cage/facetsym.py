@@ -27,8 +27,6 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "14 JUN 2017"
 
-# TODO Remove bias of Cage class to H and Li
-
 
 class Cage(Molecule):
     """
@@ -39,15 +37,15 @@ class Cage(Molecule):
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
                  validate_proximity=False, site_properties=None):
         """
-        Creates a Mutable Molecule Cage object. The Cage molecule is
+        Create a Mutable Molecule Cage object. The Cage molecule is
         automatically centered on its center of mass.
 
         :param species (list): List of atomic species. Possible kinds of input
             include a list of dict of elements/species and occupancies, a List
             of elements/specie specified as actual Element/Specie, Strings
             ("Fe", "Fe2+") or atomic numbers (1,56).
-        :param coords (3x1 array): list of cartesian coordinates of each
-            species.
+        :param coords (List of 3x1 np.array): List of cartesian coordinates of
+            each species.
         :param (float): Charge for the molecule. Defaults to 0.
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
@@ -60,7 +58,6 @@ class Cage(Molecule):
     def _center(self):
         """
         Center the Cage by updating the sites.
-        :return:
         """
 
         # Find the new Cartesian coordinates
@@ -86,9 +83,8 @@ class Cage(Molecule):
         Currently does not expand the facets to 4 sites in case it finds other
         sites which are in the plane of the site, as defined by 3 site points.
 
-        :param ignore: Tuple of Elements to ignore for the surface facet
-        determination.
-        :return: List of Facets
+        :param ignore: (Tuple of Elements) The elements to ignore for the
+        surface facet determination.
         """
 
         # Find all the sites which should not be ignored
@@ -131,8 +127,8 @@ class Cage(Molecule):
     @property
     def facets(self):
         """
-        Surface facets of the Cage.
-        :return:
+        Surface Facets of the Cage.
+        :return: (List of Facets)
         """
         if self._facets:
             return self._facets
@@ -144,7 +140,7 @@ class Cage(Molecule):
     def pointgroup(self):
         """
         Find the Schoenflies PointGroup of the Cage molecule.
-        :return: PointGroup object
+        :return: (pymatgen.symmetry.analyzer.PointGroup)
         """
         if not self._pointgroup:
             self._pointgroup = syman.PointGroupAnalyzer(self).get_pointgroup()
@@ -194,31 +190,28 @@ class Cage(Molecule):
 
     def redefine_surface(self, ignore_elements):
         """
-        The standard surface of the Cage class ignores hydrogen and lithium.
-        This method allows the user to redefine the surface of the Cage, by
-        telling it which elements to ignore in the determination of the
-        surface.
+        Redefine the surface of the Cage by telling it which elements to ignore
+        in the determination of the surface.
         :param ignore_elements:
         :return:
         """
-        self._facets = self._find_surface_facets(ignore_elements)
+        self.find_surface_facets(ignore_elements)
     
     def append(self, species, coords, validate_proximity=True,
                properties=None):
         """
         Overwrite the append method of the Molecule class, in order to
         remove the symmetry operations after the site has been appended.
-        :param species:
-        :param coords: 
-        :param validate_proximity: 
-        :param properties: 
+        :param species: (pymatgen.Specie) Species of inserted site.
+        :param coords: (3x1 numpy.array) Coordinates of inserted site.
+        :param validate_proximity: (bool) Whether to check if inserted site is
+                too close to an existing site. Defaults to True.
+        :param properties: (dict) A dictionary of properties for the Site.
         :return: 
         """
         super(Cage, self).append(species, coords, validate_proximity,
                                  properties)
         self._symmops = None
-
-        # TODO Add parameter descriptions.
 
     def to_poscar(self, filename='POSCAR'):
         """
