@@ -49,14 +49,14 @@ class Landscape(MSONable):
         """
         All of the points of the Landscape.
 
-        :return:
+        :return: (List of numpy.array)
         """
         return self._points
 
     @classmethod
     def from_vertices(cls, vertices, density=10):
         """
-        Defines a landscape by defining the vertices (end points in the case of
+        Define a landscape by providing the vertices (end points in the case of
         a line).
 
         :param vertices: (List of numpy.array)
@@ -91,6 +91,7 @@ class Landscape(MSONable):
         :param vector:
         :return:
         """
+        # TODO Extend this method so it also allows rotations around other points than origin
 
         # Find the rotation matrices
         rotation_matrices = []
@@ -109,6 +110,23 @@ class Landscape(MSONable):
 
         self._points = points.copy()
 
+    def extend_by_translation(self, vector, density=10):
+        """
+        Extends the Landscape by translating the points along a certain vector.
+        :return:
+        """
+        pass
+
+    def extend_from_point(self, point, extension, density=10):
+        """
+        Extends the Landscape by scaling the points from a specific point.
+        :param point:
+        :param extension:
+        :param density:
+        :return:
+        """
+        pass
+
     def as_dict(self):
         """
         A JSON serializable dictionary of the Landscape.
@@ -117,6 +135,15 @@ class Landscape(MSONable):
         dict = {"points": self.points}
 
         return dict
+
+    @classmethod
+    def from_file(cls, filename, fmt="json"):
+        """
+        Load a Landscape from a file.
+        :param filename: (string)
+        :return:
+        """
+        pass
 
 
 # Functions stolen from SO
