@@ -32,8 +32,8 @@ __date__ = "14 JUN 2017"
 
 class Cage(Molecule):
     """
-    A Cage is a pymatgen Molecule-derived object for molecules shaped similar to
-    fullerenes.
+    A Cage is a pymatgen Molecule-derived object for molecules shaped similar
+    to fullerenes.
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
@@ -42,9 +42,9 @@ class Cage(Molecule):
         Creates a Mutable Molecule Cage object. The Cage molecule is
         automatically centered on its center of mass.
 
-        :param species (list): List of atomic species. Possible kinds of input include
-            a list of dict of elements/species and occupancies, a List of
-            elements/specie specified as actual Element/Specie, Strings
+        :param species (list): List of atomic species. Possible kinds of input
+            include a list of dict of elements/species and occupancies, a List
+            of elements/specie specified as actual Element/Specie, Strings
             ("Fe", "Fe2+") or atomic numbers (1,56).
         :param coords (3x1 array): list of cartesian coordinates of each
             species.
@@ -53,7 +53,7 @@ class Cage(Molecule):
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
         self._center()
-        self._facets = self._find_surface_facets()
+        self._facets = None
         self._pointgroup = None
         self._symmops = None
 
@@ -78,17 +78,17 @@ class Cage(Molecule):
 
         self._sites = sites
 
-    def _find_surface_facets(self, ignore=(pmg.Element('H'),
-                                           pmg.Element('Li'))):
+    def find_surface_facets(self, ignore=(pmg.Element('H'),
+                                          pmg.Element('Li'))):
         """
-        Finds all the surface facets of the Cage object.
+        Find all the surface facets of the Cage object.
 
         Currently does not expand the facets to 4 sites in case it finds other
         sites which are in the plane of the site, as defined by 3 site points.
 
-        :param ignore: Tuple of elements to ignore for the surface facet
+        :param ignore: Tuple of Elements to ignore for the surface facet
         determination.
-        :return: List of Facet objects
+        :return: List of Facets
         """
 
         # Find all the sites which should not be ignored
@@ -126,7 +126,7 @@ class Cage(Molecule):
             if all_angles_smaller:
                 facets_surf.append(facet)
 
-        return facets_surf
+        self._facets = facets_surf
 
     @property
     def facets(self):
@@ -134,7 +134,11 @@ class Cage(Molecule):
         Surface facets of the Cage.
         :return:
         """
-        return self._facets
+        if self._facets:
+            return self._facets
+        else:
+            print('No facets stored. Please run the find_surface_facets '
+                  'method.')
 
     @property
     def pointgroup(self):
