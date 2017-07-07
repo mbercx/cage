@@ -1,0 +1,237 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cage.study &#8212; cage 0.1a1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cage.study</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding: utf-8</span>
+<span class="c1"># Copyright (c) Uncle Sam</span>
+
+<span class="kn">import</span> <span class="nn">pymatgen</span> <span class="k">as</span> <span class="nn">pmg</span>
+<span class="kn">import</span> <span class="nn">pymatgen.io.nwchem</span> <span class="k">as</span> <span class="nn">nwchem</span>
+
+<span class="kn">from</span> <span class="nn">monty.json</span> <span class="k">import</span> <span class="n">MSONable</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Defines a Study class, that contains all the information for a study of a</span>
+<span class="sd">selection of structures. It allows the user to easily set up a lot of</span>
+<span class="sd">calculations in a systematic way.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># TODO Check what went wrong with the B12 calculations, and add it to custodian</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Marnik Bercx&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;marnik.bercx@uantwerpen.be&quot;</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Nowhere&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;16 JUN 2017&quot;</span>
+
+<div class="viewcode-block" id="Study"><a class="viewcode-back" href="../../cage.html#cage.study.Study">[docs]</a><span class="k">class</span> <span class="nc">Study</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A Study is a List of Tasks which need to be performed on a List of</span>
+<span class="sd">    Structures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">software</span><span class="o">=</span><span class="s1">&#39;nwchem&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialise the Study.</span>
+
+<span class="sd">        :param systems: List of IStructures to study</span>
+<span class="sd">        :param tasks: List of NwTasks or whatever we will use for VASP</span>
+<span class="sd">        :param options: Dictionary of options to apply to calculations</span>
+<span class="sd">        :param software: String that describes the code to use for the calculations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span> <span class="o">=</span> <span class="n">structures</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tasks</span> <span class="o">=</span> <span class="n">tasks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_software</span> <span class="o">=</span> <span class="n">software</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comp_dict</span> <span class="o">=</span> <span class="n">classify_by_composition</span><span class="p">(</span><span class="n">structures</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tasks</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">software</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_software</span>
+
+<div class="viewcode-block" id="Study.set_up_input"><a class="viewcode-back" href="../../cage.html#cage.study.Study.set_up_input">[docs]</a>    <span class="k">def</span> <span class="nf">set_up_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">sort_comp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up all of the input files for the calculations and systems.</span>
+
+<span class="sd">        :param directory: The full path to the directory where the calculation</span>
+<span class="sd">        should be set up.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#TODO Let the script set up the directory in case it does not exist</span>
+
+        <span class="c1"># Get the absolute path to the directory</span>
+        <span class="n">abs_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+        <span class="c1">##############</span>
+        <span class="c1">#   NWCHEM   #</span>
+        <span class="c1">##############</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">software</span> <span class="o">==</span> <span class="s1">&#39;nwchem&#39;</span><span class="p">:</span>
+
+            <span class="c1"># Set up the directory tree and input files</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comp_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+                <span class="k">if</span> <span class="n">sort_comp</span><span class="p">:</span>
+                    <span class="n">comp_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">abs_dir</span><span class="p">,</span><span class="n">comp_dir</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">comp_dir</span> <span class="o">+</span> <span class="s1">&#39; exists, skipping...&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">comp_dir</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+                <span class="n">geo_number</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_comp_dict</span><span class="p">[</span><span class="n">comp</span><span class="p">]:</span>
+
+                    <span class="n">geo_dir</span> <span class="o">=</span> <span class="s1">&#39;geo&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">geo_number</span><span class="p">)</span>
+
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">abs_dir</span><span class="p">,</span> <span class="n">comp_dir</span><span class="p">,</span> <span class="n">geo_dir</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">geo_dir</span> <span class="o">+</span> <span class="s1">&#39; exists, skipping...&#39;</span><span class="p">)</span>
+
+                    <span class="c1"># Set up the input file</span>
+                    <span class="n">nwinput</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="n">nwinput</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">abs_dir</span><span class="p">,</span> <span class="n">comp_dir</span><span class="p">,</span>
+                                                    <span class="n">geo_dir</span><span class="p">,</span><span class="s1">&#39;input&#39;</span><span class="p">))</span>
+
+                    <span class="n">geo_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1">############</span>
+        <span class="c1">#   VASP   #</span>
+        <span class="c1">############</span>
+
+        <span class="c1">#TODO Add functionality for VASP studies</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">software</span> <span class="o">==</span> <span class="s1">&#39;vasp&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Currently, vasp inputs are not implemented yet.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Study.add_structure"><a class="viewcode-back" href="../../cage.html#cage.study.Study.add_structure">[docs]</a>    <span class="k">def</span> <span class="nf">add_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a structure to the list of structures.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_comp_dict</span> <span class="o">=</span> <span class="n">classify_by_composition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Study.add_task"><a class="viewcode-back" href="../../cage.html#cage.study.Study.add_task">[docs]</a>    <span class="k">def</span> <span class="nf">add_task</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a task to the list of tasks.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Study.change_software"><a class="viewcode-back" href="../../cage.html#cage.study.Study.change_software">[docs]</a>    <span class="k">def</span> <span class="nf">change_software</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the software being used for the calculations.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="classify_by_composition"><a class="viewcode-back" href="../../cage.html#cage.study.classify_by_composition">[docs]</a><span class="k">def</span> <span class="nf">classify_by_composition</span><span class="p">(</span><span class="n">structures</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Classify the different IStructures by composition.</span>
+<span class="sd">    :param structures: List of structures</span>
+<span class="sd">    :return: Dictionary of composition strings with a List of the corresponding</span>
+<span class="sd">    IStructures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">comp_dic</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">comp_dic</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">),</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">comp_dic</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">)]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comp_dic</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span><span class="n">structure</span><span class="p">,]</span>
+    <span class="k">return</span> <span class="n">comp_dic</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Marnik Bercx.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

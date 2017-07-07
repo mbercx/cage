@@ -1,5 +1,5 @@
 # encoding: utf-8
-# Copyright (c) Uncle Sam
+# Copyright (c) Marnik Bercx
 
 from monty.json import MSONable
 from cage.facetsym import Cage
@@ -27,101 +27,74 @@ __author__ = "Marnik Bercx"
 __version__ = "0.1"
 __maintainer__ = "Marnik Bercx"
 __email__ = "marnik.bercx@uantwerpen.be"
-__status__ = "nowhere"
+__status__ = "alpha"
 __date__ = "16 JUN 2017"
 
 class Landscape(MSONable):
     """
+<<<<<<< HEAD
+    A discrete mesh representing a line, area or volume.
+=======
     A line, area or volume that is to be studied.
+>>>>>>> b4f679c5ac990745f7d9c4a01d5e2172761ec85e
     """
-    def __init__(self, vertices, density=10):
+    def __init__(self, points):
         """
-        Defines a landscape by defining the vertices (end points in the case of
-        a line).
+        Initializes a Landscape from the points that it consists of.
 
-        :param vertices: A List of Array coordinates
-        :param density: Float
+        :param points: (List of numpy.array)
         """
-        self._vertices = vertices
-        self._density = density
-        self._dimension = self._find_dimension()
-        self._points = self._set_up_landscape()
+        self._points = points
 
-    def _find_dimension(self):
+    def __add__(self, other):
         """
-        Derive the dimension of the Landscape from the vertices.
+        Add two Landscapes to each other into a new Landscape.
 
-        WIP: Currently only designed to study lines.
-
-        :return: Int
+        :param other: (Landscape)
+        :return: (Landscape)
         """
+        points = self.points + other.points
 
-        if len(self.vertices) == 1:
-            raise IOError("Number of vertices must be at least two.")
-        elif len(self.vertices) == 2:
-            if np.linalg.norm(self.vertices[1] - self.vertices[0]) < 1e-3:
-                raise IOError("User provided two vertices that are too close"
-                              " to each other")
-            else:
-                return 1
-        else:
-            raise IOError("Higher dimensions than 2 not implemented yet.")
-
-    def _set_up_landscape(self):
-        """
-        Finds all the points necessary to describe the Landscape with the
-        desired density.
-        :return: List of Array coordinates
-        """
-        if self.dimension == 1:
-            vector = self.vertices[1] - self.vertices[0]
-            unitvector = unit_vector(vector)
-            length = np.linalg.norm(vector)
-            npoints = math.ceil(length*self.density) + 1
-            mesh_distance = length/(npoints)
-            landscape_points = []
-            for i in range(npoints):
-                landscape_points.append(self.vertices[0]
-                                        + i*mesh_distance*unitvector)
-        else:
-            raise IOError("2D and up not implemented yet.")
-
-        return landscape_points
-
-    @property
-    def vertices(self):
-        """
-        The vertices of the landscape.
-
-        :return: A List of Array coordinates
-        """
-        return self._vertices
-
-    @property
-    def density(self):
-        """
-        The density of the mesh, defined as number of points per Angstrom in
-        each dimension.
-        :return:
-        """
-        return self._density
-
-    @property
-    def dimension(self):
-        """
-        The dimension of the landscape.
-
-        :return: Int
-        """
-        return self._dimension
+        return Landscape(points)
 
     @property
     def points(self):
         """
         All of the points of the Landscape.
-        :return:
+
+        :return: (List of numpy.array)
         """
         return self._points
+
+    @classmethod
+    def from_vertices(cls, vertices, density=10):
+        """
+        Define a landscape by providing the vertices (end points in the case of
+        a line).
+
+        :param vertices: (List of numpy.array)
+        :param density: (float)
+        """
+        # Calculate the points of the Landscape depending on the number of
+        # vertices
+        if len(vertices) == 1:
+            raise IOError("Number of vertices must be at least two.")
+        elif len(vertices) == 2:
+            if np.linalg.norm(vertices[1] - vertices[0]) < 1e-3:
+                raise IOError("Vertices are too close to each other.")
+            else:
+                vector = vertices[1] - vertices[0]
+                length = np.linalg.norm(vector)
+                unitvector = vector / length
+                npoints = int(math.ceil(length * density) + 1)
+                mesh_distance = length / npoints
+                points = []
+                for i in range(npoints):
+                    points.append(vertices[0] + i * mesh_distance * unitvector)
+        else:
+            raise IOError("Higher dimensions than 2 not implemented yet.")
+
+        return Landscape(points)
 
     def extend_by_rotation(self, axis, density=10):
         """
@@ -131,6 +104,7 @@ class Landscape(MSONable):
         :param vector:
         :return:
         """
+        # TODO Extend this method so it also allows rotations around other points than origin
 
         # Find the rotation matrices
         rotation_matrices = []
@@ -148,6 +122,41 @@ class Landscape(MSONable):
                     points.append(newpoint)
 
         self._points = points.copy()
+
+    def extend_by_translation(self, vector, density=10):
+        """
+        Extends the Landscape by translating the points along a certain vector.
+        :return:
+        """
+        pass
+
+    def extend_from_point(self, point, extension, density=10):
+        """
+        Extends the Landscape by scaling the points from a specific point.
+        :param point:
+        :param extension:
+        :param density:
+        :return:
+        """
+        pass
+
+    def as_dict(self):
+        """
+        A JSON serializable dictionary of the Landscape.
+        :return: (dict)
+        """
+        dict = {"points": self.points}
+
+        return dict
+
+    @classmethod
+    def from_file(cls, filename, fmt="json"):
+        """
+        Load a Landscape from a file.
+        :param filename: (string)
+        :return:
+        """
+        pass
 
 
 class LandscapeAnalyzer(MSONable):
