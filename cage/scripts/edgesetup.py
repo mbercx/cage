@@ -13,22 +13,23 @@ import math
 import cage
 
 """
-Script to set up the calculations for all the non-equivalent facets of a cage
-molecule, defined by a VASP POSCAR file provided as an argument.
+Script to set up the calculations for all the non-equivalent edge sharing paths
+in a cage molecule. The script sets up the energy landscape calculations for
+each non-equivalent edge sharing path.
 
 This script is written specifically to study the facets of CxByHz molecules.
 In case you want to use it for anything else, it will probably need some
 adjustments.
 
-:argument filename: The filename of the VASP 
 """
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 
 # !TODO Currently not functional, due to API changes
 
 # Landscape parameters
-LINE = [1, 6] # Distance from the center of the facet for the Lithium
-DENSITY = 5
+LINE = [3, 9] # Distance from the center of the molecule for the Lithium
+DENSITY_R = 5 # Density of Lithium along the r coordinate
+DENSITY_theta = 20 # Density of Lithium along the theta coordinate
 
 # Calculation parameters
 #BASIS = {'*': "aug-pcseg-1"}
@@ -68,47 +69,52 @@ def main():
 
     # Load the POSCAR into a Cage
     mol = cage.facetsym.Cage.from_poscar(filename)
+    mol.find_surface_facets()
 
-    # Find the non-equivalent facets
-    facets = mol.find_noneq_facets()
+    # Find the non-equivalent paths
+    paths = mol.find_facet_paths()
+
+    # Find the edge paths
+    edge_paths = []
+    for path in paths:
+        if len(set(path[0].sites) & set(path[1].sites)) == 2:
+            edge_paths.append(path)
 
     # For each facet, set up the calculation input files
-    facetnumber = 1
-    for neq_facet in facets:
+    edge_number = 1
+    for path in edge_paths:
 
-        # Find the molecules for each lithium distance
-        molecules = set_up_molecules(mol, neq_facet)
+        facet1 = path[0].copy()
+        facet2 = path[1].copy()
 
-        if OPERATION == 'optimize':
-            # Add the constraints
-            ALT_SETUP['constraints'] = find_constraints(mol,neq_facet)
-            ALT_SETUP['driver'] = DRIVER_SETUP
+        intersection = facet1.get_normal_intersection(facet2)
 
-        # Set up the task for the calculations
-        tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
-                               theory='dft',
-                               operation=OPERATION,
-                               theory_directives=THEORY_SETUP,
-                               alternate_directives=ALT_SETUP)]
+        # Redefine the origin for the molecule and path
+        mol.redefine_origin(intersection)
+        facet1.redefine_origin(intersection)
+        facet2.redefine_origin(intersection)
 
-        # Set up the input files, and place the geometry files in a subdirectory
-        # of the facet directory
-        study = cage.study.Study(molecules, tasks)
-        study.set_up_input('.', sort_comp=False, geometry_options=GEO_SETUP)
+        # Set up the landscape
+        line_vector = facet1.normal
+        lands = cage.landscape.Landscape.from_vertices(
+            [line_vector*LINE[0], line_vector*LINE[1]]
+        )
+        axis = np.cross(facet1.normal, facet2.normal)
+        angle = math.asin(np.linalg.norm(axis))
+        axis = axis*angle/np.linalg.norm(axis)
 
-        facet_dir = 'facet' + str(facetnumber)
-        try:
-            os.mkdir(facet_dir)
-        except FileExistsError:
-            pass
+        lands.extend_by_rotation(axis, DENSITY_theta)
 
-        for i in range(len(molecules)):
-            shutil.move(os.path.join('geo' + str(i + 1)), facet_dir)
+        for point in lands.points:
+            try:
+                mol.append(pmg.Specie('Li', 1), point)
+            except ValueError:
+                pass
 
-        facetnumber += 1
+        mol.to(fmt='xyz', filename='edge' + str(edge_number) + '.xyz')
+        edge_number += 1
 
-        # Write out a facet json file
-        neq_facet.to(fmt='json',filename=os.path.join(facet_dir,'facet.json'))
+
 
 ###########
 # METHODS #
