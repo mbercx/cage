@@ -135,11 +135,8 @@ class Cage(Molecule):
         Surface Facets of the Cage.
         :return: (List of Facets)
         """
-        if self._facets:
-            return self._facets
-        else:
-            print('No facets stored. Please run the find_surface_facets '
-                  'method.')
+        return self._facets
+
 
     @property
     def pointgroup(self):
@@ -192,6 +189,25 @@ class Cage(Molecule):
         return cls(species=mol.species, coords=mol.cart_coords,
                    charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
                    site_properties=mol.site_properties)
+
+    def redefine_origin(self, origin):
+        """
+        Change the coordinates of the Facet, in order to change the origin.
+        :return:
+        """
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - origin
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
 
     def redefine_surface(self, ignore_elements):
         """
@@ -316,7 +332,7 @@ class Facet(SiteCollection, MSONable):
         normal = np.cross(self._sites[0].coords - self._sites[1].coords,
                           self._sites[0].coords - self._sites[2].coords)
 
-        normal /= 2  # Make the length of the normal equal to the surface area
+        normal = normal/np.linalg.norm(normal) # Make length of the normal equal to 1
 
         return normal
 
@@ -412,6 +428,9 @@ class Facet(SiteCollection, MSONable):
             raise NotImplementedError("Currently only json format is "
                                       "supported.")
 
+    def copy(self):
+        return Facet(self._sites, self._normal)
+
     def get_normal_intersection(self, other, method='gonio'):
         """
         Find the intersection of the normal lines of the Facet and another one.
@@ -429,25 +448,15 @@ class Facet(SiteCollection, MSONable):
                                  'Goniometric method will not work.')
 
             edge_middle = sum([site.coords for site in edge]) / 2
-            print('edge_middle = ' + str(edge_middle))
 
             y1 = utils.distance(self.center, edge_middle)
-            print('y1 = ' + str(y1))
             y2 = utils.distance(other.center, edge_middle)
-            print('y2 = ' + str(y2))
             beta = utils.angle_between(self.normal, other.normal)
-            print('beta = ' + str(beta))
-
             psi = math.atan2(math.sin(beta), (y1 / y2 + math.cos(beta)))
-            print('psi = ' + str(psi))
             theta = beta - psi
-            print('theta = ' + str(theta))
             r = y1 / math.sin(theta)
-            print('r = ' + str(r))
             r1 = r * math.cos(theta)
-            print('r1 = ' + str(r1))
             r2 = r * math.cos(psi)
-            print('r2 = ' + str(r2))
 
             intersection1 = self.center - r1 * utils.unit_vector(self.normal)
             intersection2 = other.center - r2 * utils.unit_vector(other.normal)
@@ -455,8 +464,9 @@ class Facet(SiteCollection, MSONable):
             if utils.distance(intersection1, intersection2) < 1e-4:
                 return intersection1
             else:
-                print('Could not find intersection. Returned closest results.')
-                return (intersection1, intersection2)
+                print('Could not find perfect intersection. Returned closest '
+                      'result.')
+                return (intersection1 + intersection2)/2
 
         # Brute method. Currently abandoned
         #
@@ -484,6 +494,25 @@ class Facet(SiteCollection, MSONable):
 
         else:
             NotImplementedError("Unknown method.")
+
+    def redefine_origin(self, origin):
+        """
+        Change the coordinates of the Facet, in order to change the origin.
+        :return:
+        """
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - origin
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
 
     def get_distance(self, i, j):
         """
