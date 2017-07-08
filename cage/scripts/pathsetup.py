@@ -58,7 +58,7 @@ def main():
     struc = set_up_structure(mol)
 
     # Find the paths, i.e. the List of facet combinations
-    paths = mol.find_facet_paths()
+    paths = mol.find_facet_paths
 
     # Set up the docking points of the facets
     # TODO Load the optimal docking points, calculated using NwChem

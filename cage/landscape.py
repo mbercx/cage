@@ -6,8 +6,10 @@ from cage.facetsym import Cage
 
 import math
 import os
+import json
 
-from itertools import combinations
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
 import numpy as np
@@ -30,11 +32,7 @@ __date__ = "16 JUN 2017"
 
 class Landscape(MSONable):
     """
-<<<<<<< HEAD
     A discrete mesh representing a line, area or volume.
-=======
-    A line, area or volume that is to be studied.
->>>>>>> b4f679c5ac990745f7d9c4a01d5e2172761ec85e
     """
     def __init__(self, points):
         """
@@ -106,9 +104,11 @@ class Landscape(MSONable):
 
         # Find the rotation matrices
         rotation_matrices = []
+        total_angle = np.linalg.norm(axis)
+        npoints = int(total_angle/math.pi*density)
 
-        for i in range(int(density)):
-            angle = np.linalg.norm(axis)*(i+1)/int(density)
+        for i in range(npoints):
+            angle = (i+1)/npoints*total_angle
             rotation_matrices.append(rotation_matrix(axis, angle))
 
         # Add all the points TODO This might be done more quickly
@@ -169,6 +169,7 @@ class LandscapeAnalyzer(MSONable):
         """
         self._data = data
         self._software = software
+        self._datapoints = None
 
     @property
     def data(self):
@@ -177,6 +178,10 @@ class LandscapeAnalyzer(MSONable):
     @property
     def software(self):
         return self._software
+
+    @property
+    def datapoints(self):
+        return self._datapoints
 
     @classmethod
     def from_data(cls, directory, output_file='result.out', software='nwchem'):
@@ -209,59 +214,109 @@ class LandscapeAnalyzer(MSONable):
                 if out.data[-1]['has_error']:
                     print('Error found in output in directory ' + dir)
                 else:
+                    if out.data[-1]['task_time'] == 0:
+                        print('No timing data found for final task. '
+                              'Calculation might not have completed '
+                              'successfully.')
                     output.append(out)
                     print('Grabbed output in directory ' + dir)
 
+            # TODO This currently only considers the final task. Not a very general approach
             data = [out.data[-1] for out in output]
 
         else:
             raise NotImplementedError("Only NwChem is currently supported.")
 
-        return LandscapeAnalyzer(data)
+        return LandscapeAnalyzer(data, software)
 
-    def plot_facet_landscape(self, coordinates="polar"):
+    def analyze_energies(self, coordinates="polar", facet=None):
         """
-        Plot the landscape of a certain property on a facet.
+        Extract the total energies for all the calculations. This function is
+        currently written specifically for the Li landscape defined on a facet.
         :return:
         """
         # TODO This method is horrendously specific, but I need to write it quick so I can show some results. Improve this later.
 
-        # Find the initial facet
-        cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
-        facet_init = cage_init.facets[0]
-        for facet in cage_init.facets:
-            if utils.distance(facet.center, cage_init.cart_coords[-1]) < \
-                    utils.distance(facet_init.center,
-                                   cage_init.cart_coords[-1]):
-                facet_init = facet
+        if not facet:
+            cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
+            facet_init = cage_init.facets[0]
+            for cage_facet in cage_init.facets:
+                if utils.distance(cage_facet.center,
+                                  cage_init.cart_coords[-1]) \
+                    < utils.distance(facet_init.center,
+                                       cage_init.cart_coords[-1]):
+                    facet = cage_facet
 
         datapoints = []
 
         for data in self.data:
 
+            Li_coord = [site.coords for site in data["molecules"][0].sites
+                        if site.specie == pmg.Element('Li')][0]
+
             if coordinates == "polar":
 
-                Li_coord = [site.coords for site in data["molecules"][0].sites
-                            if site.specie == pmg.Element('Li')][0]
-
-                cage_init = Cage.from_molecule(data["molecules"][0])
-                cage_final = Cage.from_molecule(data["molecules"][-1])
-
                 r = np.linalg.norm(Li_coord)
-                theta = angle_between(facet_init.center, Li_coord)
+                theta = angle_between(facet.center, Li_coord)
                 if theta > math.pi/8:
                     theta = math.pi - theta
                 coordinate = [r, theta]
 
+            if coordinates == "facet_cart":
+
+                Li_vector = Li_coord - facet.center
+                theta = angle_between(facet.normal, Li_vector)
+                print(theta)
+                if theta > math.pi / 2:
+                    theta = math.pi - theta
+
+                x = np.linalg.norm(Li_vector)*math.sin(theta)
+                y = np.linalg.norm(Li_vector)*math.cos(theta)
+                print((x, y))
+
+                coordinate = [x, y]
+
             energy_initial = data['energies'][0]
             energy_final = data['energies'][-1]
             coordinate.append(energy_initial)
+            coordinate.append(energy_final)
 
             datapoints.append(coordinate)
 
-        return datapoints
+        self._datapoints = datapoints
 
         # TODO Finish, in case it makes sense
+
+    def plot_energies(self, dimension):
+        """
+        Plot the energy landscape from the datapoints.
+        :return:
+        """
+        if not self.datapoints:
+            self.analyze_energies()
+
+        data_tuples = []
+        for point in self.datapoints:
+            data_tuples.append(tuple(point))
+        dtype = [('Distance', float), ('Angle', float), ('Energy', float),
+                 ('Final_Energy', float)]
+        darray = np.array(data_tuples, dtype=dtype)
+
+        np.sort(darray, order='Distance')
+
+        if dimension == 1:
+            plt.figure()
+            plt.xlabel('Distance (Angstrom)')
+            plt.ylabel('Energy (eV)')
+            plt.plot(darray['Distance'], darray['Energy'])
+            plt.show()
+
+        if dimension == 2:
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            ax.plot_trisurf(darray[:,0], darray[:,1], darray[:,2],
+                            linewidth=0.2, antialiased=True)
+            plt.show()
 
 
     def as_dict(self):
@@ -269,7 +324,30 @@ class LandscapeAnalyzer(MSONable):
         Return a dictionary representing the LandscapeAnalyzer instance.
         :return:
         """
-        pass
+        dict = {"@module": self.__class__.__module__,
+                "@class": self.__class__.__name__}
+
+        data_list = []
+        for chunk in self.data:
+            data_dict = chunk.copy()
+
+            if data_dict['structures']:
+                struc_dicts = []
+                for structure in data_dict['structures']:
+                    struc_dicts.append(structure.as_dict())
+                data_dict['structures'] = struc_dicts
+
+            if data_dict['molecules']:
+                mol_dicts = []
+                for molecule in data_dict['molecules']:
+                    mol_dicts.append(molecule.as_dict())
+                data_dict['molecules'] = mol_dicts
+
+            data_list.append(data_dict)
+
+        dict["data"] = data_list
+
+        return dict
 
     @classmethod
     def from_dict(cls, d):
@@ -289,12 +367,49 @@ class LandscapeAnalyzer(MSONable):
         pass
 
     @classmethod
-    def from_file(cls, fmt='json'):
+    def from_file(cls, filename, fmt='json'):
         """
         Initialize an instance of LandscapeAnalyzer from a file.
         :return:
         """
-        pass
+        data = []
+
+        if fmt == "json":
+
+            with open(filename, "r") as f:
+                file_data = json.load(f)
+
+            for chunk in file_data["data"]:
+                data_dict = chunk.copy()
+
+                if data_dict['structures']:
+                    structures = []
+                    for struc_dict in data_dict['structures']:
+                        structures.append(pmg.Structure.from_dict(struc_dict))
+                    data_dict['structures'] = structures
+
+                if data_dict['molecules']:
+                    molecules = []
+                    for mol_dict in data_dict['molecules']:
+                        molecules.append(pmg.Molecule.from_dict(mol_dict))
+                    data_dict['molecules'] = molecules
+
+                data.append(data_dict)
+
+        return LandscapeAnalyzer(data)
+
+    def to(self, filename, fmt="json"):
+        """
+        Write the landscape to a file for quick reading.
+        :return:
+        """
+        if fmt == "json":
+            with open(filename, "w") as f:
+                json.dump(self.as_dict(), f)
+            return
+        else:
+            raise NotImplementedError('Only json formats supported currently.')
+        # TODO Add support for .yaml
 
 
 # Functions stolen from SO
@@ -314,13 +429,13 @@ def angle_between(v1, v2):
 
 def rotation_matrix(axis, theta):
     """
-    Return the rotation matrix associated with counterclockwise rotation about
+    Return the rotation matrix associated with clockwise rotation about
     the given axis by theta radians.
     """
     axis = np.asarray(axis)
     axis = axis/math.sqrt(np.dot(axis, axis))
     a = math.cos(theta/2.0)
-    b, c, d = -axis*math.sin(theta/2.0)
+    b, c, d = axis*math.sin(theta/2.0)
     aa, bb, cc, dd = a*a, b*b, c*c, d*d
     bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
     return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],

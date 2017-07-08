@@ -2,16 +2,16 @@
 # Copyright (c) Uncle Sam
 
 import json
-from itertools import combinations
-from math import pi
+import math
 
 import numpy as np
+import pymatgen as pmg
+import cage.utils as utils
+import pymatgen.symmetry.analyzer as syman
+
+from itertools import combinations
 from monty.io import zopen
 from monty.json import MSONable
-
-import pymatgen as pmg
-import pymatgen.symmetry.analyzer as syman
-from cage.utils import angle_between
 from pymatgen.core.structure import Molecule
 from pymatgen.core.structure import SiteCollection
 
@@ -38,7 +38,7 @@ class Cage(Molecule):
                  validate_proximity=False, site_properties=None):
         """
         Create a Mutable Molecule Cage object. The Cage molecule is
-        automatically centered on its center of mass.
+        automatically centered on its geometric center.
 
         :param species (list): List of atomic species. Possible kinds of input
             include a list of dict of elements/species and occupancies, a List
@@ -50,18 +50,23 @@ class Cage(Molecule):
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
-        self._center()
+        self.center()
         self._facets = None
         self._pointgroup = None
         self._symmops = None
 
-    def _center(self):
+    def center(self, point=None):
         """
-        Center the Cage by updating the sites.
+        Center the Cage by updating the sites. In case no point is provided,
+        the molecules is centered on its geometric center.
         """
+        if point:
+            center = point
+        else:
+            # Find the coordinates of the geometric center
+            center = sum([site.coords for site in self.sites])/len(self.sites)
 
-        # Find the new Cartesian coordinates
-        center = self.center_of_mass
+        # Find the new coordinates
         new_coords = np.array(self.cart_coords) - center
 
         # Update the sites
@@ -100,7 +105,7 @@ class Cage(Molecule):
 
         # Flip the normal of the facets in case it points to the origin
         for facet in facets_all:
-            if facet.angle_to_normal(self.center_of_mass) < pi/2:
+            if facet.angle_to_normal(self.center_of_mass) < math.pi/2:
                 facet.flip_normal()
 
         # Find all the facets that are "on the surface"
@@ -115,7 +120,7 @@ class Cage(Molecule):
             # If all the angles are larger than pi/2, it's a surface site
             all_angles_smaller = True
             for angle in site_angles:
-                if angle + 0.01 < pi/2:
+                if angle + 0.01 < math.pi/2:
                     all_angles_smaller = False
 
             # In that case, add it to the surface sites
@@ -130,11 +135,8 @@ class Cage(Molecule):
         Surface Facets of the Cage.
         :return: (List of Facets)
         """
-        if self._facets:
-            return self._facets
-        else:
-            print('No facets stored. Please run the find_surface_facets '
-                  'method.')
+        return self._facets
+
 
     @property
     def pointgroup(self):
@@ -187,6 +189,25 @@ class Cage(Molecule):
         return cls(species=mol.species, coords=mol.cart_coords,
                    charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
                    site_properties=mol.site_properties)
+
+    def redefine_origin(self, origin):
+        """
+        Change the coordinates of the Facet, in order to change the origin.
+        :return:
+        """
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - origin
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
 
     def redefine_surface(self, ignore_elements):
         """
@@ -292,12 +313,35 @@ class Facet(SiteCollection, MSONable):
     #TODO Write those docstrings you lazy bastard!
 
     def __init__(self, sites, normal=None):
+        """
+        Initialize a Facet with the provided sites.
+        :param sites:
+        :param normal:
+        """
         self._sites = sites
         self._center = site_center(tuple(self.sites))
         if normal is not None:
             self._normal = normal  # TODO Check if input normal makes sense
         else:
             self._normal = self._find_normal()
+
+    def _find_normal(self):
+        """
+        Finds the normal vector of the surface, pointing away from the origin
+        """
+        normal = np.cross(self._sites[0].coords - self._sites[1].coords,
+                          self._sites[0].coords - self._sites[2].coords)
+
+        normal = normal/np.linalg.norm(normal) # Make length of the normal equal to 1
+
+        return normal
+
+    def __str__(self):
+        output = ['Facet with sites:']
+        for site in self.sites:
+            output.append(site.__str__())
+
+        return '\n'.join(output)
 
     def __eq__(self, other):
         """
@@ -351,6 +395,22 @@ class Facet(SiteCollection, MSONable):
 
         return cls(sites, normal=np.array(d['normal']))
 
+    def as_dict(self):
+        """
+
+        :return:
+        """
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "sites": []}
+        for site in self:
+            site_dict = site.as_dict()
+            del site_dict["@module"]
+            del site_dict["@class"]
+            d["sites"].append(site_dict)
+        d['normal'] = self.normal.tolist()
+        return d
+
     def to(self, fmt="json", filename=None):
         """
 
@@ -368,21 +428,91 @@ class Facet(SiteCollection, MSONable):
             raise NotImplementedError("Currently only json format is "
                                       "supported.")
 
-    def as_dict(self):
+    def copy(self):
+        return Facet(self._sites, self._normal)
+
+    def get_normal_intersection(self, other, method='gonio'):
         """
+        Find the intersection of the normal lines of the Facet and another one.
+
+        Currently only works on an edge sharing Facet.
 
         :return:
         """
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__,
-             "sites": []}
-        for site in self:
-            site_dict = site.as_dict()
-            del site_dict["@module"]
-            del site_dict["@class"]
-            d["sites"].append(site_dict)
-        d['normal'] = self.normal.tolist()
-        return d
+
+        if method == 'gonio':
+
+            edge = set(self.sites) & set(other.sites)
+            if len(edge) != 2:
+                raise ValueError('Provided facet does not share an edge. '
+                                 'Goniometric method will not work.')
+
+            edge_middle = sum([site.coords for site in edge]) / 2
+
+            y1 = utils.distance(self.center, edge_middle)
+            y2 = utils.distance(other.center, edge_middle)
+            beta = utils.angle_between(self.normal, other.normal)
+            psi = math.atan2(math.sin(beta), (y1 / y2 + math.cos(beta)))
+            theta = beta - psi
+            r = y1 / math.sin(theta)
+            r1 = r * math.cos(theta)
+            r2 = r * math.cos(psi)
+
+            intersection1 = self.center - r1 * utils.unit_vector(self.normal)
+            intersection2 = other.center - r2 * utils.unit_vector(other.normal)
+
+            if utils.distance(intersection1, intersection2) < 1e-4:
+                return intersection1
+            else:
+                print('Could not find perfect intersection. Returned closest '
+                      'result.')
+                return (intersection1 + intersection2)/2
+
+        # Brute method. Currently abandoned
+        #
+        # elif method == 'brute':
+        #     lines = []
+        #     for facet in facets:
+        #         line = Landscape.from_vertices([facet.center,
+        #                                         facet.center - 5 *
+        #                                         facet.normal],
+        #                                        density=int(1e2))
+        #         lines.append(line)
+        #
+        #     intersection = None
+        #     distance = 1e3
+        #     for point1 in lines[0].points:
+        #         for point2 in lines[1].points:
+        #             if utils.distance(point1, point2) < distance:
+        #                 distance = utils.distance(point1, point2)
+        #                 intersection = point1
+        #     if distance < 1e-2:
+        #         return intersection
+        #     else:
+        #         print('Brute force method failed.')
+        #         return None
+
+        else:
+            NotImplementedError("Unknown method.")
+
+    def redefine_origin(self, origin):
+        """
+        Change the coordinates of the Facet, in order to change the origin.
+        :return:
+        """
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - origin
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
 
     def get_distance(self, i, j):
         """
@@ -392,17 +522,6 @@ class Facet(SiteCollection, MSONable):
         :return:
         """
         pass  #TODO
-
-    def _find_normal(self):
-        """
-        Finds the normal vector of the surface, pointing away from the origin
-        """
-        normal = np.cross(self._sites[0].coords - self._sites[1].coords,
-                          self._sites[0].coords - self._sites[2].coords)
-
-        normal /= 2  # Make the length of the normal equal to the surface area
-
-        return normal
 
     def is_equivalent(self, other, symmops):
         """
@@ -438,13 +557,6 @@ class Facet(SiteCollection, MSONable):
         """
         return self._normal
 
-    def __str__(self):
-        output = ['Facet with sites:']
-        for site in self.sites:
-            output.append(site.__str__())
-
-        return '\n'.join(output)
-
     def flip_normal(self):
         """
         Flip the direction of the surface normal of the Facet.
@@ -459,28 +571,18 @@ class Facet(SiteCollection, MSONable):
         :param coordinate:
         :return: angle value (in radians)
         """
-        return angle_between(coordinate - self._center, self._normal)
+        return utils.angle_between(coordinate - self._center, self._normal)
 
 
 # Utility functions that may be useful across classes
 
 def site_center(sites):
     """
-    Find the center of a collection of sites. Not particularly fast nor clever.
+    Find the center of a collection of sites.
     :param sites: Tuple of Site objects
     :return: Array of the cartesian coordinates of the center of the sites
     """
-    assert isinstance(sites, tuple)
-    nsites = len(sites)
-
-    # Sum the x,y, and z values of the site coordinates
-    sum_coords = np.zeros(3)
-    for site in sites:
-        sum_coords[0] += site.x
-        sum_coords[1] += site.y
-        sum_coords[2] += site.z
-
-    return sum_coords / nsites
+    return sum([site.coords for site in sites])/len(sites)
 
 
 def schoenflies_to_hm():
