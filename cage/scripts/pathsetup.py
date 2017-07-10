@@ -47,6 +47,7 @@ def main():
     # Read the Molecule from the input file
     filename = sys.argv[1]
     mol = Cage.from_poscar(filename)
+    mol.find_surface_facets()
 
     # TODO Same problem as in facetsetup.py. Find a way to calculate charge automatically
     if pmg.Element('C') in [site.specie for site in mol.sites]:
@@ -58,7 +59,7 @@ def main():
     struc = set_up_structure(mol)
 
     # Find the paths, i.e. the List of facet combinations
-    paths = mol.find_facet_paths
+    paths = mol.find_facet_paths()
 
     # Set up the docking points of the facets
     # TODO Load the optimal docking points, calculated using NwChem
@@ -89,11 +90,29 @@ def main():
         molecules = [pmg.Molecule(struct.species, struct.cart_coords)
                      for struct in structures]
 
+        # Move the lithium positions on an ellips (kind of)
+        r1 = np.linalg.norm(endpoints[0])
+        r2 = np.linalg.norm(endpoints[1])
+        for m in molecules:
+            lithium_coord = m.sites[-1].coords
+            dist1 = np.linalg.norm(endpoints[0] - lithium_coord)
+            dist2 = np.linalg.norm(endpoints[1] - lithium_coord)
+            li_r = np.linalg.norm(lithium_coord)
+            new_radius = r2*dist1/(dist1 + dist2) + r1*dist2/(dist1 + dist2)
+            translate_vector = lithium_coord/li_r*(new_radius-li_r)
+            m.translate_sites([len(m)-1,], translate_vector)
+
+        path_mol = mol.copy()
+        for lithium in [m.sites[-1].coords for m in molecules]:
+            path_mol.append('Li', lithium, validate_proximity=False)
+
         path_dir = 'path' + str(path_number)
         try:
             os.mkdir(path_dir)
         except FileExistsError:
             pass
+
+        path_mol.to(fmt='xyz', filename=os.path.join(path_dir, 'path.xyz'))
 
         start_struct.to(fmt='poscar',
                         filename=os.path.join(path_dir,
@@ -110,10 +129,6 @@ def main():
         plot_images(molecules, filename=os.path.join(path_dir, 'path.neb'))
 
         path_number += 1
-
-# Find a way to convert the pathways into the xyz format that NwChem wants
-
-# Set up the directories and calculation input files
 
 
 def set_up_structure(mol):
