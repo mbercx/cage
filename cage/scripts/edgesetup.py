@@ -24,12 +24,12 @@ adjustments.
 """
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 
-# !TODO Currently not functional, due to API changes
+# TODO The current set up does not work very well for molucules that are not spherically shaped
 
 # Landscape parameters
-LINE = [3, 9] # Distance from the center of the molecule for the Lithium
-DENSITY_R = 5 # Density of Lithium along the r coordinate
-DENSITY_theta = 20 # Density of Lithium along the theta coordinate
+LINE = [2, 5] # Distance from the center of the molecule for the Lithium
+DENSITY_R = 10 # Density of Lithium along the r coordinate
+DENSITY_theta = 60 # Density of Lithium along the theta coordinate
 
 # Calculation parameters
 #BASIS = {'*': "aug-pcseg-1"}
@@ -80,77 +80,111 @@ def main():
         if len(set(path[0].sites) & set(path[1].sites)) == 2:
             edge_paths.append(path)
 
+    total_mol = mol.copy()
+
     # For each facet, set up the calculation input files
     edge_number = 1
-    for path in edge_paths:
 
+    for path in edge_paths[:2]+edge_paths[3:4]:#+edge_paths[2:5]:
+
+        edge_dir = 'edge' + str(edge_number)
+        try:
+            os.mkdir(edge_dir)
+        except FileExistsError:
+            pass
+
+        mol.to(fmt='json', filename=os.path.join(edge_dir, 'mol.json'))
+        path[0].to(fmt='json', filename=os.path.join(edge_dir,
+                                                     'init_facet.json'))
+        path[1].to(fmt='json', filename=os.path.join(edge_dir,
+                                                     'final_facet.json'))
+
+        edge_mol = mol.copy()
         facet1 = path[0].copy()
         facet2 = path[1].copy()
 
         intersection = facet1.get_normal_intersection(facet2)
 
         # Redefine the origin for the molecule and path
-        mol.redefine_origin(intersection)
-        facet1.redefine_origin(intersection)
-        facet2.redefine_origin(intersection)
+        # total_mol.redefine_origin(intersection)
+        # edge_mol.redefine_origin(intersection)
+        # facet1.redefine_origin(intersection)
+        # facet2.redefine_origin(intersection)
 
-        # Set up the landscape
-        line_vector = facet1.normal
-        lands = cage.landscape.Landscape.from_vertices(
-            [line_vector*LINE[0], line_vector*LINE[1]]
-        )
-        axis = np.cross(facet1.normal, facet2.normal)
-        angle = math.asin(np.linalg.norm(axis))
-        axis = axis*angle/np.linalg.norm(axis)
+        landscape = set_up_landscape(facet1, facet2)
 
-        lands.extend_by_rotation(axis, DENSITY_theta)
+        molecules = set_up_molecules(edge_mol, landscape)
 
-        for point in lands.points:
+        # Set up a molecule to visualize the edge
+        for point in landscape.points:
             try:
-                mol.append(pmg.Specie('Li', 1), point)
+                total_mol.append(pmg.Specie('Li', 1), point,
+                                validate_proximity=False)
+                edge_mol.append(pmg.Specie('Li', 1), point,
+                                validate_proximity=False)
             except ValueError:
                 pass
 
-        mol.to(fmt='xyz', filename='edge' + str(edge_number) + '.xyz')
+        # total_mol.redefine_origin(-intersection)
+
+        edge_file = 'edge' + str(edge_number) + '.xyz'
+        edge_mol.to(fmt='xyz', filename=os.path.join(edge_dir, edge_file))
+
+        if OPERATION == 'optimize':
+            # Add the constraints
+            ALT_SETUP['constraints'] = find_constraints(mol,facet1)
+            ALT_SETUP['driver'] = DRIVER_SETUP
+
+        # Set up the task for the calculations
+        tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
+                               theory='dft',
+                               operation=OPERATION,
+                               theory_directives=THEORY_SETUP,
+                               alternate_directives=ALT_SETUP)]
+
+        # Set up the input files, and place the geometry files in a subdirectory
+        # of the facet directory
+        study = cage.study.Study(molecules, tasks)
+        study.set_up_input(edge_dir, sort_comp=False,
+                           geometry_options=GEO_SETUP)
         edge_number += 1
 
-
+    total_mol.to(fmt='xyz', filename='total_mol.xyz')
 
 ###########
 # METHODS #
 ###########
 
-def set_up_molecules(mol, facet):
+def set_up_landscape(facet1, facet2):
+    """
+
+    :param facet1:
+    :param facet2:
+    :return:
+    """
+    line_vector = facet1.center/np.linalg.norm(facet1.center)
+    lands = cage.landscape.Landscape.from_vertices(
+        [line_vector * LINE[0], line_vector * LINE[1]]
+    )
+    axis = np.cross(facet1.normal, facet2.normal)
+    angle = math.asin(np.linalg.norm(axis))
+    axis = axis * angle / np.linalg.norm(axis)
+
+    lands.extend_by_rotation(axis, DENSITY_theta)
+
+    return lands
+
+def set_up_molecules(mol, landscape):
     """
     Set up the molecules from the lithium Landscape for a facet.
     :return:
     """
-    # Define the line on which to place the Lithium
-    center = facet.center
-    normal = facet.normal / np.linalg.norm(facet.normal)
-    endpoints = [center + LINE[0] * normal, center + LINE[1] * normal]
-    line = cage.landscape.Landscape.from_vertices(endpoints, DENSITY)
-
-    # If Carbon is in the molecule, expand the energy landscape
-    # TODO: Make this less specific to carbon. This whole module will probably need an overhaul for that.
-    if pmg.Element('C') in [site.specie for site in mol.sites]:
-        # Find the rotation axis
-        C_site = [site for site in mol.sites
-                  if site.specie == pmg.Element('C')][0]
-        connection_vector = C_site.coords - facet.center
-        axis = np.cross(facet.normal, connection_vector)
-        axis = axis/np.linalg.norm(axis)
-
-        # Overestimate rotation angle and remove landscape points that are
-        # closer to another facet.
-        angle = math.pi/8
-        line.extend_by_rotation(angle*axis)
 
     # Create the list of molecules with lithium at varying distances to
     # the facet.
     li = pmg.Specie('Li', +1)
     molecules = []
-    for point in line.points:
+    for point in landscape.points:
         configuration = mol.copy()
         # If carbon is in the molecule, the charge is -1, -2 otherwise
         # TODO Find a good way to calculate the charge, if possible
@@ -168,7 +202,7 @@ def set_up_molecules(mol, facet):
 
     return molecules
 
-def find_constraints(mol, neq_facet):
+def find_constraints(mol, facet):
     """
     Find the necessary constraints for the molecules, depending on the facet
     this might be fixing the whole opposite facet, or only one vertex.
@@ -177,10 +211,10 @@ def find_constraints(mol, neq_facet):
     # Find the facet that is the farthest away from the facet being studied
     distance = 0
     far_facet = None
-    for facet in mol.facets:
-        newdistance = np.linalg.norm(neq_facet.center - facet.center)
+    for other_facet in mol.facets:
+        newdistance = np.linalg.norm(facet.center - other_facet.center)
         if newdistance > distance:
-            far_facet = facet
+            far_facet = other_facet
             distance = newdistance
 
     # Find the corresponding atom numbers in string format
