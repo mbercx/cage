@@ -10,6 +10,7 @@ import json
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from pylab import *
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
 import numpy as np
@@ -258,7 +259,7 @@ class LandscapeAnalyzer(MSONable):
 
                 r = np.linalg.norm(Li_coord)
                 theta = angle_between(facet.center, Li_coord)
-                if theta > math.pi/8:
+                if theta > math.pi/2:
                     theta = math.pi - theta
                 coordinate = [r, theta]
 
@@ -277,46 +278,69 @@ class LandscapeAnalyzer(MSONable):
                 coordinate = [x, y]
 
             energy_initial = data['energies'][0]
-            energy_final = data['energies'][-1]
             coordinate.append(energy_initial)
-            coordinate.append(energy_final)
 
             datapoints.append(coordinate)
 
-        self._datapoints = datapoints
+        data_tuples = []
+        for point in datapoints:
+            data_tuples.append(tuple(point))
+        dtype = [('Distance', float), ('Angle', float), ('Energy', float)]
+        darray = np.array(data_tuples, dtype=dtype)
+
+        self._datapoints = darray
 
         # TODO Finish, in case it makes sense
 
-    def plot_energies(self, dimension):
+    def plot_energies(self, dimension, style='trisurf'):
         """
         Plot the energy landscape from the datapoints.
         :return:
         """
-        if not self.datapoints:
+        if self.datapoints == None:
             self.analyze_energies()
 
-        data_tuples = []
-        for point in self.datapoints:
-            data_tuples.append(tuple(point))
-        dtype = [('Distance', float), ('Angle', float), ('Energy', float),
-                 ('Final_Energy', float)]
-        darray = np.array(data_tuples, dtype=dtype)
+        data = self.datapoints
 
-        np.sort(darray, order='Distance')
+        data['Distance'] = np.round(data['Distance'], 5)
+        data = np.sort(data, order=['Distance', 'Angle'])
 
         if dimension == 1:
             plt.figure()
             plt.xlabel('Distance (Angstrom)')
             plt.ylabel('Energy (eV)')
-            plt.plot(darray['Distance'], darray['Energy'])
+            plt.plot(data['Distance'], data['Energy'])
             plt.show()
 
         if dimension == 2:
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            ax.plot_trisurf(darray[:,0], darray[:,1], darray[:,2],
-                            linewidth=0.2, antialiased=True)
-            plt.show()
+            if style == 'trisurf':
+                fig = plt.figure()
+                ax = fig.add_subplot(111, projection='3d')
+                ax.plot_trisurf(data['Distance'], data['Angle'],
+                                data['Energy'], linewidth=0.2,
+                                antialiased=True)
+                plt.show()
+
+            elif style == 'pcolor':
+                # Find the number of radii and angles
+                r_init = data['Distance'][0]
+                nangles = 1
+                while abs(data['Distance'][nangles] - r_init) < 1e-5:
+                    nangles += 1
+                nradii = int(len(data) / nangles)
+
+                # Get the right format for the data
+                radii = data['Distance'].reshape(nradii, nangles)  # [::nradii]
+                angles = data['Angle'].reshape(nradii, nangles)  # [:nangles]
+                energy = data['Energy'].reshape(nradii, nangles)
+
+                # Plot
+                fig, ax = subplots()
+                p = ax.pcolor(angles, radii, energy, vmin=energy.min(),
+                              vmax=energy.mean())
+                cb = fig.colorbar(p)
+                plt.show()
+
 
 
     def as_dict(self):
