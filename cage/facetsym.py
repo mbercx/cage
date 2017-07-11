@@ -138,7 +138,7 @@ class Cage(Molecule):
         related to and using which symmetry operation:
 
         noneq_facet = symmop(facet)
-        
+
         :return:
         """
         if not self.facets:
@@ -172,8 +172,13 @@ class Cage(Molecule):
         Surface Facets of the Cage.
         :return: (List of Facets)
         """
-        return self._facets
-
+        if self._facets:
+            return self._facets
+        else:
+            print("Surface facets have not been set up yet. Calculating them "
+                  "using the standard setup, i.e. ignoring 'H' and 'Li'.")
+            self.find_surface_facets()
+            return self._facets
 
     @property
     def pointgroup(self):
