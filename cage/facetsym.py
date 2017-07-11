@@ -14,6 +14,7 @@ from monty.io import zopen
 from monty.json import MSONable
 from pymatgen.core.structure import Molecule
 from pymatgen.core.structure import SiteCollection
+from pymatgen.core.operations import SymmOp
 
 """
 Analysis tools to find the non-equivalent faces of fullerene shaped molecules.
@@ -54,6 +55,7 @@ class Cage(Molecule):
         self._facets = None
         self._pointgroup = None
         self._symmops = None
+        self._facet_dict = None
 
     def center(self, point=None):
         """
@@ -128,6 +130,41 @@ class Cage(Molecule):
                 facets_surf.append(facet)
 
         self._facets = facets_surf
+
+    def set_up_facet_list(self):
+        """
+        Set up a List of surface facets, and how they relate to the
+        non-equivalent facets, i.e. which non-equivalent facet they can be
+        related to and using which symmetry operation:
+
+        noneq_facet = symmop(facet)
+        
+        :return:
+        """
+        if not self.facets:
+            print("Please set up surface facets first")
+            return None
+
+        facet_list = []
+
+        for facet in self.facets:
+            for noneq_facet in self.find_noneq_facets():
+                for symm in self.symmops:
+                    symm_center = symm.operate(facet.center)
+                    if np.linalg.norm(symm_center - noneq_facet.center) < 1e-2:
+                        facet_list.append((facet, noneq_facet, symm))
+                        break
+
+        list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
+                      ('symmops', SymmOp)]
+
+        facet_array = np.array(facet_list, dtype=list_types)
+
+        if len(facet_array) == len(self.facets):
+            return facet_array
+        else:
+            raise ValueError("Obtained array length is not equal to number of "
+                             "facets. Something must have gone wrong.")
 
     @property
     def facets(self):
@@ -531,7 +568,12 @@ class Facet(SiteCollection, MSONable):
         :param symmops:
         :return:
         """
-        pass  #TODO
+        is_equivalent = False
+        for symm in symmops:
+            symm_center = symm.operate(self.center)
+            if np.linalg.norm(symm_center, other.center) < 1e-2:
+                is_equivalent = True
+        return is_equivalent
 
     @property
     def sites(self):
