@@ -339,6 +339,8 @@ class LandscapeAnalyzer(MSONable):
                 p = ax.pcolor(angles, radii, energy, vmin=energy.min(),
                               vmax=energy.mean())
                 cb = fig.colorbar(p)
+                plt.xlabel('Angle (radians)')
+                plt.ylabel('Distance (Angstrom)')
                 plt.show()
 
 
