@@ -11,6 +11,7 @@ import pymatgen.io.nwchem as nw
 import pymatgen.io.vasp as vasp
 
 from cage.facetsym import Cage
+from cage.facetsym import Facet
 from pymatgen.analysis import path_finder
 
 
@@ -62,10 +63,7 @@ def main():
     paths = mol.find_facet_paths()
 
     # Set up the docking points of the facets
-    # TODO Load the optimal docking points, calculated using NwChem
-
-    dock_points = [(facet, facet.center + 1.2*facet.normal)
-                   for facet in mol.facets]
+    dock_points = extract_docking_points('../docking')
 
     tasks = [nw.NwTask(mol.charge, None, BASIS, theory='dft', operation='neb',
                        theory_directives=THEORY_SETUP,
@@ -75,7 +73,7 @@ def main():
     for path in paths:
 
         # Find the docking points for the path
-        endpoints = find_path_endpoints(path, dock_points)
+        endpoints = find_path_endpoints(mol, path, dock_points)
 
         # Set up the start and end structures
         start_struct = struc.copy()
@@ -160,22 +158,50 @@ def set_up_structure(mol):
 
     return struc
 
+def extract_docking_points(directory):
+    """
+    Extract the docking points from the docking directory.
+    :param directory directory:
+    :return:
+    """
+    dir_list = [d for d in os.listdir(directory)
+                if os.path.isdir(os.path.join(directory, d))]
 
-def find_path_endpoints(path, dock_points):
+    docking_points = []
+    for dir in dir_list:
+        facet = Facet.from_file(os.path.join(dir, 'facet.json'))
+        output = nw.NwOutput(os.path.join(dir, 'result.out'))
+        final_mol = output.data[-1]['molecules'][-1]
+        Li_coord = [site.coords for site in final_mol.sites
+                    if site.specie == pmg.Element('Li')][0]
+        docking_points.append((facet, Li_coord))
+
+    return docking_points
+
+def find_path_endpoints(mol, path, dock_points):
     """
 
     :return:
     """
+    # Find the facet list of the molecule
+    facet_list = mol.set_up_facet_list()
+
     # Set up the beginning and end sites of the various facets
     start_coords = None
-    for dock in dock_points:
-        if path[0] == dock[0]:
-            start_coords = dock[1]
-
     end_coords = None
-    for dock in dock_points:
-        if path[1] == dock[0]:
-            end_coords = dock[1]
+    for facet in facet_list:
+
+        if facet['surf_facet'] == path[0]:
+            for point in dock_points:
+                if facet['noneq_facet'] == point[0]:
+                    noneq_dock_point = point[1]
+            start_coords = facet['symmop'].inverse.operate(noneq_dock_point)
+
+        if facet['surf_facet'] == path[1]:
+            for point in dock_points:
+                if facet['noneq_facet'] == point[0]:
+                    noneq_dock_point = point[1]
+            end_coords = facet['symmop'].inverse.operate(noneq_dock_point)
 
     endpoints = (start_coords, end_coords)
 
