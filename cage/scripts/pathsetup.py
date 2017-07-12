@@ -2,17 +2,11 @@
 
 import sys
 import os
-import io
 
 import pymatgen as pmg
-import numpy as np
 import pymatgen.io.nwchem as nw
 
-import pymatgen.io.vasp as vasp
-
 from cage.facetsym import Cage
-from cage.facetsym import Facet
-from pymatgen.analysis import path_finder
 
 
 """
