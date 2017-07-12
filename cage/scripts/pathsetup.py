@@ -164,8 +164,11 @@ def extract_docking_points(directory):
     :param directory directory:
     :return:
     """
-    dir_list = [d for d in os.listdir(directory)
+    dir_list = [os.path.join(os.path.abspath(directory), d)
+                for d in os.listdir(directory)
                 if os.path.isdir(os.path.join(directory, d))]
+
+    print(dir_list)
 
     docking_points = []
     for dir in dir_list:
