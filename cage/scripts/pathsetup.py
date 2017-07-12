@@ -105,3 +105,6 @@ def main():
             .write_file(os.path.join(path_dir, 'end', 'input'))
 
         path_number += 1
+
+if __name__ == '__main__':
+    main()
