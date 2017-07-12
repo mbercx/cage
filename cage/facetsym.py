@@ -156,7 +156,7 @@ class Cage(Molecule):
                         break
 
         list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
-                      ('symmops', SymmOp)]
+                      ('symmop', SymmOp)]
 
         facet_array = np.array(facet_list, dtype=list_types)
 
