@@ -22,8 +22,6 @@ adjustments.
 """
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 
-# !TODO Currently not functional, due to API changes
-
 # Lithium parameters
 START_DIST = 2
 
