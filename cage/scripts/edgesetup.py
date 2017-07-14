@@ -24,12 +24,13 @@ adjustments.
 """
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 
-# TODO The current set up does not work very well for molucules that are not spherically shaped
+# TODO The current set up does not work very well for molecules that are not spherically shaped
 
 # Landscape parameters
+CATION = 'Na'
 LINE = [2, 5] # Distance from the center of the molecule for the Lithium
-DENSITY_R = 10 # Density of Lithium along the r coordinate
-DENSITY_theta = 60 # Density of Lithium along the theta coordinate
+NUM_R = 30 # Density of Lithium along the r coordinate
+DENSITY_theta = 50 # Density of Lithium along the theta coordinate
 
 # Calculation parameters
 #BASIS = {'*': "aug-pcseg-1"}
@@ -85,7 +86,9 @@ def main():
     # For each facet, set up the calculation input files
     edge_number = 1
 
-    for path in edge_paths[:2]+edge_paths[3:4]:#+edge_paths[2:5]:
+    # TODO Check if number of radii is equal. It should be, but I haven't figured out why it isn't yet
+
+    for path in edge_paths:
 
         edge_dir = 'edge' + str(edge_number)
         try:
@@ -118,9 +121,9 @@ def main():
         # Set up a molecule to visualize the edge
         for point in landscape.points:
             try:
-                total_mol.append(pmg.Specie('Li', 1), point,
+                total_mol.append(pmg.Specie(CATION, 1), point,
                                 validate_proximity=False)
-                edge_mol.append(pmg.Specie('Li', 1), point,
+                edge_mol.append(pmg.Specie(CATION, 1), point,
                                 validate_proximity=False)
             except ValueError:
                 pass
@@ -164,7 +167,7 @@ def set_up_landscape(facet1, facet2):
     """
     line_vector = facet1.center/np.linalg.norm(facet1.center)
     lands = cage.landscape.Landscape.from_vertices(
-        [line_vector * LINE[0], line_vector * LINE[1]]
+        [line_vector * LINE[0], line_vector * LINE[1]], num=NUM_R
     )
     axis = np.cross(facet1.normal, facet2.normal)
     angle = math.asin(np.linalg.norm(axis))
@@ -182,7 +185,7 @@ def set_up_molecules(mol, landscape):
 
     # Create the list of molecules with lithium at varying distances to
     # the facet.
-    li = pmg.Specie('Li', +1)
+    cation = pmg.Specie(CATION, +1)
     molecules = []
     for point in landscape.points:
         configuration = mol.copy()
@@ -194,7 +197,7 @@ def set_up_molecules(mol, landscape):
             configuration.set_charge_and_spin(charge=-1)
 
         try:
-            configuration.append(li, point)
+            configuration.append(cation, point)
             molecules.append(configuration)
         except ValueError:
             print('ValueError detected when appending the Li site. '
