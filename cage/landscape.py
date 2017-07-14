@@ -64,13 +64,13 @@ class Landscape(MSONable):
         return self._points
 
     @classmethod
-    def from_vertices(cls, vertices, density=10):
+    def from_vertices(cls, vertices, num=10):
         """
         Define a landscape by providing the vertices (end points in the case of
         a line).
 
         :param vertices: (List of numpy.array)
-        :param density: (float)
+        :param num: (int)
         """
         # Calculate the points of the Landscape depending on the number of
         # vertices
@@ -83,7 +83,7 @@ class Landscape(MSONable):
                 vector = vertices[1] - vertices[0]
                 length = np.linalg.norm(vector)
                 unitvector = vector / length
-                npoints = int(math.ceil(length * density) + 1)
+                npoints = num # int(length * num + 1)
                 mesh_distance = length / npoints
                 points = []
                 for i in range(npoints):
@@ -230,42 +230,53 @@ class LandscapeAnalyzer(MSONable):
 
         return LandscapeAnalyzer(data, software)
 
-    def analyze_energies(self, coordinates="polar", facet=None):
+    def analyze_cation_energies(self, facet=None , coordinates="polar",
+                                cation="Li"):
         """
         Extract the total energies for all the calculations. This function is
-        currently written specifically for the Li landscape defined on a facet.
+        written specifically for studying cation landscapes defined versus a
+        facet.
         :return:
         """
-        # TODO This method is horrendously specific, but I need to write it quick so I can show some results. Improve this later.
 
+        # If a facet is not provided, try to find the closest one to the first
+        # ion coordinate data point. This might not always work.
         if not facet:
+            print("No Facet was provided. Since the facet is important for "
+                  "defining the coordinates of the landscape, the program "
+                  "will automatically determine the closest facet to the "
+                  "cation in the first datapoint.")
             cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
+            init_cation_coords = [site.coords for site in cage_init.sites
+                                  if site.specie == pmg.Element(cation)][0]
             facet_init = cage_init.facets[0]
             for cage_facet in cage_init.facets:
-                if utils.distance(cage_facet.center,
-                                  cage_init.cart_coords[-1]) \
-                    < utils.distance(facet_init.center,
-                                       cage_init.cart_coords[-1]):
+                if utils.distance(cage_facet.center, init_cation_coords) \
+                    < utils.distance(facet_init.center, init_cation_coords):
                     facet = cage_facet
 
         datapoints = []
 
         for data in self.data:
 
-            Li_coord = [site.coords for site in data["molecules"][0].sites
-                        if site.specie == pmg.Element('Li')][0]
+            cation_coords = [site.coords for site in data["molecules"][0].sites
+                        if site.specie == pmg.Element(cation)][0]
+
+            print(cation_coords)
+            if (cation_coords == None):
+                raise ValueError("Requested cation not found in molecule.")
 
             if coordinates == "polar":
 
-                r = np.linalg.norm(Li_coord)
-                theta = angle_between(facet.center, Li_coord)
+                r = np.linalg.norm(cation_coords)
+                theta = angle_between(facet.center, cation_coords)
                 if theta > math.pi/2:
                     theta = math.pi - theta
                 coordinate = [r, theta]
 
             if coordinates == "facet_cart":
 
-                Li_vector = Li_coord - facet.center
+                Li_vector = cation_coords - facet.center
                 theta = angle_between(facet.normal, Li_vector)
                 print(theta)
                 if theta > math.pi / 2:
@@ -290,7 +301,19 @@ class LandscapeAnalyzer(MSONable):
 
         self._datapoints = darray
 
-        # TODO Finish, in case it makes sense
+    def flip_coordinates(self, coord_name):
+        """
+        Flip the coordinate values for a chosen coordinate.
+        :param coord_name:
+        :return:
+        """
+        if self._datapoints == None:
+            raise ValueError('No processed data present.')
+
+        data = self._datapoints
+        data[coord_name] = data[coord_name].max() - data[coord_name]
+        self._datapoints = data
+
 
     def plot_energies(self, dimension, style='trisurf'):
         """
@@ -343,8 +366,6 @@ class LandscapeAnalyzer(MSONable):
                 plt.ylabel('Distance (Angstrom)')
                 plt.show()
 
-
-
     def as_dict(self):
         """
         Return a dictionary representing the LandscapeAnalyzer instance.
@@ -373,6 +394,7 @@ class LandscapeAnalyzer(MSONable):
 
         dict["data"] = data_list
 
+        # TODO also include datapoints after analysis
         return dict
 
     @classmethod
