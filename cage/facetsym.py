@@ -328,18 +328,21 @@ class Cage(Molecule):
         # Find the vertex sharing paths that are non equivalent
         non_eq_paths = []
         for path in vertex_sharing_paths:
-            nonequivalent = True
+
+
             # Check to see if the path is equivalent with a path in the List of
             # non-equivalent paths
+            nonequivalent = True
             for non_eq_path in non_eq_paths:
                 for symm in self.symmops:
                     path_center = (path[0].center + path[1].center)/2
-                    non_eq_path_center = (non_eq_path[0].center +
-                                          non_eq_path[1].center)/2
+                    non_eq_path_center = sum((non_eq_path[0].center,
+                                          non_eq_path[1].center))/2
                     symm_path_center = symm.operate(path_center)
-                    if np.linalg.norm(symm_path_center - non_eq_path_center) \
-                            < 1e-2:
+                    distance = symm_path_center - non_eq_path_center
+                    if np.linalg.norm(distance) < 1e-2:
                         nonequivalent = False
+
             if nonequivalent:
                 non_eq_paths.append(path)
 
@@ -363,6 +366,36 @@ class Cage(Molecule):
 
         return furthest_facet
 
+
+class OccupiedCage(Cage):
+    """
+    A Cage Molecule that has one or more cations docked on it.
+    """
+    def __init__(self, cage, facets, docking_points=(), cation='Li'):
+        """
+        Initialize an OccupiedCage from the Cage as well as the Facets on which
+        there is a docked cation.
+        :param cage:
+        :param facets:
+        :param docking_points:
+        :param cation:
+        """
+        super(Cage, self).__init__(cage.species, cage.cart_coords, cage.charge,
+                                   cage.spin_multiplicity,
+                                   cage.validate_proximity,
+                                   cage.site_properties)
+        self.docks = facets
+
+        # Add the docked cations to the Cage
+        if docking_points:
+            for point in docking_points:
+                self.append(pmg.Specie(cation, 1), point)
+        else:
+            for facet in facets:
+                cation_coord = facet.center + 2*facet.normal
+                self.append(pmg.Specie(cation, 1), cation_coord)
+
+        # TODO Add some checks
 
 
 class Facet(SiteCollection, MSONable):
@@ -393,7 +426,8 @@ class Facet(SiteCollection, MSONable):
         normal = np.cross(self._sites[0].coords - self._sites[1].coords,
                           self._sites[0].coords - self._sites[2].coords)
 
-        normal = normal/np.linalg.norm(normal) # Make length of the normal equal to 1
+        # Make length of the normal equal to 1
+        normal = normal/np.linalg.norm(normal)
 
         return normal
 
