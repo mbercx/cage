@@ -345,6 +345,25 @@ class Cage(Molecule):
 
         return non_eq_paths
 
+    def find_furthest_facet(self, point):
+        """
+        Find the Facet of the Molecule that is the farthest away from the point
+        provided.
+        :param point: 
+        :return:
+        """
+        distance = 0
+        furthest_facet = None
+
+        for facet in self.facets:
+            newdistance = np.linalg.norm(point - facet.center)
+            if newdistance > distance:
+                furthest_facet = facet
+                distance = newdistance
+
+        return furthest_facet
+
+
 
 class Facet(SiteCollection, MSONable):
     """
