@@ -14,7 +14,8 @@ Script to set up the directories and input files to calculate the minimum
 energy paths for all non-equivalent facet combinations in a Cage molecule.
 """
 
-# Lithium parameters
+# Cation parameters
+CATION = 'Na'
 START_DIST = 2
 
 # Calculation parameters
@@ -64,9 +65,9 @@ def main():
         start_molecule = mol.copy()
         end_molecule = mol.copy()
 
-        start_molecule.append(pmg.Specie('Li', 1), path[0].center +
+        start_molecule.append(pmg.Specie(CATION, 1), path[0].center +
                               START_DIST * path[0].normal)
-        end_molecule.append(pmg.Specie('Li', 1), path[1].center +
+        end_molecule.append(pmg.Specie(CATION, 1), path[1].center +
                               START_DIST * path[1].normal)
 
         # Make the path directory
