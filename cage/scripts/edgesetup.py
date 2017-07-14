@@ -121,7 +121,7 @@ def main():
         for point in landscape.points:
             try:
                 total_mol.append(pmg.Specie(CATION, 1), point,
-                                validate_proximity=False)
+                                 validate_proximity=False)
                 edge_mol.append(pmg.Specie(CATION, 1), point,
                                 validate_proximity=False)
             except ValueError:
@@ -133,7 +133,7 @@ def main():
         # optimization setup (DRIVER)
         if OPERATION == "optimize":
             fixed_facet = mol.find_furthest_facet(landscape.center)
-            ALT_SETUP["constraints"] = find_constraints(mol,fixed_facet)
+            ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
             ALT_SETUP["driver"] = DRIVER_SETUP
 
         # Set up the task for the calculations
@@ -153,9 +153,11 @@ def main():
     # Set up an xyz file with all the paths
     total_mol.to(fmt="xyz", filename="total_mol.xyz")
 
+
 ###########
 # METHODS #
 ###########
+
 
 def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
                           number_of_radii=None, angle_density=50):
@@ -187,6 +189,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     lands.extend_by_rotation(axis, angle_density)
 
     return lands
+
 
 def set_up_molecules(mol, landscape, cation):
     """
@@ -224,6 +227,7 @@ def set_up_molecules(mol, landscape, cation):
 
     return molecules
 
+
 def find_constraints(mol, facet):
     """
     Find the constraints for the calculation, by fixing a facet and the cation.
@@ -248,6 +252,7 @@ def find_constraints(mol, facet):
 
     # Return the constraints on the atoms
     return {"fix atom": site_numbers}
+
 
 if __name__ == '__main__':
     main()
