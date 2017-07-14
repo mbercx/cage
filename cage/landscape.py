@@ -209,7 +209,10 @@ class LandscapeAnalyzer(MSONable):
                     out = nw.NwOutput(os.path.join(directory, dir,
                                                       output_file))
                 except FileNotFoundError:
-                    print('Did not find output in directory ' + dir)
+                    print('Did not find output file in directory ' + dir)
+                except IndexError:
+                    print('Did not find output in ' + output_file +
+                          ' in directory' + dir)
 
                 # Check if the output has an error
                 if out.data[-1]['has_error']:
