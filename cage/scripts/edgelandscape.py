@@ -187,7 +187,8 @@ total_energy -= total_energy.min()
 plt.figure()
 plt.pcolor(total_angles, total_radii, total_energy, vmin=total_energy.min(),
            vmax=total_energy.mean() - E_MAX_ADJUSTMENT)
-plt.colorbar()
+cbar = plt.colorbar()
+cbar.set_label('Energy (eV)', size='large')
 CS = plt.contour(total_angles, total_radii, total_energy, colors='black',
             levels=CONTOUR_LEVELS)
 for angle in facet_angles:
