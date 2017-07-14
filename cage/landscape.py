@@ -63,6 +63,15 @@ class Landscape(MSONable):
         """
         return self._points
 
+    @property
+    def center(self):
+        """
+        Center of the points of the Landscape.
+
+        :return:
+        """
+        return sum(self.points)/len(self.points)
+
     @classmethod
     def from_vertices(cls, vertices, num=10):
         """
