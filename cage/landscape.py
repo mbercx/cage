@@ -162,7 +162,7 @@ class LandscapeAnalyzer(MSONable):
     """
     An analyzer class for interpreting data from calculations on a landscape.
     """
-    def __init__(self, data, software="nwchem"):
+    def __init__(self, data, datapoints=None, software="nwchem"):
         """
         Initialize an instance of LandscapeAnalyzer. This method will rarely
         be used directly. Usually a LandscapeAnalyzer is initialized from a
@@ -170,7 +170,7 @@ class LandscapeAnalyzer(MSONable):
         """
         self._data = data
         self._software = software
-        self._datapoints = None
+        self._datapoints = datapoints
 
     @property
     def data(self):
@@ -228,10 +228,10 @@ class LandscapeAnalyzer(MSONable):
         else:
             raise NotImplementedError("Only NwChem is currently supported.")
 
-        return LandscapeAnalyzer(data, software)
+        return LandscapeAnalyzer(data, software=software)
 
-    def analyze_cation_energies(self, facet=None , coordinates="polar",
-                                cation="Li"):
+    def analyze_cation_energies(self, facet=None , cation="Li",
+                                coordinates="polar"):
         """
         Extract the total energies for all the calculations. This function is
         written specifically for studying cation landscapes defined versus a
@@ -260,11 +260,16 @@ class LandscapeAnalyzer(MSONable):
         for data in self.data:
 
             cation_coords = [site.coords for site in data["molecules"][0].sites
-                        if site.specie == pmg.Element(cation)][0]
+                             if site.specie == pmg.Element(cation)]
 
-            print(cation_coords)
-            if (cation_coords == None):
+            if len(cation_coords) == 0:
                 raise ValueError("Requested cation not found in molecule.")
+            elif len(cation_coords) == 1:
+                cation_coords = cation_coords[0]
+            else:
+                print("More than one cation found in molecule. Taking the last"
+                      "cation of the list.")
+                cation_coords = cation_coords[-1]
 
             if coordinates == "polar":
 
@@ -393,8 +398,9 @@ class LandscapeAnalyzer(MSONable):
             data_list.append(data_dict)
 
         dict["data"] = data_list
+        dict["datapoints"] = self.datapoints
 
-        # TODO also include datapoints after analysis
+        # TODO MAKE THIS WORK datapoints after analysis
         return dict
 
     @classmethod
@@ -444,7 +450,7 @@ class LandscapeAnalyzer(MSONable):
 
                 data.append(data_dict)
 
-        return LandscapeAnalyzer(data)
+        return LandscapeAnalyzer(data, datapoints=file_data["datapoints"])
 
     def to(self, filename, fmt="json"):
         """
