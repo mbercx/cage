@@ -16,7 +16,8 @@ improving it would require thinking, and aint nobody got time for that.
 """
 
 # PARAMETERS TODO DIRTY AS FUCK -> Find a better way
-R_CUTOFF = 0.6
+CATION='Na'
+R_CUTOFF = 1.1
 E_MAX_ADJUSTMENT = -0.5
 START_FACET = 0 # 0 or 1 -> determines facet to start chain from
 ANGLE_MESH = 0.003
@@ -35,7 +36,7 @@ edges = [[LandscapeAnalyzer.from_file(os.path.join(dir, 'landscape.json')),
          for dir in dir_list]
 
 for edge in edges:
-    edge[0].analyze_cation_energies(facet=edge[1][0])
+    edge[0].analyze_cation_energies(facet=edge[1][0],cation=CATION)
 
 # TODO Make landscapes and paths connected via dictionary
 

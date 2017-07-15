@@ -22,15 +22,19 @@ except JSONDecodeError:
     except:
         raise IOError('File not found.')
 
-error = False
-for data in out.data:
-    if data['has_error']:
-        error = True
+try:
+    error = False
+    for data in out.data:
+        if data['has_error']:
+            error = True
 
-print('File: ' + os.path.abspath(filename))
-if data['task_time'] != 0:
-    print('Calculation completed in ' + str(data['task_time']) + 's')
-else:
-    print('No timing information found. Calculation might not have completed '
-          'successfully.')
-print('Calculation has error: ' + str(error))
+    print('File: ' + os.path.abspath(filename))
+    if out.data[-1]['task_time'] != 0:
+        print('Calculation completed in ' + str(out.data[-1]['task_time']) + 's')
+    else:
+        print('No timing information found. Calculation might not have '
+              'completed successfully.')
+    print('Calculation has error: ' + str(error))
+
+except NameError:
+    print("No data found in file!")
