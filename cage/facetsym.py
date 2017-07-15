@@ -62,7 +62,7 @@ class Cage(Molecule):
         Center the Cage by updating the sites. In case no point is provided,
         the molecules is centered on its geometric center.
         """
-        if point:
+        if point is not None:
             center = point
         else:
             # Find the coordinates of the geometric center
@@ -371,31 +371,119 @@ class OccupiedCage(Cage):
     """
     A Cage Molecule that has one or more cations docked on it.
     """
-    def __init__(self, cage, facets, docking_points=(), cation='Li'):
+
+    def __init__(self, species, coords, charge = 0, spin_multiplicity = None,
+                 validate_proximity = False, site_properties = None):
         """
         Initialize an OccupiedCage from the Cage as well as the Facets on which
         there is a docked cation.
+
+        :param species:
+        :param coords:
+        :param charge:
+        :param spin_multiplicity:
+        :param validate_proximity:
+        :param site_properties:
+        """
+
+        super(OccupiedCage, self).__init__(species, coords, charge,
+                                           spin_multiplicity,
+                                           validate_proximity,
+                                           site_properties)
+        self._docks = []
+
+    @property
+    def docks(self):
+        return self._docks
+
+    @property
+    def facets(self):
+        return self._facets
+
+    def add_dock(self, dock, docking_point=None, cation='Li'):
+        """
+        Add a docking site to the OccupiedCage.
+        :return:
+        """
+        if docking_point:
+            self.append(pmg.Element(cation), docking_point)
+            self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
+            self._docks.append(dock)
+        else:
+            cation_coord = dock.center + 2 * dock.normal
+            self.append(pmg.Element(cation), cation_coord)
+            self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
+            self._docks.append(dock)
+
+        # TODO Add some checks
+
+    @classmethod
+    def from_cage_and_facets(cls, cage, facets, docking_points=(),
+                             cation='Li'):
+        """
+
         :param cage:
         :param facets:
         :param docking_points:
         :param cation:
         """
-        super(Cage, self).__init__(cage.species, cage.cart_coords, cage.charge,
-                                   cage.spin_multiplicity,
-                                   cage.validate_proximity,
-                                   cage.site_properties)
-        self.docks = facets
+        occ_cage = cls(species=cage.species, coords=cage.cart_coords,
+                       charge=cage.charge,
+                       spin_multiplicity=cage.spin_multiplicity,
+                       validate_proximity=True,
+                       site_properties=cage.site_properties)
 
         # Add the docked cations to the Cage
-        if docking_points:
-            for point in docking_points:
-                self.append(pmg.Specie(cation, 1), point)
-        else:
-            for facet in facets:
-                cation_coord = facet.center + 2*facet.normal
-                self.append(pmg.Specie(cation, 1), cation_coord)
+        for index in range(len(facets)):
+            try:
+                occ_cage.add_dock(facets[index],
+                                  docking_point=docking_points[index],
+                                  cation=cation)
+            except IndexError:
+                occ_cage.add_dock(facets[index], cation=cation)
 
-        # TODO Add some checks
+        return occ_cage
+
+    def remove_surface_facet(self, facet):
+        """
+
+        :return:
+        """
+        surface_facets = self.facets
+        if surface_facets:
+            self._facets = surface_facets.remove(facet)
+        else:
+            print('Surface Facets have not been set up yet.')
+
+
+    def find_surface_facets(self, ignore=(pmg.Element('H'),
+                                          pmg.Element('Li'))):
+        """
+        Find the surface facets of the OccupiedCage.
+        :param ignore:
+        :return:
+        """
+        mol = self.copy()
+        anion = [site.coords for site in mol.sites
+                 if site.specie not in (pmg.Element('Li'),
+                                        pmg.Element('Na'))]
+
+        mol.center(sum(anion)/len(anion))
+
+        super(OccupiedCage, mol).find_surface_facets(ignore=ignore)
+
+        surface_facets = mol.facets
+
+        print('Found ' + str(len(surface_facets)) + ' facets.')
+        for facet in surface_facets:
+            print(facet)
+
+        for dock in self.docks:
+            print('Dock:')
+            print(dock)
+            surface_facets.remove(dock)
+
+        self._facets = surface_facets
 
 
 class Facet(SiteCollection, MSONable):
