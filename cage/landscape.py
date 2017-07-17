@@ -260,7 +260,7 @@ class LandscapeAnalyzer(MSONable):
                   "cation in the first datapoint.")
             cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
             init_cation_coords = [site.coords for site in cage_init.sites
-                                  if site.specie == pmg.Element(cation)][0]
+                                  if site.specie == pmg.Element(cation)][-1]
             facet_init = cage_init.facets[0]
             for cage_facet in cage_init.facets:
                 if utils.distance(cage_facet.center, init_cation_coords) \
