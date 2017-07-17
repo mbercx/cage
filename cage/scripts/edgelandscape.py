@@ -12,7 +12,7 @@ from cage.facetsym import Facet
 
 """
 Plot the landscape of connected edges. This is some damn illegible code, but
-improving it would require thinking, and aint nobody got time for that.
+improving it would require thinking, and ain't nobody got time for that.
 """
 
 # PARAMETERS TODO DIRTY AS FUCK -> Find a better way
@@ -26,10 +26,17 @@ CONTOUR_LEVELS = np.mgrid[0.1:2:0.1]
 
 # Input
 
-dirname = sys.argv[1]
+# TODO Make a proper parser
+if len(sys.argv) == 3:
+    CATION = sys.argv[1]
+else:
+    CATION = 'Li'
+
+dirname = sys.argv[-1]
 dir_list = [os.path.abspath(dir) for dir in os.listdir(dirname)
             if os.path.isdir(dir)]
 
+# TODO Make this part ignore directories that do not have the right files
 edges = [[LandscapeAnalyzer.from_file(os.path.join(dir, 'landscape.json')),
           [Facet.from_file(os.path.join(dir, 'init_facet.json')),
           Facet.from_file(os.path.join(dir, 'final_facet.json'))]]
@@ -199,7 +206,7 @@ xlabel = []
 for i in range(len(facet_angles)):
     xlabel.append('$\Omega_' + str(i+1) + '$')
 plt.xlabel('Angle', size='large')
-plt.ylabel('Radius', size='large')
+plt.ylabel('Radius ($\AA$)', size='large')
 plt.xticks(facet_angles, xlabel, size='large')
 plt.clabel(CS, fontsize=10, inline_spacing=15, fmt='%1.1f', manual=True)
 plt.show()
