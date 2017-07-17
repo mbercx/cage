@@ -24,7 +24,11 @@ adjustments.
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 # TODO The current set up does not work very well for molecules that are not spherically shaped -> improve method set_up_landscape
 
+# Facetsetup parameter
+IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'))
+
 # Landscape parameters
+
 CATION = "Na"  # Cation to place on the landscape
 # Distance endpoints between the center of the molecule and the cation
 ENDPOINT_RADII = (2, 5)
@@ -71,7 +75,7 @@ def main():
 
     # Load the POSCAR into a Cage
     mol = cage.facetsym.Cage.from_poscar(filename)
-    mol.find_surface_facets()
+    mol.find_surface_facets(IGNORE)
 
     # Find the non-equivalent paths
     paths = mol.find_facet_paths()
