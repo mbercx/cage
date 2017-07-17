@@ -418,6 +418,21 @@ class Cage(Molecule):
 
         return facet_chain
 
+    def find_noneq_chain_paths(self):
+        """
+        Find the paths that connect the facets of the chain that connects a
+        set of non equivalent facets.
+
+        :return:
+        """
+
+        facet_chain = self.find_noneq_facet_chain()
+
+        chain_paths = []
+        for index in range(len(facet_chain)-1):
+            chain_paths.append((facet_chain[index], facet_chain[index + 1]))
+
+        return chain_paths
 
     def find_furthest_facet(self, point):
         """
@@ -505,6 +520,8 @@ class OccupiedCage(Cage):
             self.append(pmg.Element(cation), cation_coord)
             self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
             self._docks.append(dock)
+
+        self._facets = None
 
         # TODO Add some checks
 
