@@ -377,7 +377,11 @@ class Cage(Molecule):
         # Find the facets in the chain
         chain_facets = [noneq_facets[0]]
         chain_list_noneq_facets = [noneq_facets[0]]
-        while len(chain_facets) < len(noneq_facets):
+
+        while True:
+
+            if len(chain_facets) == len(noneq_facets):
+                break
 
             for facet in self.facets:
                 for chain_facet in chain_facets:
@@ -402,6 +406,9 @@ class Cage(Molecule):
                         end_facets.append(facet)
                     else:
                         end_facets.remove(facet)
+
+        for facet in end_facets:
+            print(facet)
 
         # Sort the chain:
         facet_chain = [end_facets[start]]
@@ -574,8 +581,7 @@ class OccupiedCage(Cage):
         """
         mol = self.copy()
         anion = [site.coords for site in mol.sites
-                 if site.specie not in (pmg.Element('Li'),
-                                        pmg.Element('Na'))]
+                 if site.specie not in OccupiedCage.CATIONS]
 
         mol.center(sum(anion)/len(anion))
 
@@ -584,12 +590,15 @@ class OccupiedCage(Cage):
         surface_facets = mol.facets
 
         print('Found ' + str(len(surface_facets)) + ' facets.')
-        for facet in surface_facets:
-            print(facet)
+        # for facet in surface_facets:
+        #     print(facet)
+        #     print(facet.normal)
+        #     print(self._docks[0] == facet)
 
         for dock in self.docks:
-            print('Dock:')
-            print(dock)
+            # print('Dock:')
+            # print(dock)
+            # print(dock.normal)
             surface_facets.remove(dock)
 
         self._facets = surface_facets
@@ -642,7 +651,7 @@ class Facet(SiteCollection, MSONable):
         :return:
         """
         if (len(set(self.sites) & set(other.sites)) == 3) and \
-                (self.normal == other.normal).all():
+                np.allclose(self.normal, other.normal):
             return True
         else:
             return False
