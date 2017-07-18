@@ -131,7 +131,7 @@ class Cage(Molecule):
 
         self._facets = facets_surf
 
-    def set_up_facet_list(self):
+    def set_up_facet_list(self, type='str_array'):
         """
         Set up a List of surface facets, and how they relate to the
         non-equivalent facets, i.e. which non-equivalent facet they can be
@@ -155,16 +155,28 @@ class Cage(Molecule):
                         facet_list.append((facet, noneq_facet, symm))
                         break
 
-        list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
-                      ('symmop', SymmOp)]
+        if type == 'str_array':
 
-        facet_array = np.array(facet_list, dtype=list_types)
+            list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
+                          ('symmop', SymmOp)]
 
-        if len(facet_array) == len(self.facets):
-            return facet_array
-        else:
-            raise ValueError("Obtained array length is not equal to number of "
-                             "facets. Something must have gone wrong.")
+            facet_array = np.array(facet_list, dtype=list_types)
+
+            if len(facet_array) == len(self.facets):
+                return facet_array
+            else:
+                raise ValueError("Obtained array length is not equal to number of "
+                                 "facets. Something must have gone wrong.")
+
+        elif type == 'dict':
+
+            facet_dict = {}
+
+            for i in range(len(facet_list)):
+                facet_dict[facet_list[i][0]] = (facet_list[i][1],
+                                                facet_list[i][2])
+
+            return facet_dict
 
     @property
     def facets(self):
@@ -348,6 +360,87 @@ class Cage(Molecule):
 
         return non_eq_paths
 
+    def find_noneq_facet_chain(self, start=0):
+        """
+        Find a chain of non equivalent facets, i.e. a collection of facets that
+        are connected by edge paths. Automatically sorts the facets so they
+        are connected by their neighbours in the list.
+
+        :param start: Determines in which direction the chain is constructed.
+        Is equal to 0 or 1.
+        :return:
+        """
+
+        facet_dict = self.set_up_facet_list('dict')
+        noneq_facets = self.find_noneq_facets()
+
+        # Find the facets in the chain
+        chain_facets = [noneq_facets[0]]
+        chain_list_noneq_facets = [noneq_facets[0]]
+
+        while True:
+
+            if len(chain_facets) == len(noneq_facets):
+                break
+
+            for facet in self.facets:
+                for chain_facet in chain_facets:
+                    if len(set(facet.sites) & set(chain_facet.sites)) == 2:
+
+                        # Check if the facet is related to one of the non
+                        # equivalent facets in the chain
+                        if facet_dict[facet][0] not in chain_list_noneq_facets:
+                            chain_facets.append(facet)
+                            chain_list_noneq_facets.append(
+                                facet_dict[facet][0]
+                            )
+
+        # Find the end facets:
+        end_facets = []
+        for facet in chain_facets:
+            other_facets = chain_facets.copy()
+            other_facets.remove(facet)
+            for other_facet in other_facets:
+                if len(set(facet.sites) & set(other_facet.sites)) == 2:
+                    if facet not in end_facets:
+                        end_facets.append(facet)
+                    else:
+                        end_facets.remove(facet)
+
+        for facet in end_facets:
+            print(facet)
+
+        # Sort the chain:
+        facet_chain = [end_facets[start]]
+        other_facets = chain_facets.copy()
+        other_facets.remove(end_facets[start])
+
+        while len(facet_chain) < len(chain_facets):
+
+            for facet in other_facets:
+                if len(set(facet.sites) & set(facet_chain[-1].sites)) == 2:
+                    facet_chain.append(facet)
+                    other_facets.remove(facet)
+                    break
+
+        return facet_chain
+
+    def find_noneq_chain_paths(self):
+        """
+        Find the paths that connect the facets of the chain that connects a
+        set of non equivalent facets.
+
+        :return:
+        """
+
+        facet_chain = self.find_noneq_facet_chain()
+
+        chain_paths = []
+        for index in range(len(facet_chain)-1):
+            chain_paths.append((facet_chain[index], facet_chain[index + 1]))
+
+        return chain_paths
+
     def find_furthest_facet(self, point):
         """
         Find the Facet of the Molecule that is the farthest away from the point
@@ -372,6 +465,9 @@ class OccupiedCage(Cage):
     A Cage Molecule that has one or more cations docked on it.
     """
 
+    CATIONS = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('K'),
+               pmg.Element('Mg'))
+
     def __init__(self, species, coords, charge = 0, spin_multiplicity = None,
                  validate_proximity = False, site_properties = None):
         """
@@ -390,6 +486,7 @@ class OccupiedCage(Cage):
                                            spin_multiplicity,
                                            validate_proximity,
                                            site_properties)
+        self.center()
         self._docks = []
 
     @property
@@ -399,6 +496,22 @@ class OccupiedCage(Cage):
     @property
     def facets(self):
         return self._facets
+
+    def center(self, point=None):
+        """
+        Center the OccupiedCage on the anion center, or a point of the user's
+        choosing.
+
+        :param point:
+        :return:
+        """
+
+        anion_coords = [site.coords for site in self.sites
+                        if site.specie not in OccupiedCage.CATIONS]
+
+        anion_center = sum(anion_coords)/len(anion_coords)
+
+        super(OccupiedCage, self).center(anion_center)
 
     def add_dock(self, dock, docking_point=None, cation='Li'):
         """
@@ -414,6 +527,8 @@ class OccupiedCage(Cage):
             self.append(pmg.Element(cation), cation_coord)
             self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
             self._docks.append(dock)
+
+        self._facets = None
 
         # TODO Add some checks
 
@@ -457,7 +572,8 @@ class OccupiedCage(Cage):
 
 
     def find_surface_facets(self, ignore=(pmg.Element('H'),
-                                          pmg.Element('Li'))):
+                                          pmg.Element('Li'),
+                                          pmg.Element('Na'))):
         """
         Find the surface facets of the OccupiedCage.
         :param ignore:
@@ -465,8 +581,7 @@ class OccupiedCage(Cage):
         """
         mol = self.copy()
         anion = [site.coords for site in mol.sites
-                 if site.specie not in (pmg.Element('Li'),
-                                        pmg.Element('Na'))]
+                 if site.specie not in OccupiedCage.CATIONS]
 
         mol.center(sum(anion)/len(anion))
 
@@ -475,12 +590,15 @@ class OccupiedCage(Cage):
         surface_facets = mol.facets
 
         print('Found ' + str(len(surface_facets)) + ' facets.')
-        for facet in surface_facets:
-            print(facet)
+        # for facet in surface_facets:
+        #     print(facet)
+        #     print(facet.normal)
+        #     print(self._docks[0] == facet)
 
         for dock in self.docks:
-            print('Dock:')
-            print(dock)
+            # print('Dock:')
+            # print(dock)
+            # print(dock.normal)
             surface_facets.remove(dock)
 
         self._facets = surface_facets
@@ -533,10 +651,17 @@ class Facet(SiteCollection, MSONable):
         :return:
         """
         if (len(set(self.sites) & set(other.sites)) == 3) and \
-                (self.normal == other.normal).all():
+                np.allclose(self.normal, other.normal):
             return True
         else:
             return False
+
+    def __hash__(self):
+        """
+        Make Facet hashable.
+        :return:
+        """
+        return hash(str(self))
 
     @classmethod
     def from_str(cls, input_string, fmt="json"):

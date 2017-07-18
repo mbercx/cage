@@ -11,13 +11,8 @@ import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 """
-Script to set up the calculations for all the non-equivalent edge sharing paths
-in a cage molecule. The script sets up the energy landscape calculations for
-each non-equivalent edge sharing path.
-
-This script is written specifically to study the facets of CxByHz molecules.
-In case you want to use it for anything else, it will probably need some
-adjustments.
+Script to set up the calculations for a chain of paths connecting the non
+equivalent facets of a cage molecule.
 
 """
 
@@ -77,21 +72,15 @@ def main():
     mol = cage.facetsym.Cage.from_poscar(filename)
     mol.find_surface_facets(IGNORE)
 
-    # Find the non-equivalent paths
-    paths = mol.find_facet_paths()
-
-    # Find the edge paths
-    edge_paths = []
-    for path in paths:
-        if len(set(path[0].sites) & set(path[1].sites)) == 2:
-            edge_paths.append(path)
+    # Find the chain paths
+    paths = mol.find_noneq_chain_paths()
 
     total_mol = mol.copy()
 
     # For each facet, set up the calculation input files
     edge_number = 1
 
-    for path in edge_paths:
+    for path in paths:
 
         # Set up the edge directory
         edge_dir = "edge" + str(edge_number)
