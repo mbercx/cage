@@ -26,9 +26,9 @@ IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'))
 
 CATION = "Na"  # Cation to place on the landscape
 # Distance endpoints between the center of the molecule and the cation
-ENDPOINT_RADII = (2, 5)
+ENDPOINT_RADII = (3.4,4)
 # TODO For some reason, using the density to set the number of radii did not work. However, that seems much more sensible. Fix it.
-N_RADII = 30  # Number of radius points for the landscape
+N_RADII = 1  # Number of radius points for the landscape
 ANGLE_DENSITY = 50  # Density of points along the angle coordinate
 
 # Calculation parameters

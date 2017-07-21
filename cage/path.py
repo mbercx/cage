@@ -6,7 +6,7 @@ import numpy as np
 import re
 
 import matplotlib.pyplot as plt
-from scipy.interpolate import interp1d
+import scipy.interpolate as inter
 
 from pymatgen.core.structure import Molecule
 from monty.io import zopen
@@ -40,13 +40,16 @@ class Path(object):
         :param other:
         :return:
         """
-        # TODO Give an error if paths dont match
-        path = self.__class__(self.site_collections + other.site_collections)
-        if self.energies == None or other.energies == None:
-            return path
+
+        if self.site_collections[-1] == other.site_collections[0]:
+            path = self.__class__(self.site_collections[:-1] + other.site_collections)
+            if self.energies == None or other.energies == None:
+                return path
+            else:
+                path.set_energies(self.energies[:-1] + other.energies)
+                return path
         else:
-            path.set_energies(self.energies + other.energies)
-            return path
+            raise ValueError('Path endpoints do not match.')
 
     @property
     def site_collections(self):
@@ -120,7 +123,7 @@ class Path(object):
 
             return path
 
-    def plot_energies(self):
+    def plot_energies(self, interpolation='Cubic Spline'):
         """
 
         :return:
@@ -131,15 +134,23 @@ class Path(object):
         energies = (energies - energies.min())*1000
         images = np.linspace(0, len(self.energies)-1, num=len(self.energies))
 
-        e_inter = interp1d(images, energies, kind='cubic')
-
-        im_inter = np.linspace(0, images.max(), num=100, endpoint=True)
-
         plt.figure()
-        plt.plot(im_inter, e_inter(im_inter), 'black')
-        plt.plot(images, energies, 'bo')
-        plt.xlabel('Image Number')
-        plt.ylabel('Energy (meV)')
+
+        if interpolation == 'Cubic Spline':
+            tck = inter.splrep(images, energies, s=0.01)
+            images_inter = np.mgrid[images.min():images.max():0.01]
+            energies_inter = inter.splev(images_inter, tck, der=0)
+            plt.plot(images_inter, energies_inter, color='#143264')
+
+        elif interpolation == 'cubic':
+            energies_inter = inter.interp1d(images, energies, kind='cubic')
+            images_inter = np.linspace(0, images.max(), num=100, endpoint=True)
+            plt.plot(images_inter, energies_inter(images_inter), color='#143264')
+
+        plt.plot(images, energies, 'o', color='#143264')
+        plt.xticks([],[])
+        plt.xlabel('Diffusion Pathway', size='x-large')
+        plt.ylabel('Energy (meV)', size='x-large')
         plt.show()
 
 

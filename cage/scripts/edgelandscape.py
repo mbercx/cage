@@ -17,12 +17,11 @@ improving it would require thinking, and ain't nobody got time for that.
 
 # PARAMETERS TODO DIRTY AS FUCK -> Find a better way
 CATION='Na'
-R_CUTOFF = 1.1
-E_MAX_ADJUSTMENT = -0.5
 START_FACET = 0 # 0 or 1 -> determines facet to start chain from
 ANGLE_MESH = 0.003
 RADIUS_MESH = 0.01
 CONTOUR_LEVELS = np.mgrid[0.1:2:0.1]
+E_LIMITS = (0, 1.4)
 
 # Input
 
@@ -127,8 +126,6 @@ for landscape in landscape_chain:
     if rmin > max_min_radius:
         max_min_radius = rmin
 
-max_min_radius += R_CUTOFF
-
 print('-----------')
 print('Largest minimal radius = ' + str(max_min_radius))
 print('Smallest maximal radius = ' + str(min_max_radius))
@@ -193,24 +190,23 @@ total_energy = np.concatenate(tuple(all_energy))
 total_energy -= total_energy.min()
 
 plt.figure()
-plt.pcolor(total_angles, total_radii, total_energy, vmin=total_energy.min(),
-           vmax=total_energy.mean() - E_MAX_ADJUSTMENT)
+plt.pcolor(total_angles, total_radii, total_energy, vmin=E_LIMITS[0],
+           vmax=E_LIMITS[1], cmap='viridis')
 cbar = plt.colorbar()
-cbar.set_label('Energy (eV)', size='large')
+cbar.set_label('Energy (eV)', size='x-large')
 CS = plt.contour(total_angles, total_radii, total_energy, colors='black',
-            levels=CONTOUR_LEVELS)
+            levels=CONTOUR_LEVELS, linewidths=0.6)
 for angle in facet_angles:
     plt.plot([angle, angle], [total_radii.min(), total_radii.max()], color='k',
          linestyle='-', linewidth=1)
 xlabel = []
 for i in range(len(facet_angles)):
     xlabel.append('$\Omega_' + str(i+1) + '$')
-plt.xlabel('Angle', size='large')
-plt.ylabel('Radius ($\AA$)', size='large')
-plt.xticks(facet_angles, xlabel, size='large')
+#plt.xlabel('Angle', size='large')
+plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
+plt.xticks(facet_angles, xlabel, size='x-large')
 plt.clabel(CS, fontsize=10, inline_spacing=15, fmt='%1.1f', manual=True)
 plt.show()
-
 
 
 
