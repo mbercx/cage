@@ -454,6 +454,24 @@ class Cage(Molecule):
                 distance = newdistance
 
         return furthest_facet
+    
+    def find_closest_facet(self, point):
+        """
+        Find the Facet of the Molecule that is the closest to the point 
+        provided.
+        :param point: 
+        :return:
+        """
+        distance = 0
+        closest_facet = None
+
+        for facet in self.facets:
+            newdistance = np.linalg.norm(point - facet.center)
+            if newdistance < distance:
+                closest_facet = facet
+                distance = newdistance
+
+        return closest_facet
 
 
 class OccupiedCage(Cage):
