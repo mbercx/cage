@@ -2,7 +2,7 @@
 # Written for Python 3.6
 
 import os
-import sys
+import argparse
 
 import numpy as np
 import pymatgen as pmg
@@ -45,12 +45,29 @@ ALT_SETUP = {"driver": {'loose': '', 'maxiter': '100'}}
 
 OPERATION = 'optimize'
 
-# Input check
-try:
-    filename = sys.argv[1]
-except IndexError:
-    raise IOError('No POSCAR file provided.')
+# Input parsing
+parser = argparse.ArgumentParser(description=
+                                 "No description, too lazy atm...")
 
+parser.add_argument('-I', metavar='cation', type=str,
+                    help="The chemical symbol of the cation under study, i.e. "
+                         "'Li', 'Na', ...")
+parser.add_argument('POSCAR', type=str,
+                    help="The structure POSCAR.")
+
+args = vars(parser.parse_args())
+
+try:
+    filename = args['POSCAR']
+except IndexError:
+    raise IOError("No POSCAR file provided.")
+
+for argument in args.keys():
+
+    if args[argument]:
+
+        if argument == 'I':
+            CATION = args['I']
 
 def main():
 

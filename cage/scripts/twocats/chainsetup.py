@@ -2,9 +2,9 @@
 # Written for Python 3.6
 
 import os
-import sys
 import math
 import cage
+import argparse
 
 import numpy as np
 import pymatgen as pmg
@@ -59,18 +59,42 @@ DRIVER_SETUP = {"loose": "", "maxiter": "100"}
 
 OPERATION = "energy"
 
-# Input check
+# Input parsing
+parser = argparse.ArgumentParser(description=
+                                 "This script looks for the docking points for"
+                                 " cations on the anion, then sets up a set of"
+                                 " calculations to study the 2D landscape "
+                                 "between the non-equivalent facets in this "
+                                 "occupied anion. "
+                                 "The calculation is set up in the current "
+                                 "directory, but the user must provide "
+                                 "the docking directory as input (for now).")
+
+parser.add_argument('-I', metavar='cation', type=str,
+                    help="The chemical symbol of the cation under study, i.e. "
+                         "'Li', 'Na', ...")
+parser.add_argument('-O', metavar='operation', type=str,
+                    help="The Nwchem operation to use, i.e. 'energy' for only"
+                         " total energy calculations, 'optimize' in case the "
+                         "structure should be optimized first.")
+parser.add_argument('dir', type=str,
+                    help="The docking directory.")
+
+args = vars(parser.parse_args())
+
 try:
-    # Take the dirname argument from the user
-    dirname = os.path.abspath(sys.argv[2])
-    # Take the operation input
-    OPERATION = sys.argv[1]
+    dirname = args['dir']
 except IndexError:
-    # Take the filename argument from the user
-    try:
-        dirname = os.path.abspath(sys.argv[1])
-    except IndexError:
-        raise IOError("No docking directory provided.")
+    raise IOError("No docking directory provided.")
+
+for argument in args.keys():
+
+    if args[argument]:
+
+        if argument == 'I':
+            CATION = args['I']
+        elif argument == 'O':
+            OPERATION = args['O']
 
 def main():
 
@@ -91,8 +115,12 @@ def main():
             continue
 
         mol = out.data[-1]['molecules'][-1]
-        cat_coords = [site.coords for site in mol.sites
-                      if site.specie == pmg.Element(CATION)]
+
+        try:
+            cat_coords = [site.coords for site in mol.sites
+                          if site.specie == pmg.Element(CATION)][-1]
+        except IndexError:
+            raise IOError("Requested cation is not found in the molecule.")
 
         # Set up the occupied anion
         occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
@@ -135,7 +163,7 @@ def main():
                                                          "final_facet.json"))
 
             # Get copies so the originals aren't mutated
-            edge_mol = mol.copy()
+            edge_mol = occmol.copy()
             facet1 = path[0].copy()
             facet2 = path[1].copy()
 
@@ -163,8 +191,9 @@ def main():
             # In case the molecules must be optimized, add the constraints and
             # optimization setup (DRIVER)
             if OPERATION == "optimize":
-                fixed_facet = mol.find_furthest_facet(landscape.center)
-                ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
+                fixed_facet = occmol.find_furthest_facet(landscape.center)
+                ALT_SETUP["constraints"] = find_constraints(occmol,
+                                                            fixed_facet)
                 ALT_SETUP["driver"] = DRIVER_SETUP
 
             # Set up the task for the calculations
@@ -218,7 +247,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     angle = math.asin(np.linalg.norm(axis))
     axis = axis * angle / np.linalg.norm(axis)
 
-    lands.extend_by_rotation(axis, angle_density)
+    lands.extend_by_rotation(axis, angle_density, remove_endline=True)
 
     return lands
 
