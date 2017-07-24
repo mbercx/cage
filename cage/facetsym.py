@@ -514,15 +514,20 @@ class OccupiedCage(Cage):
         Add a docking site to the OccupiedCage.
         :return:
         """
-        if docking_point:
-            self.append(pmg.Element(cation), docking_point)
-            self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
+        if cation == None:
             self._docks.append(dock)
         else:
-            cation_coord = dock.center + 2 * dock.normal
-            self.append(pmg.Element(cation), cation_coord)
-            self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
-            self._docks.append(dock)
+            if docking_point:
+                self.append(pmg.Element(cation), docking_point)
+                self.set_charge_and_spin(self.charge,
+                                         self.spin_multiplicity- 1)
+
+            else:
+                cation_coord = dock.center + 2 * dock.normal
+                self.append(pmg.Element(cation), cation_coord)
+                self.set_charge_and_spin(self.charge,
+                                         self.spin_multiplicity - 1)
+                self._docks.append(dock)
 
         self._facets = None
 
