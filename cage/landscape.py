@@ -102,7 +102,7 @@ class Landscape(MSONable):
 
         return Landscape(points)
 
-    def extend_by_rotation(self, axis, density=10):
+    def extend_by_rotation(self, axis, density=10, remove_endline=False):
         """
         Extends the landscape using a axis vector and turning all the vertices
         in the landscape around the origin by a value and direction determined
@@ -117,9 +117,14 @@ class Landscape(MSONable):
         total_angle = np.linalg.norm(axis)
         npoints = int(total_angle/math.pi*density)
 
-        for i in range(npoints):
-            angle = (i+1)/npoints*total_angle
-            rotation_matrices.append(rotation_matrix(axis, angle))
+        if remove_endline:
+            for i in range(npoints-1):
+                angle = (i+1)/npoints*total_angle
+                rotation_matrices.append(rotation_matrix(axis, angle))
+        else:
+            for i in range(npoints):
+                angle = (i+1)/npoints*total_angle
+                rotation_matrices.append(rotation_matrix(axis, angle))
 
         # Add all the points TODO This might be done more quickly
         points = self.points.copy()
