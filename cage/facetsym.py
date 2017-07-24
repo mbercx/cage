@@ -184,13 +184,8 @@ class Cage(Molecule):
         Surface Facets of the Cage.
         :return: (List of Facets)
         """
-        if self._facets:
-            return self._facets
-        else:
-            print("Surface facets have not been set up yet. Calculating them "
-                  "using the standard setup, i.e. ignoring 'H' and 'Li'.")
-            self.find_surface_facets()
-            return self._facets
+        return self._facets
+
 
     @property
     def pointgroup(self):
@@ -294,11 +289,12 @@ class Cage(Molecule):
         """
         pass  # TODO
 
-    def find_noneq_facets(self):
+    def find_noneq_facets(self, tol=1e-2):
         """
         Find all of the nonequivalent facets of the Cage.
 
         :return: List of Facets
+        :param tol: Tolerance for the equivalence condition
         """
 
         # Find all the non-equivalent facets
@@ -311,7 +307,7 @@ class Cage(Molecule):
                 for symm in self.symmops:
                     symm_facet_center = symm.operate(facet.center.tolist())
                     if np.linalg.norm(symm_facet_center - facet_noneq.center)\
-                            < 1e-2:
+                            < tol:
                         facet_is_nonequivalent = False
             if facet_is_nonequivalent:
                 facets_noneq.append(facet)
@@ -743,7 +739,8 @@ class Facet(SiteCollection, MSONable):
         """
         Find the intersection of the normal lines of the Facet and another one.
 
-        Currently only works on an edge sharing Facet.
+        Currently only works on an edge sharing Facet whose normal intersects
+        with this ones'.
 
         :return:
         """
@@ -901,7 +898,7 @@ def site_center(sites):
 def schoenflies_to_hm():
     """
     Function for converting the Schoenflies point group symbol to the Hermann
-    Mangiun one.
+    Manguin one.
     :return:
     """
     pass  # TODO

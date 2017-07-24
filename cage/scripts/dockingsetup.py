@@ -22,8 +22,9 @@ adjustments.
 """
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 
-# Lithium parameters
-START_DIST = 2
+# Cation parameters
+START_DIST = 2 # Initial distance of the cation to the facet
+CATION = 'Li'
 
 # Calculation parameters
 # BASIS = {'*': "aug-pcseg-1"}
@@ -64,10 +65,10 @@ def main():
     dock_number = 1
     for neq_facet in facets:
 
-        # Set up the initial lithium site
+        # Set up the initial cation site
         mol = molecule.copy()
         mol.find_surface_facets()
-        mol.append(pmg.Specie('Li', 1), neq_facet.center +
+        mol.append(pmg.Specie(CATION, 1), neq_facet.center +
                    START_DIST*neq_facet.normal)
 
         # Set the charge for the molecule
