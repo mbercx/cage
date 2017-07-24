@@ -11,23 +11,17 @@ import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 """
+Script to set up the calculations for a chain of paths connecting the non
+equivalent facets of a cage molecule.
 
-This script looks for the docking points for cations on the anion, then sets up
-a set of calculations to study the 2D landscape between the non-equivalent
-facets in this occupied anion.
-
-The calculation is set up in the current directory, but the user must provide
-the docking directory as input (for now).
 """
 
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 # TODO The current set up does not work very well for molecules that are not spherically shaped -> improve method set_up_landscape
 
-OUTPUT_FILE = 'result.out'
-
 # Facetsetup parameter
 IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
-          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'))
+          pmg.Element('I'))
 
 # Landscape parameters
 
@@ -61,45 +55,34 @@ OPERATION = "energy"
 
 # Input check
 try:
-    # Take the dirname argument from the user
-    dirname = sys.argv[2]
+    # Take the filename argument from the user
+    filename = sys.argv[2]
     # Take the operation input
     OPERATION = sys.argv[1]
 except IndexError:
     # Take the filename argument from the user
     try:
-        dirname = sys.argv[1]
+        filename = sys.argv[1]
     except IndexError:
         raise IOError("No POSCAR file provided.")
 
 
 def main():
 
-    # Get the docking directories
-    dir_list = [os.path.abspath(dir) for dir in os.listdir(dirname)
-                if os.path.isdir(dir)]
+    # Load the POSCAR into a Cage
+    mol = cage.facetsym.Cage.from_poscar(filename)
+    mol.find_surface_facets(IGNORE)
 
-    dock_number = 1
+    noneq_facets = mol.find_noneq_facets()
 
-    for dir in dir_list:
+    ne_facet_number = 1
 
-        # Extract the occupied cage
-        try:
-            out = nwchem.NwOutput(os.path.join(dir, OUTPUT_FILE))
-        except:
-            print('Failed to extract output from ' + os.path.abspath(dir) +
-                  '. Skipping...')
-            continue
+    for ne_facet in noneq_facets:
 
-        mol = out.data[-1]['molecules'][-1]
-        cat_coords = [site.coords for site in mol.sites
-                      if site.specie == pmg.Element(CATION)]
-
-        # Set up the occupied anion
-        occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
-        dock = occmol.find_closest_facet(cat_coords)
-
-        occmol.add_dock(dock, cation=None)
+        # Construct the occupied cage
+        occmol = cage.facetsym.OccupiedCage.from_cage_and_facets(mol,
+                                                                 (ne_facet,),
+                                                                 cation=CATION)
         occmol.find_surface_facets(IGNORE)
 
         total_mol = occmol.copy()
@@ -107,10 +90,10 @@ def main():
         # Find the chain paths
         paths = occmol.find_noneq_chain_paths()
 
-        dock_dir = 'dock' + str(dock_number)
+        facet_dir = 'facet' + str(ne_facet_number)
 
         try:
-            os.mkdir(dock_dir)
+            os.mkdir(facet_dir)
         except FileExistsError:
             pass
 
@@ -121,7 +104,7 @@ def main():
 
             # Set up the edge directory
             edge_dir = "edge" + str(edge_number)
-            edge_dir = os.path.join(dock_dir, edge_dir)
+            edge_dir = os.path.join(facet_dir, edge_dir)
             try:
                 os.mkdir(edge_dir)
             except FileExistsError:
@@ -182,7 +165,7 @@ def main():
             edge_number += 1
 
         # Set up an xyz file with all the paths
-        total_mol.to(fmt="xyz", filename=os.path.join(dock_dir,
+        total_mol.to(fmt="xyz", filename=os.path.join(facet_dir,
                                                       "total_mol.xyz"))
 
 
