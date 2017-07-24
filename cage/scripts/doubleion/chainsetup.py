@@ -31,7 +31,7 @@ IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
 
 # Landscape parameters
 
-CATION = "Na"  # Cation to place on the landscape
+CATION = "Li"  # Cation to place on the landscape
 # Distance endpoints between the center of the molecule and the cation
 ENDPOINT_RADII = (3, 6)
 # TODO For some reason, using the density to set the number of radii did not work. However, that seems much more sensible. Fix it.
@@ -62,22 +62,21 @@ OPERATION = "energy"
 # Input check
 try:
     # Take the dirname argument from the user
-    dirname = sys.argv[2]
+    dirname = os.path.abspath(sys.argv[2])
     # Take the operation input
     OPERATION = sys.argv[1]
 except IndexError:
     # Take the filename argument from the user
     try:
-        dirname = sys.argv[1]
+        dirname = os.path.abspath(sys.argv[1])
     except IndexError:
-        raise IOError("No POSCAR file provided.")
-
+        raise IOError("No docking directory provided.")
 
 def main():
 
     # Get the docking directories
-    dir_list = [os.path.abspath(dir) for dir in os.listdir(dirname)
-                if os.path.isdir(dir)]
+    dir_list = [os.path.join(dirname, dir) for dir in os.listdir(dirname)
+                if os.path.isdir(os.path.join(dirname, dir))]
 
     dock_number = 1
 
@@ -97,6 +96,7 @@ def main():
 
         # Set up the occupied anion
         occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
+        occmol.find_surface_facets(ignore=IGNORE)
         dock = occmol.find_closest_facet(cat_coords)
 
         occmol.add_dock(dock, cation=None)

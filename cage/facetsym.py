@@ -403,9 +403,6 @@ class Cage(Molecule):
                     else:
                         end_facets.remove(facet)
 
-        for facet in end_facets:
-            print(facet)
-
         # Sort the chain:
         facet_chain = [end_facets[start]]
         other_facets = chain_facets.copy()
@@ -462,7 +459,7 @@ class Cage(Molecule):
         :param point: 
         :return:
         """
-        distance = 0
+        distance = 1e6
         closest_facet = None
 
         for facet in self.facets:
@@ -608,16 +605,7 @@ class OccupiedCage(Cage):
 
         surface_facets = mol.facets
 
-        print('Found ' + str(len(surface_facets)) + ' facets.')
-        # for facet in surface_facets:
-        #     print(facet)
-        #     print(facet.normal)
-        #     print(self._docks[0] == facet)
-
         for dock in self.docks:
-            # print('Dock:')
-            # print(dock)
-            # print(dock.normal)
             surface_facets.remove(dock)
 
         self._facets = surface_facets
