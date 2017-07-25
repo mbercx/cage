@@ -587,9 +587,7 @@ class OccupiedCage(Cage):
             print('Surface Facets have not been set up yet.')
 
 
-    def find_surface_facets(self, ignore=(pmg.Element('H'),
-                                          pmg.Element('Li'),
-                                          pmg.Element('Na'))):
+    def find_surface_facets(self, ignore=None):
         """
         Find the surface facets of the OccupiedCage.
         :param ignore:
