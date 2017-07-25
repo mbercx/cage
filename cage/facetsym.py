@@ -131,7 +131,7 @@ class Cage(Molecule):
 
         self._facets = facets_surf
 
-    def set_up_facet_list(self, type='str_array'):
+    def set_up_facet_list(self, type='str_array', tol=5e-1):
         """
         Set up a List of surface facets, and how they relate to the
         non-equivalent facets, i.e. which non-equivalent facet they can be
@@ -151,7 +151,7 @@ class Cage(Molecule):
             for noneq_facet in self.find_noneq_facets():
                 for symm in self.symmops:
                     symm_center = symm.operate(facet.center)
-                    if np.linalg.norm(symm_center - noneq_facet.center) < 1e-2:
+                    if np.linalg.norm(symm_center - noneq_facet.center) < tol:
                         facet_list.append((facet, noneq_facet, symm))
                         break
 
@@ -289,7 +289,7 @@ class Cage(Molecule):
         """
         pass  # TODO
 
-    def find_noneq_facets(self, tol=1e-2):
+    def find_noneq_facets(self, tol=5e-1):
         """
         Find all of the nonequivalent facets of the Cage.
 
@@ -356,7 +356,7 @@ class Cage(Molecule):
 
         return non_eq_paths
 
-    def find_noneq_facet_chain(self, start=0):
+    def find_noneq_facet_chain(self, start=0, symm_tol=5e-1):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
         are connected by edge paths. Automatically sorts the facets so they
@@ -367,8 +367,8 @@ class Cage(Molecule):
         :return:
         """
 
-        facet_dict = self.set_up_facet_list('dict')
-        noneq_facets = self.find_noneq_facets()
+        facet_dict = self.set_up_facet_list('dict', tol=symm_tol)
+        noneq_facets = self.find_noneq_facets(tol=symm_tol)
 
         # Find the facets in the chain
         chain_facets = [noneq_facets[0]]
@@ -381,6 +381,8 @@ class Cage(Molecule):
 
             for facet in self.facets:
                 for chain_facet in chain_facets:
+
+                    # Check if the facet is connected
                     if len(set(facet.sites) & set(chain_facet.sites)) == 2:
 
                         # Check if the facet is related to one of the non
@@ -390,6 +392,7 @@ class Cage(Molecule):
                             chain_list_noneq_facets.append(
                                 facet_dict[facet][0]
                             )
+                            break
 
         # Find the end facets:
         end_facets = []
