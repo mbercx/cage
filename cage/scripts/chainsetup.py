@@ -20,7 +20,9 @@ equivalent facets of a cage molecule.
 # TODO The current set up does not work very well for molecules that are not spherically shaped -> improve method set_up_landscape
 
 # Facetsetup parameter
-IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'))
+IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
+          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
+          pmg.Element('F'))
 
 # Landscape parameters
 
@@ -179,7 +181,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     angle = math.asin(np.linalg.norm(axis))
     axis = axis * angle / np.linalg.norm(axis)
 
-    lands.extend_by_rotation(axis, angle_density)
+    lands.extend_by_rotation(axis, angle_density, remove_endline=True)
 
     return lands
 
