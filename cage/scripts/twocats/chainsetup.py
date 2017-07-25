@@ -27,7 +27,8 @@ OUTPUT_FILE = 'result.out'
 
 # Facetsetup parameter
 IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
-          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'))
+          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
+          pmg.Element('F'))
 
 # Landscape parameters
 
@@ -128,7 +129,7 @@ def main():
         dock = occmol.find_closest_facet(cat_coords)
 
         occmol.add_dock(dock, cation=None)
-        occmol.find_surface_facets(IGNORE)
+        occmol.find_surface_facets(ignore=IGNORE)
 
         total_mol = occmol.copy()
 
