@@ -235,7 +235,7 @@ class Cage(Molecule):
         """
         pass  # TODO
 
-    def find_noneq_facets(self, tol=1e-2):
+    def find_noneq_facets(self, tol=1e-3):
         """
         Find all of the nonequivalent facets of the Cage.
 
@@ -260,7 +260,7 @@ class Cage(Molecule):
 
         return facets_noneq
 
-    def set_up_facet_list(self, type='str_array', tol=1e-2):
+    def set_up_facet_list(self, type='str_array', tol=1e-3):
         """
         Set up a List of surface facets, and how they relate to the
         non-equivalent facets, i.e. which non-equivalent facet they can be
@@ -307,7 +307,7 @@ class Cage(Molecule):
 
             return facet_dict
 
-    def find_noneq_facet_chain(self, start=0, symm_tol=1e-2, verbose=False):
+    def find_noneq_facet_chain(self, start=0, symm_tol=1e-3, verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
         are connected by edge paths. Automatically sorts the facets so they
@@ -469,7 +469,7 @@ class Cage(Molecule):
 
         return non_eq_paths
 
-    def find_noneq_chain_paths(self, symm_tol=1e-2, verbose=False):
+    def find_noneq_chain_paths(self, symm_tol=1e-3, verbose=False):
         """
         Find the paths that connect the facets of the chain that connects a
         set of non equivalent facets.
