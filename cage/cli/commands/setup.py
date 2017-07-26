@@ -2,6 +2,7 @@
 # Written for Python 3.6
 
 import os
+import io
 import math
 
 import numpy as np
@@ -9,6 +10,8 @@ import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 import cage
+
+from cage.facetsym import Cage
 
 """
 Script to set up the calculations for all the non-equivalent facets of a cage
@@ -227,6 +230,153 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
     total_mol.to(fmt="xyz", filename="total_mol.xyz")
 
 
+def pathsetup(filename, cation, distance, edges):
+
+    # Read the Molecule from the input file
+    anion = Cage.from_poscar(filename)
+    anion.find_surface_facets()
+
+    # TODO Find charge automatically
+    if pmg.Element('C') in [site.specie for site in anion.sites]:
+        anion.set_charge_and_spin(charge=0)
+    else:
+        anion.set_charge_and_spin(charge=-1)
+
+    # Find the paths, i.e. the List of facet combinations
+    paths = anion.find_facet_paths(share_edge=edges)
+
+    tasks = [nwchem.NwTask(anion.charge, None, BASIS, theory='dft',
+                           operation="optimize",
+                           theory_directives=THEORY_SETUP,
+                           alternate_directives=ALT_SETUP)]
+
+    path_number = 1
+    for path in paths:
+
+        # Set up the start and end molecules
+        start_molecule = anion.copy()
+        end_molecule = anion.copy()
+
+        start_molecule.append(pmg.Specie(cation, 1), path[0].center +
+                              distance * path[0].normal)
+        end_molecule.append(pmg.Specie(cation, 1), path[1].center +
+                            distance * path[1].normal)
+
+        # Make the path directory
+        path_dir = 'path' + str(path_number)
+        try:
+            os.mkdir(path_dir)
+        except FileExistsError:
+            pass
+
+        # Write out the start and end molecule
+        start_molecule.to(fmt='xyz',
+                          filename=os.path.join(path_dir, 'start.xyz'))
+        end_molecule.to(fmt='xyz',
+                        filename=os.path.join(path_dir, 'end.xyz'))
+
+        # Make the directories for the start and end molecules optimizations
+        try:
+            os.mkdir(os.path.join(path_dir, 'start'))
+        except FileExistsError:
+            pass
+        try:
+            os.mkdir(os.path.join(path_dir, 'end'))
+        except FileExistsError:
+            pass
+
+        # Set up the input
+        nwchem.NwInput(start_molecule, tasks, geometry_options=GEO_SETUP)\
+            .write_file(os.path.join(path_dir, 'start', 'input'))
+        nwchem.NwInput(end_molecule, tasks, geometry_options=GEO_SETUP) \
+            .write_file(os.path.join(path_dir, 'end', 'input'))
+
+        path_number += 1
+
+
+def nebsetup(paths_dir, nimages):
+
+    directory = os.path.abspath(paths_dir)
+
+    dir_list = [os.path.join(directory, d) for d in os.listdir(directory)
+                if os.path.isdir(os.path.join(directory, d))]
+
+    for directory in dir_list:
+
+        # Get the output from the docking calculations
+        try:
+            start_data = nwchem.NwOutput(os.path.join(directory, 'start',
+                                                      OUTPUT_FILE)).data[-1]
+            end_data = nwchem.NwOutput(os.path.join(directory, 'end',
+                                                    OUTPUT_FILE)).data[-1]
+        except:
+            print('Failed to extract output in ' + directory +
+                  ', ignoring directory...')
+            continue
+
+        # Set up the structures
+        start_molecule = start_data['molecules'][-1]
+        end_molecule = end_data['molecules'][-1]
+
+        lattice = set_up_lattice(start_molecule)
+
+        start_struct = pmg.Structure(lattice, start_molecule.species,
+                                     start_molecule.cart_coords,
+                                     coords_are_cartesian=True)
+        end_struct = pmg.Structure(lattice, end_molecule.species,
+                                   end_molecule.cart_coords,
+                                   coords_are_cartesian=True)
+
+        # Interpolate to find the images
+        structures = start_struct.interpolate(end_struct, nimages=nimages)
+
+        molecules = [pmg.Molecule(struct.species, struct.cart_coords)
+                     for struct in structures]
+
+        # Move the lithium positions on an ellips (kind of)
+        r1 = np.linalg.norm(start_molecule.sites[-1].coords)
+        r2 = np.linalg.norm(end_molecule.sites[-1].coords)
+        for m in molecules:
+            lithium_coord = m.sites[-1].coords
+            dist1 = np.linalg.norm(start_molecule.sites[-1].coords
+                                   - lithium_coord)
+            dist2 = np.linalg.norm(end_molecule.sites[-1].coords
+                                   - lithium_coord)
+            li_r = np.linalg.norm(lithium_coord)
+            new_radius = r2*dist1/(dist1 + dist2) + r1*dist2/(dist1 + dist2)
+            translate_vector = lithium_coord/li_r*(new_radius-li_r)
+            m.translate_sites([len(m) - 1, ], translate_vector)
+
+        # Make a path molecule to show the interpolation
+        path_mol = start_molecule.copy()
+        for m in molecules[1:]:
+            for coord in [(site.coords, site.specie) for site in m.sites]:
+                path_mol.append(coord[1], coord[0], validate_proximity=False)
+
+        path_mol.to(fmt='xyz', filename=os.path.join(directory, 'path.xyz'))
+
+        # Set up the input file
+
+        # Set the charge for the molecule
+        # TODO CALCULATE THE CHARGE SOMEHOW
+        if pmg.Element('C') in [site.specie for site in start_molecule.sites]:
+            start_molecule.set_charge_and_spin(charge=0)
+        else:
+            start_molecule.set_charge_and_spin(charge=-1)
+
+        tasks = [nwchem.NwTask(start_molecule.charge, None, BASIS,
+                               theory='dft',
+                               operation="neb",
+                               theory_directives=THEORY_SETUP,
+                               alternate_directives=ALT_SETUP), ]
+
+        nw_input = nwchem.NwInput(start_molecule, tasks,
+                                  geometry_options=GEO_SETUP)
+        nw_input.write_file(os.path.join(directory, 'input'))
+
+        plot_images(molecules, filename=os.path.join(directory, 'path.neb'))
+
+
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose):
 
@@ -441,3 +591,37 @@ def find_constraints(mol, sites):
 
     # Set up the constraints on the atoms
     return {'fix atom': site_numbers}
+
+def set_up_lattice(mol):
+    """
+
+    :param mol:
+    :return:
+    """
+    # Find the distance between the origin and the furthest atom in the
+    # molecule
+
+    max_distance = 0
+    for site in mol.sites:
+        distance = np.linalg.norm(site.coords)
+        if distance > max_distance:
+            max_distance = distance
+
+    # triple that, and use it to set up the lattice
+
+    lat_const = int(3 * max_distance)
+    lattice = pmg.Lattice(np.array([[lat_const, 0, 0], [0, lat_const, 0],
+                                    [0, 0, lat_const]]))
+
+    return lattice
+
+def plot_images(molecules, filename='path.neb'):
+    """
+
+    :param molecules:
+    :return:
+    """
+    file = io.open(filename, 'w')
+    for structure in molecules:
+        file.write(structure.to(fmt='xyz'))
+        file.write('\n')
