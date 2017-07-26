@@ -28,6 +28,11 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "14 JUN 2017"
 
+# This is a tolerance value to determine the symmetry operations of the Cage.
+# It is also used to determine which facets are equivalent. The standard value
+# of 1E-2 is usually pretty good. In case the right non-equivalent facets are
+# not found, it might be a good idea to try tweaking this value.
+SYMMETRY_TOLERANCE = 5e-2
 
 class Cage(Molecule):
     """
@@ -82,7 +87,7 @@ class Cage(Molecule):
 
         self._sites = sites
 
-    def find_surface_facets(self, ignore=[]):
+    def find_surface_facets(self, ignore=()):
         """
         Find all the surface facets of the Cage object.
 
@@ -138,7 +143,6 @@ class Cage(Molecule):
         """
         return self._facets
 
-
     @property
     def pointgroup(self):
         """
@@ -161,7 +165,8 @@ class Cage(Molecule):
             pgan = syman.PointGroupAnalyzer(self)
     
             # Find the full set of symmetry operations
-            self._symmops = syman.generate_full_symmops(pgan.symmops, 0.01)
+            self._symmops = syman.generate_full_symmops(pgan.symmops,
+                                                        SYMMETRY_TOLERANCE)
         
         return self._symmops
         
@@ -235,13 +240,16 @@ class Cage(Molecule):
         """
         pass  # TODO
 
-    def find_noneq_facets(self, tol=1e-3):
+    def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
         Find all of the nonequivalent facets of the Cage.
 
         :return: List of Facets
         :param tol: Tolerance for the equivalence condition
         """
+        if not self.facets:
+            print("Please set up surface facets first")
+            return []
 
         # Find all the non-equivalent facets
         facets_noneq = []
@@ -260,7 +268,7 @@ class Cage(Molecule):
 
         return facets_noneq
 
-    def set_up_facet_list(self, type='str_array', tol=1e-3):
+    def set_up_facet_list(self, fmt='str_array', tol=SYMMETRY_TOLERANCE):
         """
         Set up a List of surface facets, and how they relate to the
         non-equivalent facets, i.e. which non-equivalent facet they can be
@@ -272,7 +280,7 @@ class Cage(Molecule):
         """
         if not self.facets:
             print("Please set up surface facets first")
-            return None
+            return []
 
         facet_list = []
 
@@ -284,7 +292,7 @@ class Cage(Molecule):
                         facet_list.append((facet, noneq_facet, symm))
                         break
 
-        if type == 'str_array':
+        if fmt == 'str_array':
 
             list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
                           ('symmop', SymmOp)]
@@ -294,10 +302,10 @@ class Cage(Molecule):
             if len(facet_array) == len(self.facets):
                 return facet_array
             else:
-                raise ValueError("Obtained array length is not equal to number of "
-                                 "facets. Something must have gone wrong.")
+                raise ValueError("Obtained array length is not equal to number"
+                                 " of facets. Something must have gone wrong.")
 
-        elif type == 'dict':
+        elif fmt == 'dict':
 
             facet_dict = {}
 
@@ -305,9 +313,16 @@ class Cage(Molecule):
                 facet_dict[facet_list[i][0]] = (facet_list[i][1],
                                                 facet_list[i][2])
 
-            return facet_dict
+            if sum([len(facet_list) for facet_list in facet_dict.values()])\
+                    == len(self.facets):
+                return facet_dict
+            else:
+                raise ValueError("Obtained number of facets in dict is not "
+                                 "equal to number of surface facets. "
+                                 "Something must have gone wrong.")
 
-    def find_noneq_facet_chain(self, start=0, symm_tol=1e-3, verbose=False):
+    def find_noneq_facet_chain(self, start=0, symm_tol=SYMMETRY_TOLERANCE,
+                               verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
         are connected by edge paths. Automatically sorts the facets so they
@@ -469,7 +484,8 @@ class Cage(Molecule):
 
         return non_eq_paths
 
-    def find_noneq_chain_paths(self, symm_tol=1e-3, verbose=False):
+    def find_noneq_chain_paths(self, symm_tol=SYMMETRY_TOLERANCE,
+                               verbose=False):
         """
         Find the paths that connect the facets of the chain that connects a
         set of non equivalent facets.
