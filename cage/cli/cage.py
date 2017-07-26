@@ -23,7 +23,7 @@ def main():
 @click.argument('filename')
 def dock(filename):
     """ Set up the docking sites """
-    from cage.cli.commands.dock import docksetup
+    from cage.cli.commands.setup import docksetup
 
     docksetup(filename)
 

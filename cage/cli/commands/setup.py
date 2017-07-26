@@ -100,20 +100,14 @@ def docksetup(filename):
 ###########
 
 
-def find_constraints(mol, neq_facet):
+def find_constraints(mol, point):
     """
-    Find the necessary constraints for the molecules, depending on the facet
-    this might be fixing the whole opposite facet, or only one vertex.
-    :return:
+    Find the necessary constraints for a molecule by fixing the facet that is
+    furthest away from a point.
+
     """
     # Find the facet that is the farthest away from the facet being studied
-    distance = 0
-    far_facet = None
-    for facet in mol.facets:
-        newdistance = np.linalg.norm(neq_facet.center - facet.center)
-        if newdistance > distance:
-            far_facet = facet
-            distance = newdistance
+    far_facet = mol.find_furthest_facet(point)
 
     # Find the corresponding atom numbers in string format
     site_numbers = []
