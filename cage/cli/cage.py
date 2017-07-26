@@ -35,7 +35,11 @@ def optimize(filename):
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
 def dock(filename, cation, distance):
-    """ Set up the docking sites. It is recommended to use a  """
+    """
+    Set up the docking sites. It is recommended to use an anion which has
+    first been optimize using cage optimize.
+
+    """
     from cage.cli.commands.setup import docksetup
 
     docksetup(filename, cation, distance)
@@ -52,6 +56,26 @@ def chain(filename, cation, operation, endradii, nradii, adensity):
     from cage.cli.commands.setup import chainsetup
 
     chainsetup(filename, cation, operation, endradii, nradii, adensity)
+
+@main.command()
+@click.argument('filename')
+@click.option('--cation', '-C', default='Li')
+@click.option('--distance', '-d', default=2)
+@click.option('--edges', is_flag=True)
+def path(filename, cation, distance, edges):
+    """ Set up the paths between facets that share a vertex. """
+    from cage.cli.commands.setup import pathsetup
+
+    pathsetup(filename, cation, distance, edges)
+
+@main.command()
+@click.argument('paths_dir')
+@click.option('--nimages', '-n', default=10)
+def neb(filename, nimages):
+    """ Set up the paths between facets that share a vertex. """
+    from cage.cli.commands.setup import nebsetup
+
+    pathsetup(filename, nimages)
 
 @main.group()
 def twocat():
