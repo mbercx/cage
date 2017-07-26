@@ -131,7 +131,7 @@ class Cage(Molecule):
 
         self._facets = facets_surf
 
-    def set_up_facet_list(self, type='str_array'):
+    def set_up_facet_list(self, type='str_array', tol=5e-1):
         """
         Set up a List of surface facets, and how they relate to the
         non-equivalent facets, i.e. which non-equivalent facet they can be
@@ -151,7 +151,7 @@ class Cage(Molecule):
             for noneq_facet in self.find_noneq_facets():
                 for symm in self.symmops:
                     symm_center = symm.operate(facet.center)
-                    if np.linalg.norm(symm_center - noneq_facet.center) < 1e-2:
+                    if np.linalg.norm(symm_center - noneq_facet.center) < tol:
                         facet_list.append((facet, noneq_facet, symm))
                         break
 
@@ -184,13 +184,8 @@ class Cage(Molecule):
         Surface Facets of the Cage.
         :return: (List of Facets)
         """
-        if self._facets:
-            return self._facets
-        else:
-            print("Surface facets have not been set up yet. Calculating them "
-                  "using the standard setup, i.e. ignoring 'H' and 'Li'.")
-            self.find_surface_facets()
-            return self._facets
+        return self._facets
+
 
     @property
     def pointgroup(self):
@@ -294,11 +289,12 @@ class Cage(Molecule):
         """
         pass  # TODO
 
-    def find_noneq_facets(self):
+    def find_noneq_facets(self, tol=5e-1):
         """
         Find all of the nonequivalent facets of the Cage.
 
         :return: List of Facets
+        :param tol: Tolerance for the equivalence condition
         """
 
         # Find all the non-equivalent facets
@@ -311,7 +307,7 @@ class Cage(Molecule):
                 for symm in self.symmops:
                     symm_facet_center = symm.operate(facet.center.tolist())
                     if np.linalg.norm(symm_facet_center - facet_noneq.center)\
-                            < 1e-2:
+                            < tol:
                         facet_is_nonequivalent = False
             if facet_is_nonequivalent:
                 facets_noneq.append(facet)
@@ -360,7 +356,7 @@ class Cage(Molecule):
 
         return non_eq_paths
 
-    def find_noneq_facet_chain(self, start=0):
+    def find_noneq_facet_chain(self, start=0, symm_tol=5e-1):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
         are connected by edge paths. Automatically sorts the facets so they
@@ -371,8 +367,8 @@ class Cage(Molecule):
         :return:
         """
 
-        facet_dict = self.set_up_facet_list('dict')
-        noneq_facets = self.find_noneq_facets()
+        facet_dict = self.set_up_facet_list('dict', tol=symm_tol)
+        noneq_facets = self.find_noneq_facets(tol=symm_tol)
 
         # Find the facets in the chain
         chain_facets = [noneq_facets[0]]
@@ -385,6 +381,8 @@ class Cage(Molecule):
 
             for facet in self.facets:
                 for chain_facet in chain_facets:
+
+                    # Check if the facet is connected
                     if len(set(facet.sites) & set(chain_facet.sites)) == 2:
 
                         # Check if the facet is related to one of the non
@@ -394,6 +392,7 @@ class Cage(Molecule):
                             chain_list_noneq_facets.append(
                                 facet_dict[facet][0]
                             )
+                            break
 
         # Find the end facets:
         end_facets = []
@@ -481,6 +480,24 @@ class Cage(Molecule):
                 distance = newdistance
 
         return furthest_facet
+    
+    def find_closest_facet(self, point):
+        """
+        Find the Facet of the Molecule that is the closest to the point 
+        provided.
+        :param point: 
+        :return:
+        """
+        distance = 1e6
+        closest_facet = None
+
+        for facet in self.facets:
+            newdistance = np.linalg.norm(point - facet.center)
+            if newdistance < distance:
+                closest_facet = facet
+                distance = newdistance
+
+        return closest_facet
 
 
 class OccupiedCage(Cage):
@@ -541,15 +558,20 @@ class OccupiedCage(Cage):
         Add a docking site to the OccupiedCage.
         :return:
         """
-        if docking_point:
-            self.append(pmg.Element(cation), docking_point)
-            self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
+        if cation == None:
             self._docks.append(dock)
         else:
-            cation_coord = dock.center + 2 * dock.normal
-            self.append(pmg.Element(cation), cation_coord)
-            self.set_charge_and_spin(self.charge, self.spin_multiplicity - 1)
-            self._docks.append(dock)
+            if docking_point:
+                self.append(pmg.Element(cation), docking_point)
+                self.set_charge_and_spin(self.charge,
+                                         self.spin_multiplicity- 1)
+
+            else:
+                cation_coord = dock.center + 2 * dock.normal
+                self.append(pmg.Element(cation), cation_coord)
+                self.set_charge_and_spin(self.charge,
+                                         self.spin_multiplicity - 1)
+                self._docks.append(dock)
 
         self._facets = None
 
@@ -594,9 +616,7 @@ class OccupiedCage(Cage):
             print('Surface Facets have not been set up yet.')
 
 
-    def find_surface_facets(self, ignore=(pmg.Element('H'),
-                                          pmg.Element('Li'),
-                                          pmg.Element('Na'))):
+    def find_surface_facets(self, ignore=None):
         """
         Find the surface facets of the OccupiedCage.
         :param ignore:
@@ -757,7 +777,8 @@ class Facet(SiteCollection, MSONable):
         """
         Find the intersection of the normal lines of the Facet and another one.
 
-        Currently only works on an edge sharing Facet.
+        Currently only works on an edge sharing Facet whose normal intersects
+        with this ones'.
 
         :return:
         """
@@ -915,7 +936,7 @@ def site_center(sites):
 def schoenflies_to_hm():
     """
     Function for converting the Schoenflies point group symbol to the Hermann
-    Mangiun one.
+    Manguin one.
     :return:
     """
     pass  # TODO

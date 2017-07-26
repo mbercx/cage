@@ -2,34 +2,41 @@
 # Written for Python 3.6
 
 import os
-import sys
 import math
 import cage
+import argparse
 
 import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 """
-Script to set up the calculations for a chain of paths connecting the non
-equivalent facets of a cage molecule.
 
+This script looks for the docking points for cations on the anion, then sets up
+a set of calculations to study the 2D landscape between the non-equivalent
+facets in this occupied anion.
+
+The calculation is set up in the current directory, but the user must provide
+the docking directory as input (for now).
 """
 
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 # TODO The current set up does not work very well for molecules that are not spherically shaped -> improve method set_up_landscape
 
+OUTPUT_FILE = 'result.out'
+
 # Facetsetup parameter
 IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
-          pmg.Element('I'))
+          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
+          pmg.Element('F'))
 
 # Landscape parameters
 
-CATION = "Na"  # Cation to place on the landscape
+CATION = "Li"  # Cation to place on the landscape
 # Distance endpoints between the center of the molecule and the cation
-ENDPOINT_RADII = (3, 5)
+ENDPOINT_RADII = (3, 6)
 # TODO For some reason, using the density to set the number of radii did not work. However, that seems much more sensible. Fix it.
-N_RADII = 1  # Number of radius points for the landscape
+N_RADII = 30  # Number of radius points for the landscape
 ANGLE_DENSITY = 50  # Density of points along the angle coordinate
 
 # Calculation parameters
@@ -53,47 +60,86 @@ DRIVER_SETUP = {"loose": "", "maxiter": "100"}
 
 OPERATION = "energy"
 
-# Input check
-try:
-    # Take the filename argument from the user
-    filename = sys.argv[2]
-    # Take the operation input
-    OPERATION = sys.argv[1]
-except IndexError:
-    # Take the filename argument from the user
-    try:
-        filename = sys.argv[1]
-    except IndexError:
-        raise IOError("No POSCAR file provided.")
+# Input parsing
+parser = argparse.ArgumentParser(description=
+                                 "This script looks for the docking points for"
+                                 " cations on the anion, then sets up a set of"
+                                 " calculations to study the 2D landscape "
+                                 "between the non-equivalent facets in this "
+                                 "occupied anion. "
+                                 "The calculation is set up in the current "
+                                 "directory, but the user must provide "
+                                 "the docking directory as input (for now).")
 
+parser.add_argument('-I', metavar='cation', type=str,
+                    help="The chemical symbol of the cation under study, i.e. "
+                         "'Li', 'Na', ...")
+parser.add_argument('-O', metavar='operation', type=str,
+                    help="The Nwchem operation to use, i.e. 'energy' for only"
+                         " total energy calculations, 'optimize' in case the "
+                         "structure should be optimized first.")
+parser.add_argument('dir', type=str,
+                    help="The docking directory.")
+
+args = vars(parser.parse_args())
+
+try:
+    dirname = args['dir']
+except IndexError:
+    raise IOError("No docking directory provided.")
+
+for argument in args.keys():
+
+    if args[argument]:
+
+        if argument == 'I':
+            CATION = args['I']
+        elif argument == 'O':
+            OPERATION = args['O']
 
 def main():
 
-    # Load the POSCAR into a Cage
-    mol = cage.facetsym.Cage.from_poscar(filename)
-    mol.find_surface_facets(IGNORE)
+    # Get the docking directories
+    dir_list = [os.path.join(dirname, dir) for dir in os.listdir(dirname)
+                if os.path.isdir(os.path.join(dirname, dir))]
 
-    noneq_facets = mol.find_noneq_facets()
+    dock_number = 1
 
-    ne_facet_number = 1
+    for dir in dir_list:
 
-    for ne_facet in noneq_facets:
+        # Extract the occupied cage
+        try:
+            out = nwchem.NwOutput(os.path.join(dir, OUTPUT_FILE))
+        except:
+            print('Failed to extract output from ' + os.path.abspath(dir) +
+                  '. Skipping...')
+            continue
 
-        # Construct the occupied cage
-        occmol = cage.facetsym.OccupiedCage.from_cage_and_facets(mol,
-                                                                 (ne_facet,),
-                                                                 cation=CATION)
-        occmol.find_surface_facets(IGNORE)
+        mol = out.data[-1]['molecules'][-1]
+
+        try:
+            cat_coords = [site.coords for site in mol.sites
+                          if site.specie == pmg.Element(CATION)][-1]
+        except IndexError:
+            raise IOError("Requested cation is not found in the molecule.")
+
+        # Set up the occupied anion
+        occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
+        occmol.find_surface_facets(ignore=IGNORE)
+        dock = occmol.find_closest_facet(cat_coords)
+
+        occmol.add_dock(dock, cation=None)
+        occmol.find_surface_facets(ignore=IGNORE)
 
         total_mol = occmol.copy()
 
         # Find the chain paths
         paths = occmol.find_noneq_chain_paths()
 
-        facet_dir = 'facet' + str(ne_facet_number)
+        dock_dir = 'dock' + str(dock_number)
 
         try:
-            os.mkdir(facet_dir)
+            os.mkdir(dock_dir)
         except FileExistsError:
             pass
 
@@ -104,7 +150,7 @@ def main():
 
             # Set up the edge directory
             edge_dir = "edge" + str(edge_number)
-            edge_dir = os.path.join(facet_dir, edge_dir)
+            edge_dir = os.path.join(dock_dir, edge_dir)
             try:
                 os.mkdir(edge_dir)
             except FileExistsError:
@@ -118,7 +164,7 @@ def main():
                                                          "final_facet.json"))
 
             # Get copies so the originals aren't mutated
-            edge_mol = mol.copy()
+            edge_mol = occmol.copy()
             facet1 = path[0].copy()
             facet2 = path[1].copy()
 
@@ -146,8 +192,9 @@ def main():
             # In case the molecules must be optimized, add the constraints and
             # optimization setup (DRIVER)
             if OPERATION == "optimize":
-                fixed_facet = mol.find_furthest_facet(landscape.center)
-                ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
+                fixed_facet = occmol.find_furthest_facet(landscape.center)
+                ALT_SETUP["constraints"] = find_constraints(occmol,
+                                                            fixed_facet)
                 ALT_SETUP["driver"] = DRIVER_SETUP
 
             # Set up the task for the calculations
@@ -165,10 +212,8 @@ def main():
             edge_number += 1
 
         # Set up an xyz file with all the paths
-        total_mol.to(fmt="xyz", filename=os.path.join(facet_dir,
+        total_mol.to(fmt="xyz", filename=os.path.join(dock_dir,
                                                       "total_mol.xyz"))
-
-        ne_facet_number += 1
 
 
 ###########
@@ -203,7 +248,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     angle = math.asin(np.linalg.norm(axis))
     axis = axis * angle / np.linalg.norm(axis)
 
-    lands.extend_by_rotation(axis, angle_density)
+    lands.extend_by_rotation(axis, angle_density, remove_endline=True)
 
     return lands
 

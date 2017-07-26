@@ -21,14 +21,17 @@ equivalent facets of a cage molecule.
 
 # Facetsetup parameter
 IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
-          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
-          pmg.Element('F'))
+          pmg.Element('I'))
 
 # Landscape parameters
 
 CATION = "Na"  # Cation to place on the landscape
 # Distance endpoints between the center of the molecule and the cation
-ENDPOINT_RADII = (3.4,4)
+<<<<<<< HEAD:cage/scripts/doubleion/chainsetup.py
+ENDPOINT_RADII = (3, 5)
+=======
+ENDPOINT_RADII = (3, 6)
+>>>>>>> 98c86eb79b195f5b55cccb31e6d87420e4d1d7da:cage/scripts/twocats/chain_old.py
 # TODO For some reason, using the density to set the number of radii did not work. However, that seems much more sensible. Fix it.
 N_RADII = 1  # Number of radius points for the landscape
 ANGLE_DENSITY = 50  # Density of points along the angle coordinate
@@ -74,79 +77,102 @@ def main():
     mol = cage.facetsym.Cage.from_poscar(filename)
     mol.find_surface_facets(IGNORE)
 
-    # Find the chain paths
-    paths = mol.find_noneq_chain_paths()
+    noneq_facets = mol.find_noneq_facets()
 
-    total_mol = mol.copy()
+    ne_facet_number = 1
 
-    # For each facet, set up the calculation input files
-    edge_number = 1
+    for ne_facet in noneq_facets:
 
-    for path in paths:
+        # Construct the occupied cage
+        occmol = cage.facetsym.OccupiedCage.from_cage_and_facets(mol,
+                                                                 (ne_facet,),
+                                                                 cation=CATION)
+        occmol.find_surface_facets(IGNORE)
 
-        # Set up the edge directory
-        edge_dir = "edge" + str(edge_number)
+        total_mol = occmol.copy()
+
+        # Find the chain paths
+        paths = occmol.find_noneq_chain_paths()
+
+        facet_dir = 'facet' + str(ne_facet_number)
+
         try:
-            os.mkdir(edge_dir)
+            os.mkdir(facet_dir)
         except FileExistsError:
             pass
 
-        # Write out the molecule and path facets to the edge directory
-        mol.to(fmt="json", filename=os.path.join(edge_dir, "mol.json"))
-        path[0].to(fmt="json", filename=os.path.join(edge_dir,
-                                                     "init_facet.json"))
-        path[1].to(fmt="json", filename=os.path.join(edge_dir,
-                                                     "final_facet.json"))
+        # For each facet, set up the calculation input files
+        edge_number = 1
 
-        # Get copies so the originals aren't mutated
-        edge_mol = mol.copy()
-        facet1 = path[0].copy()
-        facet2 = path[1].copy()
+        for path in paths:
 
-        # Set up the landscape
-        landscape = set_up_edge_landscape(facet1, facet2,
-                                          endpoint_radii=ENDPOINT_RADII,
-                                          number_of_radii=N_RADII,
-                                          angle_density=ANGLE_DENSITY)
-
-        # Get the molecule for each landscape point
-        molecules = set_up_molecules(edge_mol, landscape, CATION)
-
-        # Set up an xyz file to visualize the edge
-        for point in landscape.points:
+            # Set up the edge directory
+            edge_dir = "edge" + str(edge_number)
+            edge_dir = os.path.join(facet_dir, edge_dir)
             try:
-                total_mol.append(pmg.Specie(CATION, 1), point,
-                                 validate_proximity=False)
-                edge_mol.append(pmg.Specie(CATION, 1), point,
-                                validate_proximity=False)
-            except ValueError:
+                os.mkdir(edge_dir)
+            except FileExistsError:
                 pass
 
-        edge_mol.to(fmt="xyz", filename=os.path.join(edge_dir, "edge.xyz"))
+            # Write out the molecule and path facets to the edge directory
+            mol.to(fmt="json", filename=os.path.join(edge_dir, "mol.json"))
+            path[0].to(fmt="json", filename=os.path.join(edge_dir,
+                                                         "init_facet.json"))
+            path[1].to(fmt="json", filename=os.path.join(edge_dir,
+                                                         "final_facet.json"))
 
-        # In case the molecules must be optimized, add the constraints and
-        # optimization setup (DRIVER)
-        if OPERATION == "optimize":
-            fixed_facet = mol.find_furthest_facet(landscape.center)
-            ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
-            ALT_SETUP["driver"] = DRIVER_SETUP
+            # Get copies so the originals aren't mutated
+            edge_mol = mol.copy()
+            facet1 = path[0].copy()
+            facet2 = path[1].copy()
 
-        # Set up the task for the calculations
-        tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
-                               theory="dft",
-                               operation=OPERATION,
-                               theory_directives=THEORY_SETUP,
-                               alternate_directives=ALT_SETUP)]
+            # Set up the landscape
+            landscape = set_up_edge_landscape(facet1, facet2,
+                                              endpoint_radii=ENDPOINT_RADII,
+                                              number_of_radii=N_RADII,
+                                              angle_density=ANGLE_DENSITY)
 
-        # Set up the input files
-        study = cage.study.Study(molecules, tasks)
-        study.set_up_input(edge_dir, sort_comp=False,
-                           geometry_options=GEO_SETUP)
+            # Get the molecule for each landscape point
+            molecules = set_up_molecules(edge_mol, landscape, CATION)
 
-        edge_number += 1
+            # Set up an xyz file to visualize the edge
+            for point in landscape.points:
+                try:
+                    total_mol.append(pmg.Specie(CATION, 1), point,
+                                     validate_proximity=False)
+                    edge_mol.append(pmg.Specie(CATION, 1), point,
+                                    validate_proximity=False)
+                except ValueError:
+                    pass
 
-    # Set up an xyz file with all the paths
-    total_mol.to(fmt="xyz", filename="total_mol.xyz")
+            edge_mol.to(fmt="xyz", filename=os.path.join(edge_dir, "edge.xyz"))
+
+            # In case the molecules must be optimized, add the constraints and
+            # optimization setup (DRIVER)
+            if OPERATION == "optimize":
+                fixed_facet = mol.find_furthest_facet(landscape.center)
+                ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
+                ALT_SETUP["driver"] = DRIVER_SETUP
+
+            # Set up the task for the calculations
+            tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
+                                   theory="dft",
+                                   operation=OPERATION,
+                                   theory_directives=THEORY_SETUP,
+                                   alternate_directives=ALT_SETUP)]
+
+            # Set up the input files
+            study = cage.study.Study(molecules, tasks)
+            study.set_up_input(edge_dir, sort_comp=False,
+                               geometry_options=GEO_SETUP)
+
+            edge_number += 1
+
+        # Set up an xyz file with all the paths
+        total_mol.to(fmt="xyz", filename=os.path.join(facet_dir,
+                                                      "total_mol.xyz"))
+
+        ne_facet_number += 1
 
 
 ###########
@@ -181,7 +207,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     angle = math.asin(np.linalg.norm(axis))
     axis = axis * angle / np.linalg.norm(axis)
 
-    lands.extend_by_rotation(axis, angle_density, remove_endline=True)
+    lands.extend_by_rotation(axis, angle_density)
 
     return lands
 

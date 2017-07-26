@@ -2,7 +2,6 @@
 # Written for Python 3.6
 
 import os
-import argparse
 
 import numpy as np
 import pymatgen as pmg
@@ -22,54 +21,30 @@ adjustments.
 """
 # TODO Make these parameters defaults, but allow the user to change them with arguments in the CLI
 
-# Cation parameters
-START_DIST = 2 # Initial distance of the cation to the facet
-CATION = 'Li'
+def docksetup(filename):
 
-# Calculation parameters
-# BASIS = {'*': "aug-pcseg-1"}
-BASIS = {'*': "aug-cc-pVDZ"}
+    # Cation parameters
+    START_DIST = 2  # Initial distance of the cation to the facet
+    CATION = 'Li'
 
-THEORY_SETUP = {'iterations': '300',
-                'xc': 'xpbe96 xpbe96',
-                'direct': '',
-                'smear': '0.01',
-                'convergence energy': '1e-4',
-                'convergence density': '1e-2',
-                'convergence gradient': '1e-2',
-                'convergence damp': '70'}
+    # Calculation parameters
+    # BASIS = {'*': "aug-pcseg-1"}
+    BASIS = {'*': "aug-cc-pVDZ"}
 
-GEO_SETUP = {"noautosym", "noautoz", 'nocenter', "units angstroms"}
+    THEORY_SETUP = {'iterations': '300',
+                    'xc': 'xpbe96 xpbe96',
+                    'direct': '',
+                    'smear': '0.01',
+                    'convergence energy': '1e-4',
+                    'convergence density': '1e-2',
+                    'convergence gradient': '1e-2',
+                    'convergence damp': '70'}
 
-ALT_SETUP = {"driver": {'loose': '', 'maxiter': '100'}}
+    GEO_SETUP = {"noautosym", "noautoz", 'nocenter', "units angstroms"}
 
-OPERATION = 'optimize'
+    ALT_SETUP = {"driver": {'loose': '', 'maxiter': '100'}}
 
-# Input parsing
-parser = argparse.ArgumentParser(description=
-                                 "No description, too lazy atm...")
-
-parser.add_argument('-I', metavar='cation', type=str,
-                    help="The chemical symbol of the cation under study, i.e. "
-                         "'Li', 'Na', ...")
-parser.add_argument('POSCAR', type=str,
-                    help="The structure POSCAR.")
-
-args = vars(parser.parse_args())
-
-try:
-    filename = args['POSCAR']
-except IndexError:
-    raise IOError("No POSCAR file provided.")
-
-for argument in args.keys():
-
-    if args[argument]:
-
-        if argument == 'I':
-            CATION = args['I']
-
-def main():
+    OPERATION = 'optimize'
 
     # Load the POSCAR into a Cage
     molecule = cage.facetsym.Cage.from_poscar(filename)
@@ -150,6 +125,3 @@ def find_constraints(mol, neq_facet):
 
     # Set up the constraints on the atoms
     return {'fix atom': site_numbers}
-
-if __name__ == '__main__':
-    main()

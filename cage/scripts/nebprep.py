@@ -19,7 +19,8 @@ NIMAGES = 10  # Standard number of images along every path
 OUT_FILE = 'result.out'
 
 # Calculation parameters
-BASIS = {'*': "aug-pcseg-1"}
+#BASIS = {'*': "aug-pcseg-1"}
+BASIS = {'*': "aug-cc-pVDZ"}
 
 THEORY_SETUP = {'iterations': '300',
                 'xc': 'xpbe96 xpbe96',
