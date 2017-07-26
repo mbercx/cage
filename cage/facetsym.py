@@ -307,7 +307,7 @@ class Cage(Molecule):
 
             return facet_dict
 
-    def find_noneq_facet_chain(self, start=0, symm_tol=1e-2):
+    def find_noneq_facet_chain(self, start=0, symm_tol=1e-2, verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
         are connected by edge paths. Automatically sorts the facets so they
@@ -318,34 +318,59 @@ class Cage(Molecule):
         :return:
         """
 
+        if verbose:
+            print("")
+            print("Starting search for chain of non-equivalent facets in "
+                  "molecule " + self.composition.__str__().replace(' ', '')
+                  + "...")
+            print("")
+            print("Looking for non-equivalent facets...")
+
         facet_dict = self.set_up_facet_list('dict', tol=symm_tol)
         noneq_facets = self.find_noneq_facets(tol=symm_tol)
+
+        if verbose:
+            print("Found " + str(len(noneq_facets)) +
+                  " non-equivalent facets.")
+            print("")
 
         # Find the facets in the chain
         chain_facets = [noneq_facets[0]]
         chain_list_noneq_facets = [noneq_facets[0]]
 
-        while True:
+        while len(chain_facets) < len(noneq_facets):
 
-            if len(chain_facets) == len(noneq_facets):
-                break
+            new_chain_facet = False
 
-            for facet in self.facets:
-                for chain_facet in chain_facets:
+            # Loop over the facets in the chain
+            for chain_facet in chain_facets:
 
-                    # Check if the facet is connected
-                    if len(set(facet.sites) & set(chain_facet.sites)) == 2:
+                # If a new facet has been appended, restart the loop
+                if new_chain_facet == False:
 
-                        # Check if the facet is related to one of the non
-                        # equivalent facets in the chain
-                        if facet_dict[facet][0] not in chain_list_noneq_facets:
+                    # Find a facet that shares an edge
+                    for facet in self.facets:
+
+                        # Check if the facet shares an edge and is not related
+                        # to one of the non-equivalent facets in the chain
+                        if len(set(facet.sites) & set(chain_facet.sites)) == 2\
+                                and (facet_dict[facet][0] not in
+                                         chain_list_noneq_facets):
+
                             chain_facets.append(facet)
                             chain_list_noneq_facets.append(
                                 facet_dict[facet][0]
                             )
+                            new_chain_facet = True
                             break
 
-        # Find the end facets:
+        if verbose:
+            print("Found " + str(len(chain_facets)) +
+                  " non-equivalent facets in chain.")
+            print("")
+
+        # Find the end facets. These are defined as facets which only have one
+        # edge with other chain facets.
         end_facets = []
         for facet in chain_facets:
             other_facets = chain_facets.copy()
@@ -357,6 +382,10 @@ class Cage(Molecule):
                         break
                     else:
                         end_facets.append(facet)
+
+        if verbose:
+            print("Found " + str(len(end_facets)) + " end facets in chain.")
+            print("")
 
         # Sort the chain:
         facet_chain = [end_facets[start]]
@@ -440,7 +469,7 @@ class Cage(Molecule):
 
         return non_eq_paths
 
-    def find_noneq_chain_paths(self, symm_tol=1e-2):
+    def find_noneq_chain_paths(self, symm_tol=1e-2, verbose=False):
         """
         Find the paths that connect the facets of the chain that connects a
         set of non equivalent facets.
@@ -448,7 +477,8 @@ class Cage(Molecule):
         :return:
         """
 
-        facet_chain = self.find_noneq_facet_chain(symm_tol=symm_tol)
+        facet_chain = self.find_noneq_facet_chain(symm_tol=symm_tol,
+                                                  verbose=verbose)
 
         chain_paths = []
         for index in range(len(facet_chain)-1):
