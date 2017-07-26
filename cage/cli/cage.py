@@ -35,7 +35,7 @@ def optimize(filename):
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
 def dock(filename, cation, distance):
-    """ Set up the docking sites """
+    """ Set up the docking sites. It is recommended to use a  """
     from cage.cli.commands.setup import docksetup
 
     docksetup(filename, cation, distance)
@@ -68,11 +68,15 @@ def twocat():
 @click.option('--endradii', '-e', default=(3, 6))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
-def chain(dock_dir, cation, operation, endradii, nradii, adensity):
+@click.option('--tolerance', default=1e-2)
+@click.option('--verbose', '-v', is_flag=True)
+def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
+          verbose):
     """
     Similar to the single cation case, this command sets up a 2D landscape
     between the normals of a chain of non-equivalent facets.
     """
     from cage.cli.commands.setup import twocat_chainsetup
 
-    twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity)
+    twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
+                      tolerance, verbose)

@@ -71,6 +71,9 @@ def optimize(filename):
                            theory_directives=THEORY_SETUP,
                            alternate_directives=ALT_SETUP)]
 
+    # Set the driver settings for the optimization
+    ALT_SETUP["driver"] = DRIVER_SETUP
+
     # Set up input
     os.mkdir('optimize')
     nw_input = nwchem.NwInput(anion, tasks, geometry_options=GEO_SETUP)
@@ -220,7 +223,8 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
     total_mol.to(fmt="xyz", filename="total_mol.xyz")
 
 
-def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity):
+def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
+                      tolerance, verbose):
 
     # Get the docking directories
     dir_list = [os.path.join(dock_dir, directory)
@@ -258,7 +262,8 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity):
         total_mol = occmol.copy()
 
         # Find the chain paths
-        paths = occmol.find_noneq_chain_paths(symm_tol=5e-1)
+        paths = occmol.find_noneq_chain_paths(symm_tol=tolerance,
+                                              verbose=verbose)
 
         dock_dir = 'dock' + str(dock_number)
 
