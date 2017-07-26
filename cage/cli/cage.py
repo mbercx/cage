@@ -52,7 +52,7 @@ def dock(filename, cation, distance):
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
 def chain(filename, cation, operation, endradii, nradii, adensity):
-    """ Set up the 2D landscape along the chain of non-equivalent facets. """
+    """ Set up a 2D landscape along the chain of non-equivalent facets. """
     from cage.cli.commands.setup import chainsetup
 
     chainsetup(filename, cation, operation, endradii, nradii, adensity)

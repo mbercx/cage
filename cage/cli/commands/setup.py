@@ -100,6 +100,12 @@ def docksetup(filename, cation, distance):
     # Find the non-equivalent facets
     facets = anion.find_noneq_facets()
 
+    docking_dir = 'docking'
+    try:
+        os.mkdir(docking_dir)
+    except FileExistsError:
+        pass
+
     # For each docking point, set up the calculation input file
     dock_number = 1
     for neq_facet in facets:
@@ -130,7 +136,7 @@ def docksetup(filename, cation, distance):
                                theory_directives=THEORY_SETUP,
                                alternate_directives=ALT_SETUP)]
 
-        dock_dir = 'dock' + str(dock_number)
+        dock_dir = os.path.join(docking_dir, 'dock' + str(dock_number))
 
         try:
             os.mkdir(dock_dir)
@@ -150,37 +156,44 @@ def docksetup(filename, cation, distance):
 def chainsetup(filename, cation, operation, endradii, nradii, adensity):
 
     # Load the POSCAR into a Cage
-    mol = cage.facetsym.Cage.from_poscar(filename)
-    mol.find_surface_facets(IGNORE)
+    anion = cage.facetsym.Cage.from_poscar(filename)
+    anion.find_surface_facets(IGNORE)
 
-    # Find the chain paths
-    paths = mol.find_noneq_chain_paths()
+    # Find the chain edges, i.e. the paths between the edge sharing facets of
+    # the chain of non-equivalent facets.
+    edges = anion.find_noneq_chain_paths()
 
-    total_mol = mol.copy()
+    total_mol = anion.copy()
+
+    chain_dir = 'chain'
+    try:
+        os.mkdir(chain_dir)
+    except FileExistsError:
+        pass
 
     # For each facet, set up the calculation input files
     edge_number = 1
 
-    for path in paths:
+    for edge in edges:
 
         # Set up the edge directory
-        edge_dir = "edge" + str(edge_number)
+        edge_dir = os.path.join(chain_dir, "edge" + str(edge_number))
         try:
             os.mkdir(edge_dir)
         except FileExistsError:
             pass
 
         # Write out the molecule and path facets to the edge directory
-        mol.to(fmt="json", filename=os.path.join(edge_dir, "mol.json"))
-        path[0].to(fmt="json", filename=os.path.join(edge_dir,
+        anion.to(fmt="json", filename=os.path.join(edge_dir, "mol.json"))
+        edge[0].to(fmt="json", filename=os.path.join(edge_dir,
                                                      "init_facet.json"))
-        path[1].to(fmt="json", filename=os.path.join(edge_dir,
+        edge[1].to(fmt="json", filename=os.path.join(edge_dir,
                                                      "final_facet.json"))
 
         # Get copies so the originals aren't mutated
-        edge_mol = mol.copy()
-        facet1 = path[0].copy()
-        facet2 = path[1].copy()
+        edge_mol = anion.copy()
+        facet1 = edge[0].copy()
+        facet2 = edge[1].copy()
 
         # Set up the landscape
         landscape = set_up_edge_landscape(facet1, facet2,
@@ -206,10 +219,10 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
         # In case the molecules must be optimized, add the constraints and
         # optimization setup (DRIVER)
         if operation == "optimize":
-            far_facet = mol.find_furthest_facet(landscape.center)
-            ALT_SETUP["constraints"] = find_constraints(mol, far_facet.sites)
+            far_facet = anion.find_furthest_facet(landscape.center)
+            ALT_SETUP["constraints"] = find_constraints(anion, far_facet.sites)
 
-            ALT_SETUP['constraints'].join(' ' + str(len(mol.sites)))  # cation
+            ALT_SETUP['constraints'].join(' ' + str(len(anion.sites)))  # cation
             ALT_SETUP["driver"] = DRIVER_SETUP
 
         # Set up the task for the calculations
@@ -310,7 +323,7 @@ def nebsetup(paths_dir, nimages):
             end_data = nwchem.NwOutput(os.path.join(directory, 'end',
                                                     OUTPUT_FILE)).data[-1]
         except:
-            print('Failed to extract output in ' + directory +
+            print('Failed to extract start and end images in ' + directory +
                   ', ignoring directory...')
             continue
 
@@ -397,6 +410,18 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                   + '. Skipping...')
             continue
 
+        # Check if calculation has completed successfully
+        if out.data[-1]['task_time'] == 0:
+            print("WARNING: No task time information found in output file: "
+                  + os.path.join(directory, OUTPUT_FILE) + "\n" +
+                  "The calculation might not have completed successfully.")
+
+        for data in out.data:
+            if data['has_error']:
+                print("WARNING: Error found in one of the calculations of "
+                      + os.path.join(directory, OUTPUT_FILE))
+
+        # The final molecules in the optimization is used
         mol = out.data[-1]['molecules'][-1]
 
         try:
