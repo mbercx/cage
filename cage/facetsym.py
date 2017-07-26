@@ -328,8 +328,10 @@ class Cage(Molecule):
         are connected by edge paths. Automatically sorts the facets so they
         are connected by their neighbours in the list.
 
-        :param start: Determines in which direction the chain is constructed.
-        Is equal to 0 or 1.
+        :param start: Determines from which end_facet the chain is constructed.
+        :param symm_tol: Determines a tolerance value for the symmetry
+        analysis.
+        :param verbose: Print information about the analysis procedure.
         :return:
         """
 
@@ -442,11 +444,13 @@ class Cage(Molecule):
 
         return facet_chain
 
-    def find_facet_paths(self):
+    def find_facet_paths(self, share_edge=False):
         """
         Find the non equivalent pathways between connected facets of the
         cage molecule. The facets can be connected by sharing an edge,
         or a vertex.
+
+        :param share_edge: Only return paths between facets that share an edge.
         :return:
         """
 
@@ -459,12 +463,18 @@ class Cage(Molecule):
         for path in paths:
             cross_section = set(path[0].sites) & set(path[1].sites)
             if cross_section:
-                vertex_sharing_paths.append(path)
+
+                # In case the user only wants edge-sharing paths, check that
+                if share_edge:
+                    if len(cross_section) == 2:
+                        vertex_sharing_paths.append(path)
+                # Else just add the path to the list
+                else:
+                    vertex_sharing_paths.append(path)
 
         # Find the vertex sharing paths that are non equivalent
         non_eq_paths = []
         for path in vertex_sharing_paths:
-
 
             # Check to see if the path is equivalent with a path in the List of
             # non-equivalent paths
