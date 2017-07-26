@@ -14,8 +14,8 @@ cage.egg-info/requires.txt
 cage.egg-info/top_level.txt
 cage/cli/__init__.py
 cage/cli/cage.py
-cage/commands/__init__.py
-cage/commands/dock.py
+cage/cli/commands/__init__.py
+cage/cli/commands/setup.py
 cage/scripts/__init__.py
 cage/scripts/chainsetup.py
 cage/scripts/checkCalc.py
