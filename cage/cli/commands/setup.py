@@ -75,7 +75,10 @@ def optimize(filename):
     ALT_SETUP["driver"] = DRIVER_SETUP
 
     # Set up input
-    os.mkdir('optimize')
+    try:
+        os.mkdir('optimize')
+    except FileExistsError:
+        
     nw_input = nwchem.NwInput(anion, tasks, geometry_options=GEO_SETUP)
     nw_input.write_file(os.path.join('optimize', 'input'))
 
