@@ -223,19 +223,20 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity):
 
     # Get the docking directories
-    dir_list = [os.path.join(dock_dir, dir) for dir in os.listdir(dock_dir)
-                if os.path.isdir(os.path.join(dock_dir, dir))]
+    dir_list = [os.path.join(dock_dir, directory)
+                for directory in os.listdir(dock_dir)
+                if os.path.isdir(os.path.join(dock_dir, directory))]
 
     dock_number = 1
 
-    for dir in dir_list:
+    for directory in dir_list:
 
         # Extract the occupied cage
         try:
-            out = nwchem.NwOutput(os.path.join(dir, OUTPUT_FILE))
+            out = nwchem.NwOutput(os.path.join(directory, OUTPUT_FILE))
         except:
-            print('Failed to extract output from ' + os.path.abspath(dir) +
-                  '. Skipping...')
+            print('Failed to extract output from ' + os.path.abspath(directory)
+                  + '. Skipping...')
             continue
 
         mol = out.data[-1]['molecules'][-1]
@@ -257,7 +258,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity):
         total_mol = occmol.copy()
 
         # Find the chain paths
-        paths = occmol.find_noneq_chain_paths()
+        paths = occmol.find_noneq_chain_paths(symm_tol=5e-1)
 
         dock_dir = 'dock' + str(dock_number)
 

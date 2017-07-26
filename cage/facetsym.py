@@ -440,7 +440,7 @@ class Cage(Molecule):
 
         return non_eq_paths
 
-    def find_noneq_chain_paths(self):
+    def find_noneq_chain_paths(self, symm_tol=1e-2):
         """
         Find the paths that connect the facets of the chain that connects a
         set of non equivalent facets.
@@ -448,7 +448,7 @@ class Cage(Molecule):
         :return:
         """
 
-        facet_chain = self.find_noneq_facet_chain()
+        facet_chain = self.find_noneq_facet_chain(symm_tol=symm_tol)
 
         chain_paths = []
         for index in range(len(facet_chain)-1):
