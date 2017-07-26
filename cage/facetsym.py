@@ -17,7 +17,7 @@ from pymatgen.core.structure import SiteCollection
 from pymatgen.core.operations import SymmOp
 
 """
-Analysis tools to find the non-equivalent faces of fullerene shaped molecules.
+Tools to find the non-equivalent faces of fullerene shaped molecules.
 Still very much a work in progress.
 """
 
@@ -82,8 +82,7 @@ class Cage(Molecule):
 
         self._sites = sites
 
-    def find_surface_facets(self, ignore=(pmg.Element('H'),
-                                          pmg.Element('Li'))):
+    def find_surface_facets(self, ignore=None):
         """
         Find all the surface facets of the Cage object.
 
@@ -130,53 +129,6 @@ class Cage(Molecule):
                 facets_surf.append(facet)
 
         self._facets = facets_surf
-
-    def set_up_facet_list(self, type='str_array', tol=5e-1):
-        """
-        Set up a List of surface facets, and how they relate to the
-        non-equivalent facets, i.e. which non-equivalent facet they can be
-        related to and using which symmetry operation:
-
-        noneq_facet = symmop(facet)
-
-        :return:
-        """
-        if not self.facets:
-            print("Please set up surface facets first")
-            return None
-
-        facet_list = []
-
-        for facet in self.facets:
-            for noneq_facet in self.find_noneq_facets():
-                for symm in self.symmops:
-                    symm_center = symm.operate(facet.center)
-                    if np.linalg.norm(symm_center - noneq_facet.center) < tol:
-                        facet_list.append((facet, noneq_facet, symm))
-                        break
-
-        if type == 'str_array':
-
-            list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
-                          ('symmop', SymmOp)]
-
-            facet_array = np.array(facet_list, dtype=list_types)
-
-            if len(facet_array) == len(self.facets):
-                return facet_array
-            else:
-                raise ValueError("Obtained array length is not equal to number of "
-                                 "facets. Something must have gone wrong.")
-
-        elif type == 'dict':
-
-            facet_dict = {}
-
-            for i in range(len(facet_list)):
-                facet_dict[facet_list[i][0]] = (facet_list[i][1],
-                                                facet_list[i][2])
-
-            return facet_dict
 
     @property
     def facets(self):
@@ -242,7 +194,9 @@ class Cage(Molecule):
     def redefine_origin(self, origin):
         """
         Change the coordinates of the Facet, in order to change the origin.
-        :return:
+
+        :param origin: (3x1 numpy.array) Origin coordinates
+        :return: None
         """
         # Find the new coordinates
         new_coords = np.array(self.cart_coords) - origin
@@ -257,21 +211,13 @@ class Cage(Molecule):
                                   properties=prop))
 
         self._sites = sites
-
-    def redefine_surface(self, ignore_elements):
-        """
-        Redefine the surface of the Cage by telling it which elements to ignore
-        in the determination of the surface.
-        :param ignore_elements:
-        :return:
-        """
-        self.find_surface_facets(ignore_elements)
     
     def append(self, species, coords, validate_proximity=True,
                properties=None):
         """
         Overwrite the append method of the Molecule class, in order to
         remove the symmetry operations after the site has been appended.
+
         :param species: (pymatgen.Specie) Species of inserted site.
         :param coords: (3x1 numpy.array) Coordinates of inserted site.
         :param validate_proximity: (bool) Whether to check if inserted site is
@@ -289,7 +235,7 @@ class Cage(Molecule):
         """
         pass  # TODO
 
-    def find_noneq_facets(self, tol=5e-1):
+    def find_noneq_facets(self, tol=1e-2):
         """
         Find all of the nonequivalent facets of the Cage.
 
@@ -314,49 +260,54 @@ class Cage(Molecule):
 
         return facets_noneq
 
-    def find_facet_paths(self):
+    def set_up_facet_list(self, type='str_array', tol=1e-2):
         """
-        Find the non equivalent pathways between connected facets of the
-        cage molecule. The facets can be connected by sharing an edge,
-        or a vertex.
+        Set up a List of surface facets, and how they relate to the
+        non-equivalent facets, i.e. which non-equivalent facet they can be
+        related to and using which symmetry operation:
+
+        noneq_facet = symmop(facet)
+
         :return:
         """
+        if not self.facets:
+            print("Please set up surface facets first")
+            return None
 
-        # Find all paths, i.e. possible combinations of surface facets
-        paths = list(combinations(self.facets, 2))
+        facet_list = []
 
-        # Find the paths that share a vertex (this automatically finds those
-        # that share an edge as well).
-        vertex_sharing_paths = []
-        for path in paths:
-            cross_section = set(path[0].sites) & set(path[1].sites)
-            if cross_section:
-                vertex_sharing_paths.append(path)
-
-        # Find the vertex sharing paths that are non equivalent
-        non_eq_paths = []
-        for path in vertex_sharing_paths:
-
-
-            # Check to see if the path is equivalent with a path in the List of
-            # non-equivalent paths
-            nonequivalent = True
-            for non_eq_path in non_eq_paths:
+        for facet in self.facets:
+            for noneq_facet in self.find_noneq_facets():
                 for symm in self.symmops:
-                    path_center = (path[0].center + path[1].center)/2
-                    non_eq_path_center = sum((non_eq_path[0].center,
-                                          non_eq_path[1].center))/2
-                    symm_path_center = symm.operate(path_center)
-                    distance = symm_path_center - non_eq_path_center
-                    if np.linalg.norm(distance) < 1e-2:
-                        nonequivalent = False
+                    symm_center = symm.operate(facet.center)
+                    if np.linalg.norm(symm_center - noneq_facet.center) < tol:
+                        facet_list.append((facet, noneq_facet, symm))
+                        break
 
-            if nonequivalent:
-                non_eq_paths.append(path)
+        if type == 'str_array':
 
-        return non_eq_paths
+            list_types = [('surf_facet', Facet), ('noneq_facet', Facet),
+                          ('symmop', SymmOp)]
 
-    def find_noneq_facet_chain(self, start=0, symm_tol=5e-1):
+            facet_array = np.array(facet_list, dtype=list_types)
+
+            if len(facet_array) == len(self.facets):
+                return facet_array
+            else:
+                raise ValueError("Obtained array length is not equal to number of "
+                                 "facets. Something must have gone wrong.")
+
+        elif type == 'dict':
+
+            facet_dict = {}
+
+            for i in range(len(facet_list)):
+                facet_dict[facet_list[i][0]] = (facet_list[i][1],
+                                                facet_list[i][2])
+
+            return facet_dict
+
+    def find_noneq_facet_chain(self, start=0, symm_tol=1e-2):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
         are connected by edge paths. Automatically sorts the facets so they
@@ -446,6 +397,48 @@ class Cage(Molecule):
             print('WARNING: Could not connect all nonequivalent facets.')
 
         return facet_chain
+
+    def find_facet_paths(self):
+        """
+        Find the non equivalent pathways between connected facets of the
+        cage molecule. The facets can be connected by sharing an edge,
+        or a vertex.
+        :return:
+        """
+
+        # Find all paths, i.e. possible combinations of surface facets
+        paths = list(combinations(self.facets, 2))
+
+        # Find the paths that share a vertex (this automatically finds those
+        # that share an edge as well).
+        vertex_sharing_paths = []
+        for path in paths:
+            cross_section = set(path[0].sites) & set(path[1].sites)
+            if cross_section:
+                vertex_sharing_paths.append(path)
+
+        # Find the vertex sharing paths that are non equivalent
+        non_eq_paths = []
+        for path in vertex_sharing_paths:
+
+
+            # Check to see if the path is equivalent with a path in the List of
+            # non-equivalent paths
+            nonequivalent = True
+            for non_eq_path in non_eq_paths:
+                for symm in self.symmops:
+                    path_center = (path[0].center + path[1].center)/2
+                    non_eq_path_center = sum((non_eq_path[0].center,
+                                          non_eq_path[1].center))/2
+                    symm_path_center = symm.operate(path_center)
+                    distance = symm_path_center - non_eq_path_center
+                    if np.linalg.norm(distance) < 1e-2:
+                        nonequivalent = False
+
+            if nonequivalent:
+                non_eq_paths.append(path)
+
+        return non_eq_paths
 
     def find_noneq_chain_paths(self):
         """

@@ -29,6 +29,8 @@ IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
           pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
           pmg.Element('F'))
 
+OUTPUT_FILE = 'result.out'
+
 # Calculation parameters
 THEORY_SETUP = {'iterations': '300',
                 'xc': 'xpbe96 xpbe96',
@@ -47,11 +49,48 @@ ALT_SETUP = {}
 
 DRIVER_SETUP = {"driver": {'loose': '', 'maxiter': '100'}}
 
+
+def optimize(filename):
+
+    try:
+        # Load the POSCAR into a Cage
+        anion = cage.facetsym.Cage.from_poscar(filename)
+    except ValueError:
+        anion = cage.facetsym.Cage.from_file(filename)
+    else:
+        raise IOError('Could not open structure file.')
+
+    # Set the charge for the molecule
+    if pmg.Element('C') in [site.specie for site in anion.sites]:
+        anion.set_charge_and_spin(charge=-1)
+    else:
+        anion.set_charge_and_spin(charge=-2)
+
+    # Set up the geometry optimization
+    tasks = [nwchem.NwTask(anion.charge, None, BASIS,
+                           theory='dft',
+                           operation="optimize",
+                           theory_directives=THEORY_SETUP,
+                           alternate_directives=ALT_SETUP)]
+
+    # Set up input
+    os.mkdir('optimize')
+    nw_input = nwchem.NwInput(anion, tasks, geometry_options=GEO_SETUP)
+    nw_input.write_file(os.path.join('optimize', 'input'))
+
+
 def docksetup(filename, cation, distance):
 
-    # Load the POSCAR into a Cage
-    molecule = cage.facetsym.Cage.from_poscar(filename)
-    molecule.find_surface_facets()
+    try:
+        # Load the POSCAR into a Cage
+        anion = cage.facetsym.Cage.from_poscar(filename)
+    except ValueError:
+        anion = cage.facetsym.Cage.from_file(filename)
+    else:
+        raise IOError('Could not open structure file.')
+
+
+    molecule.find_surface_facets(ignore=IGNORE)
 
     # Find the non-equivalent facets
     facets = molecule.find_noneq_facets()
@@ -66,17 +105,18 @@ def docksetup(filename, cation, distance):
         mol.append(pmg.Specie(cation, 1), neq_facet.center +
                    distance*neq_facet.normal)
 
+        # Constrain the opposite facet
+        far_facet = mol.find_furthest_facet(neq_facet.center)
+        ALT_SETUP['constraints'] = find_constraints(mol, far_facet.sites)
+
+        # Set the driver settings for the optimization
+        ALT_SETUP["driver"] = DRIVER_SETUP
+
         # Set the charge for the molecule
         if pmg.Element('C') in [site.specie for site in mol.sites]:
             mol.set_charge_and_spin(charge=0)
         else:
             mol.set_charge_and_spin(charge=-1)
-
-        # Add the constraints
-        ALT_SETUP['constraints'] = find_constraints(mol, neq_facet.center)
-
-        # Set the driver settings for the optimization
-        ALT_SETUP["driver"] = DRIVER_SETUP
 
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(mol.charge, None, BASIS,
@@ -102,7 +142,7 @@ def docksetup(filename, cation, distance):
         dock_number += 1
 
 
-def chainsetup(filename, cation, operation, endpoints, nradii, adensity):
+def chainsetup(filename, cation, operation, endradii, nradii, adensity):
 
     # Load the POSCAR into a Cage
     mol = cage.facetsym.Cage.from_poscar(filename)
@@ -139,7 +179,7 @@ def chainsetup(filename, cation, operation, endpoints, nradii, adensity):
 
         # Set up the landscape
         landscape = set_up_edge_landscape(facet1, facet2,
-                                          endpoint_radii=endpoints,
+                                          endpoint_radii=endradii,
                                           number_of_radii=nradii,
                                           angle_density=adensity)
 
@@ -161,8 +201,10 @@ def chainsetup(filename, cation, operation, endpoints, nradii, adensity):
         # In case the molecules must be optimized, add the constraints and
         # optimization setup (DRIVER)
         if operation == "optimize":
-            fixed_facet = mol.find_furthest_facet(landscape.center)
-            ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
+            far_facet = mol.find_furthest_facet(landscape.center)
+            ALT_SETUP["constraints"] = find_constraints(mol, far_facet.sites)
+
+            ALT_SETUP['constraints'].join(' ' + str(len(mol.sites)))  # cation
             ALT_SETUP["driver"] = DRIVER_SETUP
 
         # Set up the task for the calculations
@@ -181,6 +223,127 @@ def chainsetup(filename, cation, operation, endpoints, nradii, adensity):
 
     # Set up an xyz file with all the paths
     total_mol.to(fmt="xyz", filename="total_mol.xyz")
+
+
+def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity):
+
+    # Get the docking directories
+    dir_list = [os.path.join(dock_dir, dir) for dir in os.listdir(dock_dir)
+                if os.path.isdir(os.path.join(dock_dir, dir))]
+
+    dock_number = 1
+
+    for dir in dir_list:
+
+        # Extract the occupied cage
+        try:
+            out = nwchem.NwOutput(os.path.join(dir, OUTPUT_FILE))
+        except:
+            print('Failed to extract output from ' + os.path.abspath(dir) +
+                  '. Skipping...')
+            continue
+
+        mol = out.data[-1]['molecules'][-1]
+
+        try:
+            cat_coords = [site.coords for site in mol.sites
+                          if site.specie == pmg.Element(cation)][-1]
+        except IndexError:
+            raise IOError("Requested cation is not found in the molecule.")
+
+        # Set up the occupied anion
+        occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
+        occmol.find_surface_facets(ignore=IGNORE)
+        dock = occmol.find_closest_facet(cat_coords)
+
+        occmol.add_dock(dock, cation=None)
+        occmol.find_surface_facets(ignore=IGNORE)
+
+        total_mol = occmol.copy()
+
+        # Find the chain paths
+        paths = occmol.find_noneq_chain_paths()
+
+        dock_dir = 'dock' + str(dock_number)
+
+        try:
+            os.mkdir(dock_dir)
+        except FileExistsError:
+            pass
+
+        # For each facet, set up the calculation input files
+        edge_number = 1
+
+        for path in paths:
+
+            # Set up the edge directory
+            edge_dir = "edge" + str(edge_number)
+            edge_dir = os.path.join(dock_dir, edge_dir)
+            try:
+                os.mkdir(edge_dir)
+            except FileExistsError:
+                pass
+
+            # Write out the molecule and path facets to the edge directory
+            mol.to(fmt="json", filename=os.path.join(edge_dir, "mol.json"))
+            path[0].to(fmt="json", filename=os.path.join(edge_dir,
+                                                         "init_facet.json"))
+            path[1].to(fmt="json", filename=os.path.join(edge_dir,
+                                                         "final_facet.json"))
+
+            # Get copies so the originals aren't mutated
+            edge_mol = occmol.copy()
+            facet1 = path[0].copy()
+            facet2 = path[1].copy()
+
+            # Set up the landscape
+            landscape = set_up_edge_landscape(facet1, facet2,
+                                              endpoint_radii=endradii,
+                                              number_of_radii=nradii,
+                                              angle_density=adensity)
+
+            # Get the molecule for each landscape point
+            molecules = set_up_molecules(edge_mol, landscape, cation)
+
+            # Set up an xyz file to visualize the edge
+            for point in landscape.points:
+                try:
+                    total_mol.append(pmg.Specie(cation, 1), point,
+                                     validate_proximity=False)
+                    edge_mol.append(pmg.Specie(cation, 1), point,
+                                    validate_proximity=False)
+                except ValueError:
+                    pass
+
+            edge_mol.to(fmt="xyz", filename=os.path.join(edge_dir, "edge.xyz"))
+
+            # In case the molecules must be optimized, add the constraints and
+            # optimization setup (DRIVER)
+            if operation == "optimize":
+                far_facet = occmol.find_furthest_facet(landscape.center)
+                ALT_SETUP["constraints"] = find_constraints(occmol,
+                                                            far_facet.sites)
+                ALT_SETUP['constraints'].join(
+                    ' ' + str(len(mol.sites)))  # cation
+                ALT_SETUP["driver"] = DRIVER_SETUP
+
+            # Set up the task for the calculations
+            tasks = [nwchem.NwTask(molecules[0].charge, None, BASIS,
+                                   theory="dft",
+                                   operation=operation,
+                                   theory_directives=THEORY_SETUP,
+                                   alternate_directives=ALT_SETUP)]
+
+            # Set up the input files
+            study = cage.study.Study(molecules, tasks)
+            study.set_up_input(edge_dir, sort_comp=False,
+                               geometry_options=GEO_SETUP)
+
+            edge_number += 1
+
+        # Set up an xyz file with all the paths
+        total_mol.to(fmt="xyz", filename=os.path.join(dock_dir,
+                                                      "total_mol.xyz"))
 
 
 ###########
@@ -257,19 +420,16 @@ def set_up_molecules(mol, landscape, cation):
     return molecules
 
 
-def find_constraints(mol, point):
+def find_constraints(mol, sites):
     """
-    Find the necessary constraints for a molecule by fixing the facet that is
-    furthest away from a point.
+    Find the NwChem constraints for a selection of sites on a molecule.
 
     """
-    # Find the facet that is the farthest away from the facet being studied
-    far_facet = mol.find_furthest_facet(point)
 
     # Find the corresponding atom numbers in string format
     site_numbers = []
     for i in range(len(mol.sites)):
-        if mol.sites[i] in far_facet.sites:
+        if mol.sites[i] in sites:
             site_numbers.append(str(i + 1) + ' ')
 
     site_numbers = ''.join(site_numbers)
