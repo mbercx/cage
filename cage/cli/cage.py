@@ -21,14 +21,23 @@ def main():
 
 @main.command()
 @click.argument('filename')
-def dock(filename):
+@click.option('--cation', '-C', default='Li')
+@click.option('--distance', '-d', default=2)
+def dock(filename, cation, distance):
     """ Set up the docking sites """
     from cage.cli.commands.setup import docksetup
 
-    docksetup(filename)
-
+    docksetup(filename, cation, distance)
 
 @main.command()
-def paths():
+@click.argument('filename')
+@click.option('--cation', '-C', default='Li')
+@click.option('--operation', '-O', default='energy')
+@click.option('--endpoints', '-e', default=(3, 6))
+@click.option('--nradii', default=30)
+@click.option('--adensity', default=50)
+def chain(filename, cation, operation, endpoints, nradii, adensity):
     """ Set up the non-equivalent paths between facets. """
-    print('Implement me, foolish human!')
+    from cage.cli.commands.setup import chainsetup
+
+    chainsetup(filename, cation, operation, endpoints, nradii, adensity)
