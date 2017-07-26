@@ -78,7 +78,8 @@ def optimize(filename):
     try:
         os.mkdir('optimize')
     except FileExistsError:
-        
+        pass
+
     nw_input = nwchem.NwInput(anion, tasks, geometry_options=GEO_SETUP)
     nw_input.write_file(os.path.join('optimize', 'input'))
 
