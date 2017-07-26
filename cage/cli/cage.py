@@ -71,11 +71,11 @@ def path(filename, cation, distance, edges):
 @main.command()
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
-def neb(filename, nimages):
+def neb(paths_dir, nimages):
     """ Set up the paths between facets that share a vertex. """
     from cage.cli.commands.setup import nebsetup
 
-    pathsetup(filename, nimages)
+    nebsetup(paths_dir, nimages)
 
 @main.group()
 def twocat():
