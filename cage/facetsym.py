@@ -402,26 +402,49 @@ class Cage(Molecule):
             other_facets.remove(facet)
             for other_facet in other_facets:
                 if len(set(facet.sites) & set(other_facet.sites)) == 2:
-                    if facet not in end_facets:
-                        end_facets.append(facet)
-                    else:
+                    if facet in end_facets:
                         end_facets.remove(facet)
-
-        for facet in end_facets:
-            print(facet)
+                        break
+                    else:
+                        end_facets.append(facet)
 
         # Sort the chain:
         facet_chain = [end_facets[start]]
         other_facets = chain_facets.copy()
         other_facets.remove(end_facets[start])
 
-        while len(facet_chain) < len(chain_facets):
+        for i in range(len(other_facets)):
+
+            options = []
 
             for facet in other_facets:
+
+                # See if the facet connects to the last facet in the chain
                 if len(set(facet.sites) & set(facet_chain[-1].sites)) == 2:
-                    facet_chain.append(facet)
-                    other_facets.remove(facet)
-                    break
+
+                    # Check the amount of connections this next facet has
+                    leftover_facets = other_facets.copy()
+                    leftover_facets.remove(facet)
+                    number_connections = 0
+                    for leftover_facet in leftover_facets:
+                        if len(set(facet.sites)
+                                       & set(leftover_facet.sites)) == 2:
+                            number_connections += 1
+
+                    options.append((facet, number_connections))
+
+            if len(options) == 1:
+                facet_chain.append(options[0][0])
+                other_facets.remove(options[0][0])
+            else:
+                for option in options:
+                    if option[1] == 1:
+                        facet_chain.append(option[0])
+                        other_facets.remove(option[0])
+                        break
+
+        if len(facet_chain) < len(noneq_facets):
+            print('WARNING: Could not connect all nonequivalent facets.')
 
         return facet_chain
 
@@ -589,16 +612,7 @@ class OccupiedCage(Cage):
 
         surface_facets = mol.facets
 
-        print('Found ' + str(len(surface_facets)) + ' facets.')
-        # for facet in surface_facets:
-        #     print(facet)
-        #     print(facet.normal)
-        #     print(self._docks[0] == facet)
-
         for dock in self.docks:
-            # print('Dock:')
-            # print(dock)
-            # print(dock.normal)
             surface_facets.remove(dock)
 
         self._facets = surface_facets
@@ -651,7 +665,7 @@ class Facet(SiteCollection, MSONable):
         :return:
         """
         if (len(set(self.sites) & set(other.sites)) == 3) and \
-                np.allclose(self.normal, other.normal):
+                np.allclose(self.normal, other.normal, atol=1e-3):
             return True
         else:
             return False
