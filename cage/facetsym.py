@@ -82,7 +82,7 @@ class Cage(Molecule):
 
         self._sites = sites
 
-    def find_surface_facets(self, ignore=None):
+    def find_surface_facets(self, ignore=[]):
         """
         Find all the surface facets of the Cage object.
 

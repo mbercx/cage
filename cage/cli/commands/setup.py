@@ -89,18 +89,17 @@ def docksetup(filename, cation, distance):
     else:
         raise IOError('Could not open structure file.')
 
-
-    molecule.find_surface_facets(ignore=IGNORE)
+    anion.find_surface_facets(ignore=IGNORE)
 
     # Find the non-equivalent facets
-    facets = molecule.find_noneq_facets()
+    facets = anion.find_noneq_facets()
 
     # For each docking point, set up the calculation input file
     dock_number = 1
     for neq_facet in facets:
 
         # Set up the initial cation site
-        mol = molecule.copy()
+        mol = anion.copy()
         mol.find_surface_facets()
         mol.append(pmg.Specie(cation, 1), neq_facet.center +
                    distance*neq_facet.normal)

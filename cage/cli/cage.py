@@ -22,7 +22,13 @@ def main():
     """
     pass
 
-main.command
+@main.command()
+@click.argument('filename')
+def optimize(filename):
+    """ Set up the initial anion optimization. """
+    from cage.cli.commands.setup import optimize
+
+    optimize(filename)
 
 @main.command()
 @click.argument('filename')
