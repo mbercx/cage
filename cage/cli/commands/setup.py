@@ -57,8 +57,6 @@ def optimize(filename):
         anion = cage.facetsym.Cage.from_poscar(filename)
     except ValueError:
         anion = cage.facetsym.Cage.from_file(filename)
-    else:
-        raise IOError('Could not open structure file.')
 
     # Set the charge for the molecule
     if pmg.Element('C') in [site.specie for site in anion.sites]:
@@ -86,8 +84,6 @@ def docksetup(filename, cation, distance):
         anion = cage.facetsym.Cage.from_poscar(filename)
     except ValueError:
         anion = cage.facetsym.Cage.from_file(filename)
-    else:
-        raise IOError('Could not open structure file.')
 
     anion.find_surface_facets(ignore=IGNORE)
 
