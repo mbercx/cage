@@ -6,45 +6,47 @@ Subpackages
 
 .. toctree::
 
+    cage.cli
     cage.scripts
+    cage.tests
 
 Submodules
 ----------
 
-cage.facetsym module
---------------------
+cage\.facetsym module
+---------------------
 
 .. automodule:: cage.facetsym
     :members:
     :undoc-members:
     :show-inheritance:
 
-cage.landscape module
----------------------
+cage\.landscape module
+----------------------
 
 .. automodule:: cage.landscape
     :members:
     :undoc-members:
     :show-inheritance:
 
-cage.path module
-----------------
+cage\.path module
+-----------------
 
 .. automodule:: cage.path
     :members:
     :undoc-members:
     :show-inheritance:
 
-cage.study module
------------------
+cage\.study module
+------------------
 
 .. automodule:: cage.study
     :members:
     :undoc-members:
     :show-inheritance:
 
-cage.utils module
------------------
+cage\.utils module
+------------------
 
 .. automodule:: cage.utils
     :members:
