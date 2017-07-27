@@ -43,17 +43,24 @@ class Cage(Molecule):
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
                  validate_proximity=False, site_properties=None):
         """
-        Create a Mutable Molecule Cage object. The Cage molecule is
-        automatically centered on its geometric center.
+        Create a Cage instance. The Cage molecule is automatically centered
+        on its geometric center.
 
         Args:
-            species (list): List of atomic species. Possible kinds of input
-                include a list of dict of elements/species and occupancies, a
-                List of elements/specie specified as actual Element/Specie,
-                Strings ("Fe", "Fe2+") or atomic numbers (1,56).
+            species (List of pymatgen.Specie): List of atomic species. Possible
+                kinds of input include a list of dict of elements/species and
+                occupancies, a List of elements/specie specified as actual
+                Element/Specie, Strings ("Fe", "Fe2+") or atomic numbers
+                (1,56).
             coords (List of (3,) numpy.ndarray): List of cartesian coordinates
                 of each species.
-        :param (float): Charge for the molecule. Defaults to 0.
+            charge (float): Charge for the molecule. Defaults to 0.
+            validate_proximity (bool): Whether to check if there are sites
+                that are less than 1 Ang apart. Defaults to False.
+            site_properties (dict): Properties associated with the sites as
+                a dict of sequences, e.g., {"magmom":[5,5,5,5]}. The
+                sequences have to be the same length as the atomic species
+                and fractional_coords. Defaults to None for no properties.
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
@@ -63,10 +70,87 @@ class Cage(Molecule):
         self._symmops = None
         self._facet_dict = None
 
+    @property
+    def facets(self):
+        """
+        Surface Facets of the Cage. Note that in case the surface facets have
+        not been set up using find.surface.facets(), the property is equal to
+        *None*.
+
+        Returns:
+            (List of Facets): The surface facets of the Cage, as set up using
+                find_surface_facets()
+        """
+        return self._facets
+
+    @property
+    def pointgroup(self):
+        """
+        Returns:
+            (pymatgen.symmetry.analyzer.PointGroup):The Schoenflies PointGroup
+                of the Cage molecule.
+        """
+        if not self._pointgroup:
+            self._pointgroup = syman.PointGroupAnalyzer(self).get_pointgroup()
+
+        return self._pointgroup
+
+    @property
+    def symmops(self):
+        """
+        Returns:
+            (List of pymatgen.Symmop): The symmetry operations of the Cage.
+        """
+        if not self._symmops:
+            # Set up the point group analyzer
+            pgan = syman.PointGroupAnalyzer(self)
+    
+            # Find the full set of symmetry operations
+            self._symmops = syman.generate_full_symmops(pgan.symmops,
+                                                        SYMMETRY_TOLERANCE)
+        
+        return self._symmops
+        
+    @classmethod
+    def from_poscar(cls, filename):
+        """
+        Imports a Cage from a VASP POSCAR file.
+
+        Returns:
+            (cage.facetsym.Cage)
+        """
+        # Import the structure from the POSCAR file
+        structure = pmg.Structure.from_file(filename)
+
+        # Generate the molecule object from the structure sites
+        cage = cls(structure.species, structure.cart_coords)
+
+        return cage
+
+    @classmethod
+    def from_molecule(cls, mol):
+        """
+        Initializes a Cage from a Molecule.
+        :param mol:
+        :return:
+        """
+        assert type(mol) is Molecule
+        return cls(species=mol.species, coords=mol.cart_coords,
+                   charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
+                   site_properties=mol.site_properties)
+
+    def to_poscar(self, filename='POSCAR'):
+        """
+        Writes the Cage to a POSCAR file.
+        """
+        pass  # TODO
+
     def center(self, point=None):
         """
-        Center the Cage around a point by updating the sites. In case no point
-        is provided, the molecule is centered around the origin.
+        Center the Cage around a point by updating the sites, i.e. find the
+        coordinates for the sites so that the geometric center is on the point
+        provided. In case no point is provided, the molecule is centered around
+        the origin.
 
         Args:
             point ((3,) numpy.ndarray): Point around which to center the
@@ -96,15 +180,19 @@ class Cage(Molecule):
 
     def find_surface_facets(self, ignore=()):
         """
-        Find all the surface facets of the Cage object.
+        Find all the surface facets of the Cage object. A surface facet is
+        defined as a facet for which all atoms of non-ignored species are on
+        one side of the surface defined by the facet.
 
         Currently does not expand the facets to 4 sites in case it finds other
         sites which are in the plane of the site, as defined by 3 site points.
 
         Args:
-            ignore (Tuple of Elements): The elements to ignore for the surface
-                facet determination.
+            ignore (Tuple of Elements/Species): The elements to ignore for the
+                surface facet determination.
         """
+
+        #TODO Expand the algorithm to more sites
 
         # Find all the sites which should not be ignored
         sites_valid = []
@@ -143,73 +231,12 @@ class Cage(Molecule):
 
         self._facets = facets_surf
 
-    @property
-    def facets(self):
-        """
-        Surface Facets of the Cage.
-        :return: (List of Facets)
-        """
-        return self._facets
-
-    @property
-    def pointgroup(self):
-        """
-        Find the Schoenflies PointGroup of the Cage molecule.
-        :return: (pymatgen.symmetry.analyzer.PointGroup)
-        """
-        if not self._pointgroup:
-            self._pointgroup = syman.PointGroupAnalyzer(self).get_pointgroup()
-
-        return self._pointgroup
-
-    @property
-    def symmops(self):
-        """
-        The symmetry operations of the Cage.
-        :return: List of 
-        """
-        if not self._symmops:
-            # Set up the point group analyzer
-            pgan = syman.PointGroupAnalyzer(self)
-    
-            # Find the full set of symmetry operations
-            self._symmops = syman.generate_full_symmops(pgan.symmops,
-                                                        SYMMETRY_TOLERANCE)
-        
-        return self._symmops
-        
-    @classmethod
-    def from_poscar(cls, filename):
-        """
-        Imports a Cage from a VASP POSCAR file.
-        :return: Cage
-        """
-        # Import the structure from the POSCAR file
-        structure = pmg.Structure.from_file(filename)
-
-        # Generate the molecule object from the structure sites
-        cage = cls(structure.species, structure.cart_coords)
-
-        return cage
-
-    @classmethod
-    def from_molecule(cls, mol):
-        """
-        Initializes a Cage from a Molecule.
-        :param mol:
-        :return:
-        """
-        assert type(mol) is Molecule
-        return cls(species=mol.species, coords=mol.cart_coords,
-                   charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
-                   site_properties=mol.site_properties)
-
     def redefine_origin(self, origin):
         """
-        Change the coordinates of the Facet, in order to change the origin.
+        Change the coordinates of the Cage, in order to redefine the origin.
 
-        :param origin: (3x1 numpy.array) Origin coordinates
-        :return: None
+        Args:
+            origin ((3,) numpy.ndarray): Origin coordinates.
         """
         # Find the new coordinates
         new_coords = np.array(self.cart_coords) - origin
@@ -224,29 +251,45 @@ class Cage(Molecule):
                                   properties=prop))
 
         self._sites = sites
-    
-    def append(self, species, coords, validate_proximity=True,
+
+    def insert(self, index, species, coords, validate_proximity=True,
                properties=None):
         """
         Overwrite the append method of the Molecule class, in order to
-        remove the symmetry operations after the site has been appended.
+        reset the symmetry operations and point group after the site has been
+        appended.
 
-        :param species: (pymatgen.Specie) Species of inserted site.
-        :param coords: (3x1 numpy.array) Coordinates of inserted site.
-        :param validate_proximity: (bool) Whether to check if inserted site is
+        Args:
+            index (int): Index to insert site.
+            species (pymatgen.Specie): Species of inserted site.
+            coords ((3,) numpy.ndarray): Coordinates of inserted site.
+            validate_proximity (bool): Whether to check if inserted site is
                 too close to an existing site. Defaults to True.
-        :param properties: (dict) A dictionary of properties for the Site.
-        :return: 
+            properties (dict): A dictionary of properties for the Site.
         """
         super(Cage, self).append(species, coords, validate_proximity,
                                  properties)
         self._symmops = None
+        self._pointgroup = None
 
-    def to_poscar(self, filename='POSCAR'):
+    def append(self, species, coords, validate_proximity=True,
+               properties=None):
         """
-        Writes the Cage to a POSCAR file.
+        Overwrite the append method of the Molecule class, in order to
+        reset the symmetry operations and point group after the site has been
+        appended.
+
+        Args:
+            species (pymatgen.Specie): Species of inserted site.
+            coords ((3,) numpy.ndarray): Coordinates of inserted site.
+            validate_proximity (bool): Whether to check if inserted site is
+                too close to an existing site. Defaults to True.
+            properties (dict): A dictionary of properties for the Site.
         """
-        pass  # TODO
+        super(Cage, self).append(species, coords, validate_proximity,
+                                 properties)
+        self._symmops = None
+        self._pointgroup = None
 
     def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
