@@ -155,9 +155,12 @@ def docksetup(filename, cation, distance):
 
 def chainsetup(filename, cation, operation, endradii, nradii, adensity):
 
-    # Load the POSCAR into a Cage
-    anion = cage.facetsym.Cage.from_poscar(filename)
-    anion.find_surface_facets(IGNORE)
+    # Load the Cage from the file
+    try:
+        # Load the POSCAR into a Cage
+        anion = cage.facetsym.Cage.from_poscar(filename)
+    except ValueError:
+        anion = cage.facetsym.Cage.from_file(filename)
 
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
@@ -245,15 +248,21 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
 
 def pathsetup(filename, cation, distance, edges):
 
-    # Read the Molecule from the input file
-    anion = Cage.from_poscar(filename)
-    anion.find_surface_facets()
+    # Load the Cage from the file
+    try:
+        # Load the POSCAR into a Cage
+        anion = cage.facetsym.Cage.from_poscar(filename)
+    except ValueError:
+        anion = cage.facetsym.Cage.from_file(filename)
 
     # TODO Find charge automatically
     if pmg.Element('C') in [site.specie for site in anion.sites]:
         anion.set_charge_and_spin(charge=0)
     else:
         anion.set_charge_and_spin(charge=-1)
+
+    # Find the surface facets
+    anion.find_surface_facets(ignore=IGNORE)
 
     # Find the paths, i.e. the List of facet combinations
     paths = anion.find_facet_paths(share_edge=edges)
@@ -262,6 +271,12 @@ def pathsetup(filename, cation, distance, edges):
                            operation="optimize",
                            theory_directives=THEORY_SETUP,
                            alternate_directives=ALT_SETUP)]
+
+    paths_dir = 'paths'
+    try:
+        os.mkdir(paths_dir)
+    except FileExistsError:
+        pass
 
     path_number = 1
     for path in paths:
@@ -276,7 +291,7 @@ def pathsetup(filename, cation, distance, edges):
                             distance * path[1].normal)
 
         # Make the path directory
-        path_dir = 'path' + str(path_number)
+        path_dir = os.path.join(paths_dir, 'path' + str(path_number))
         try:
             os.mkdir(path_dir)
         except FileExistsError:
