@@ -46,12 +46,13 @@ class Cage(Molecule):
         Create a Mutable Molecule Cage object. The Cage molecule is
         automatically centered on its geometric center.
 
-        :param species (list): List of atomic species. Possible kinds of input
-            include a list of dict of elements/species and occupancies, a List
-            of elements/specie specified as actual Element/Specie, Strings
-            ("Fe", "Fe2+") or atomic numbers (1,56).
-        :param coords (List of 3x1 np.array): List of cartesian coordinates of
-            each species.
+        Args:
+            species (list): List of atomic species. Possible kinds of input
+                include a list of dict of elements/species and occupancies, a
+                List of elements/specie specified as actual Element/Specie,
+                Strings ("Fe", "Fe2+") or atomic numbers (1,56).
+            coords (List of (3,) numpy.ndarray): List of cartesian coordinates
+                of each species.
         :param (float): Charge for the molecule. Defaults to 0.
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
@@ -64,14 +65,18 @@ class Cage(Molecule):
 
     def center(self, point=None):
         """
-        Center the Cage by updating the sites. In case no point is provided,
-        the molecules is centered on its geometric center.
+        Center the Cage around a point by updating the sites. In case no point
+        is provided, the molecule is centered around the origin.
+
+        Args:
+            point ((3,) numpy.ndarray): Point around which to center the
+                molecule.
         """
+
+        center = sum([site.coords for site in self.sites]) / len(self.sites)
+
         if point is not None:
-            center = point
-        else:
-            # Find the coordinates of the geometric center
-            center = sum([site.coords for site in self.sites])/len(self.sites)
+            center -= point
 
         # Find the new coordinates
         new_coords = np.array(self.cart_coords) - center
@@ -80,8 +85,10 @@ class Cage(Molecule):
         sites = []
         for i in range(len(self.species)):
             prop = None
+
             if self.site_properties:
                 prop = {k: v[i] for k, v in self.site_properties.items()}
+
             sites.append(pmg.Site(self.species[i], new_coords[i],
                                   properties=prop))
 
@@ -94,8 +101,9 @@ class Cage(Molecule):
         Currently does not expand the facets to 4 sites in case it finds other
         sites which are in the plane of the site, as defined by 3 site points.
 
-        :param ignore: (Tuple of Elements) The elements to ignore for the
-        surface facet determination.
+        Args:
+            ignore (Tuple of Elements): The elements to ignore for the surface
+                facet determination.
         """
 
         # Find all the sites which should not be ignored
