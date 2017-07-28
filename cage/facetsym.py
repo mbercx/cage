@@ -74,7 +74,7 @@ class Cage(Molecule):
     def facets(self):
         """
         Surface Facets of the Cage. Note that in case the surface facets have
-        not been set up using find.surface.facets(), the property is equal to
+        not been set up using *find.surface.facets()*, the property is equal to
         *None*.
 
         Returns:
@@ -86,9 +86,10 @@ class Cage(Molecule):
     @property
     def pointgroup(self):
         """
+        The Schoenflies PointGroup of the Cage molecule.
+
         Returns:
-            (pymatgen.symmetry.analyzer.PointGroup):The Schoenflies PointGroup
-                of the Cage molecule.
+            :*pymatgen.symmetry.analyzer.PointGroup*
         """
         if not self._pointgroup:
             self._pointgroup = syman.PointGroupAnalyzer(self).get_pointgroup()
@@ -98,8 +99,10 @@ class Cage(Molecule):
     @property
     def symmops(self):
         """
+        The symmetry operations of the Cage.
+
         Returns:
-            (List of pymatgen.Symmop): The symmetry operations of the Cage.
+            *List of pymatgen.Symmop*
         """
         if not self._symmops:
             # Set up the point group analyzer

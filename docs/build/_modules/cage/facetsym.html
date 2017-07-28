@@ -85,16 +85,24 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">spin_multiplicity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">site_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a Mutable Molecule Cage object. The Cage molecule is</span>
-<span class="sd">        automatically centered on its geometric center.</span>
+<span class="sd">        Create a Cage instance. The Cage molecule is automatically centered</span>
+<span class="sd">        on its geometric center.</span>
 
-<span class="sd">        :param species (list): List of atomic species. Possible kinds of input</span>
-<span class="sd">            include a list of dict of elements/species and occupancies, a List</span>
-<span class="sd">            of elements/specie specified as actual Element/Specie, Strings</span>
-<span class="sd">            (&quot;Fe&quot;, &quot;Fe2+&quot;) or atomic numbers (1,56).</span>
-<span class="sd">        :param coords (List of 3x1 np.array): List of cartesian coordinates of</span>
-<span class="sd">            each species.</span>
-<span class="sd">        :param (float): Charge for the molecule. Defaults to 0.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            species (List of pymatgen.Specie): List of atomic species. Possible</span>
+<span class="sd">                kinds of input include a list of dict of elements/species and</span>
+<span class="sd">                occupancies, a List of elements/specie specified as actual</span>
+<span class="sd">                Element/Specie, Strings (&quot;Fe&quot;, &quot;Fe2+&quot;) or atomic numbers</span>
+<span class="sd">                (1,56).</span>
+<span class="sd">            coords (List of (3,) numpy.ndarray): List of cartesian coordinates</span>
+<span class="sd">                of each species.</span>
+<span class="sd">            charge (float): Charge for the molecule. Defaults to 0.</span>
+<span class="sd">            validate_proximity (bool): Whether to check if there are sites</span>
+<span class="sd">                that are less than 1 Ang apart. Defaults to False.</span>
+<span class="sd">            site_properties (dict): Properties associated with the sites as</span>
+<span class="sd">                a dict of sequences, e.g., {&quot;magmom&quot;:[5,5,5,5]}. The</span>
+<span class="sd">                sequences have to be the same length as the atomic species</span>
+<span class="sd">                and fractional_coords. Defaults to None for no properties.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">charge</span><span class="p">,</span> <span class="n">spin_multiplicity</span><span class="p">,</span>
                                    <span class="n">validate_proximity</span><span class="p">,</span> <span class="n">site_properties</span><span class="p">)</span>
@@ -104,16 +112,100 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_facet_dict</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">facets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Surface Facets of the Cage. Note that in case the surface facets have</span>
+<span class="sd">        not been set up using *find.surface.facets()*, the property is equal to</span>
+<span class="sd">        *None*.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (List of Facets): The surface facets of the Cage, as set up using</span>
+<span class="sd">                find_surface_facets()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pointgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The Schoenflies PointGroup of the Cage molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            *pymatgen.symmetry.analyzer.PointGroup*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">PointGroupAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_pointgroup</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">symmops</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The symmetry operations of the Cage.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            *List of pymatgen.Symmop*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span><span class="p">:</span>
+            <span class="c1"># Set up the point group analyzer</span>
+            <span class="n">pgan</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">PointGroupAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    
+            <span class="c1"># Find the full set of symmetry operations</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">generate_full_symmops</span><span class="p">(</span><span class="n">pgan</span><span class="o">.</span><span class="n">symmops</span><span class="p">,</span>
+                                                        <span class="n">SYMMETRY_TOLERANCE</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span>
+        
+<div class="viewcode-block" id="Cage.from_poscar"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.from_poscar">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_poscar</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Imports a Cage from a VASP POSCAR file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (cage.facetsym.Cage)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Import the structure from the POSCAR file</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="c1"># Generate the molecule object from the structure sites</span>
+        <span class="n">cage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cage</span></div>
+
+<div class="viewcode-block" id="Cage.from_molecule"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.from_molecule">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_molecule</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes a Cage from a Molecule.</span>
+<span class="sd">        :param mol:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Molecule</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
+                   <span class="n">charge</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">spin_multiplicity</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="p">,</span>
+                   <span class="n">site_properties</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">site_properties</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cage.to_poscar"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.to_poscar">[docs]</a>    <span class="k">def</span> <span class="nf">to_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Writes the Cage to a POSCAR file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>  <span class="c1"># TODO</span></div>
+
 <div class="viewcode-block" id="Cage.center"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.center">[docs]</a>    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Center the Cage by updating the sites. In case no point is provided,</span>
-<span class="sd">        the molecules is centered on its geometric center.</span>
+<span class="sd">        Center the Cage around a point by updating the sites, i.e. find the</span>
+<span class="sd">        coordinates for the sites so that the geometric center is on the point</span>
+<span class="sd">        provided. In case no point is provided, the molecule is centered around</span>
+<span class="sd">        the origin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point ((3,) numpy.ndarray): Point around which to center the</span>
+<span class="sd">                molecule.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">])</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">center</span> <span class="o">=</span> <span class="n">point</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Find the coordinates of the geometric center</span>
-            <span class="n">center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+            <span class="n">center</span> <span class="o">-=</span> <span class="n">point</span>
 
         <span class="c1"># Find the new coordinates</span>
         <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">center</span>
@@ -122,8 +214,10 @@
         <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
             <span class="n">prop</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
                 <span class="n">prop</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
             <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                   <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
 
@@ -131,15 +225,19 @@
 
 <div class="viewcode-block" id="Cage.find_surface_facets"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.find_surface_facets">[docs]</a>    <span class="k">def</span> <span class="nf">find_surface_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find all the surface facets of the Cage object.</span>
+<span class="sd">        Find all the surface facets of the Cage object. A surface facet is</span>
+<span class="sd">        defined as a facet for which all atoms of non-ignored species are on</span>
+<span class="sd">        one side of the surface defined by the facet.</span>
 
 <span class="sd">        Currently does not expand the facets to 4 sites in case it finds other</span>
 <span class="sd">        sites which are in the plane of the site, as defined by 3 site points.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            ignore (Tuple of Elements): The elements to ignore for the surface</span>
-<span class="sd">                facet determination.</span>
+<span class="sd">            ignore (Tuple of Elements/Species): The elements to ignore for the</span>
+<span class="sd">                surface facet determination.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#TODO Expand the algorithm to more sites</span>
 
         <span class="c1"># Find all the sites which should not be ignored</span>
         <span class="n">sites_valid</span> <span class="o">=</span> <span class="p">[]</span>
@@ -178,73 +276,12 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="n">facets_surf</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">facets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Surface Facets of the Cage.</span>
-<span class="sd">        :return: (List of Facets)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">pointgroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find the Schoenflies PointGroup of the Cage molecule.</span>
-<span class="sd">        :return: (pymatgen.symmetry.analyzer.PointGroup)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">PointGroupAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_pointgroup</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">symmops</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The symmetry operations of the Cage.</span>
-<span class="sd">        :return: List of </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span><span class="p">:</span>
-            <span class="c1"># Set up the point group analyzer</span>
-            <span class="n">pgan</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">PointGroupAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-    
-            <span class="c1"># Find the full set of symmetry operations</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">generate_full_symmops</span><span class="p">(</span><span class="n">pgan</span><span class="o">.</span><span class="n">symmops</span><span class="p">,</span>
-                                                        <span class="n">SYMMETRY_TOLERANCE</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span>
-        
-<div class="viewcode-block" id="Cage.from_poscar"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.from_poscar">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_poscar</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Imports a Cage from a VASP POSCAR file.</span>
-<span class="sd">        :return: Cage</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Import the structure from the POSCAR file</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-
-        <span class="c1"># Generate the molecule object from the structure sites</span>
-        <span class="n">cage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">cage</span></div>
-
-<div class="viewcode-block" id="Cage.from_molecule"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.from_molecule">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_molecule</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initializes a Cage from a Molecule.</span>
-<span class="sd">        :param mol:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Molecule</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
-                   <span class="n">charge</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">spin_multiplicity</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="p">,</span>
-                   <span class="n">site_properties</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">site_properties</span><span class="p">)</span></div>
-
 <div class="viewcode-block" id="Cage.redefine_origin"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.redefine_origin">[docs]</a>    <span class="k">def</span> <span class="nf">redefine_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Change the coordinates of the Facet, in order to change the origin.</span>
+<span class="sd">        Change the coordinates of the Cage, in order to redefine the origin.</span>
 
-<span class="sd">        :param origin: (3x1 numpy.array) Origin coordinates</span>
-<span class="sd">        :return: None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            origin ((3,) numpy.ndarray): Origin coordinates.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Find the new coordinates</span>
         <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin</span>
@@ -259,29 +296,45 @@
                                   <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span></div>
-    
+
+<div class="viewcode-block" id="Cage.insert"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwrite the append method of the Molecule class, in order to</span>
+<span class="sd">        reset the symmetry operations and point group after the site has been</span>
+<span class="sd">        appended.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (int): Index to insert site.</span>
+<span class="sd">            species (pymatgen.Specie): Species of inserted site.</span>
+<span class="sd">            coords ((3,) numpy.ndarray): Coordinates of inserted site.</span>
+<span class="sd">            validate_proximity (bool): Whether to check if inserted site is</span>
+<span class="sd">                too close to an existing site. Defaults to True.</span>
+<span class="sd">            properties (dict): A dictionary of properties for the Site.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="p">,</span>
+                                 <span class="n">properties</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span></div>
+
 <div class="viewcode-block" id="Cage.append"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Overwrite the append method of the Molecule class, in order to</span>
-<span class="sd">        remove the symmetry operations after the site has been appended.</span>
+<span class="sd">        reset the symmetry operations and point group after the site has been</span>
+<span class="sd">        appended.</span>
 
-<span class="sd">        :param species: (pymatgen.Specie) Species of inserted site.</span>
-<span class="sd">        :param coords: (3x1 numpy.array) Coordinates of inserted site.</span>
-<span class="sd">        :param validate_proximity: (bool) Whether to check if inserted site is</span>
+<span class="sd">        Args:</span>
+<span class="sd">            species (pymatgen.Specie): Species of inserted site.</span>
+<span class="sd">            coords ((3,) numpy.ndarray): Coordinates of inserted site.</span>
+<span class="sd">            validate_proximity (bool): Whether to check if inserted site is</span>
 <span class="sd">                too close to an existing site. Defaults to True.</span>
-<span class="sd">        :param properties: (dict) A dictionary of properties for the Site.</span>
-<span class="sd">        :return: </span>
+<span class="sd">            properties (dict): A dictionary of properties for the Site.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="p">,</span>
                                  <span class="n">properties</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span></div>
-
-<div class="viewcode-block" id="Cage.to_poscar"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.to_poscar">[docs]</a>    <span class="k">def</span> <span class="nf">to_poscar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;POSCAR&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Writes the Cage to a POSCAR file.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>  <span class="c1"># TODO</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Cage.find_noneq_facets"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.find_noneq_facets">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

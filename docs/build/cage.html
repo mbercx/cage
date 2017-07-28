@@ -112,21 +112,19 @@ to fullerenes.</p>
 <dt id="cage.facetsym.Cage.append">
 <code class="descname">append</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overwrite the append method of the Molecule class, in order to
-remove the symmetry operations after the site has been appended.</p>
+reset the symmetry operations and point group after the site has been
+appended.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>species</strong> – (pymatgen.Specie) Species of inserted site.</li>
-<li><strong>coords</strong> – (3x1 numpy.array) Coordinates of inserted site.</li>
-<li><strong>validate_proximity</strong> – (bool) Whether to check if inserted site is
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>species</strong> (<em>pymatgen.Specie</em>) – Species of inserted site.</li>
+<li><strong>coords</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Coordinates of inserted site.</li>
+<li><strong>validate_proximity</strong> (<em>bool</em>) – Whether to check if inserted site is
 too close to an existing site. Defaults to True.</li>
-<li><strong>properties</strong> – (dict) A dictionary of properties for the Site.</li>
+<li><strong>properties</strong> (<em>dict</em>) – A dictionary of properties for the Site.</li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
 </td>
 </tr>
 </tbody>
@@ -136,15 +134,41 @@ too close to an existing site. Defaults to True.</li>
 <dl class="method">
 <dt id="cage.facetsym.Cage.center">
 <code class="descname">center</code><span class="sig-paren">(</span><em>point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Center the Cage by updating the sites. In case no point is provided,
-the molecules is centered on its geometric center.</p>
+<dd><p>Center the Cage around a point by updating the sites, i.e. find the
+coordinates for the sites so that the geometric center is on the point
+provided. In case no point is provided, the molecule is centered around
+the origin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Point around which to center the
+molecule.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="cage.facetsym.Cage.facets">
 <code class="descname">facets</code><a class="headerlink" href="#cage.facetsym.Cage.facets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Surface Facets of the Cage.
-:return: (List of Facets)</p>
+<dd><p>Surface Facets of the Cage. Note that in case the surface facets have
+not been set up using <em>find.surface.facets()</em>, the property is equal to
+<em>None</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>The surface facets of the Cage, as set up using</dt>
+<dd>find_surface_facets()</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(List of Facets)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -240,15 +264,17 @@ are connected by their neighbours in the list.</p>
 <dl class="method">
 <dt id="cage.facetsym.Cage.find_surface_facets">
 <code class="descname">find_surface_facets</code><span class="sig-paren">(</span><em>ignore=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_surface_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_surface_facets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find all the surface facets of the Cage object.</p>
+<dd><p>Find all the surface facets of the Cage object. A surface facet is
+defined as a facet for which all atoms of non-ignored species are on
+one side of the surface defined by the facet.</p>
 <p>Currently does not expand the facets to 4 sites in case it finds other
 sites which are in the plane of the site, as defined by 3 site points.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ignore</strong> (<em>Tuple of Elements</em>) – The elements to ignore for the surface
-facet determination.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ignore</strong> (<em>Tuple of Elements/Species</em>) – The elements to ignore for the
+surface facet determination.</td>
 </tr>
 </tbody>
 </table>
@@ -265,28 +291,64 @@ facet determination.</td>
 <dl class="classmethod">
 <dt id="cage.facetsym.Cage.from_poscar">
 <em class="property">classmethod </em><code class="descname">from_poscar</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.from_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.from_poscar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Imports a Cage from a VASP POSCAR file.
-:return: Cage</p>
+<dd><p>Imports a Cage from a VASP POSCAR file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(cage.facetsym.Cage)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cage.facetsym.Cage.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite the append method of the Molecule class, in order to
+reset the symmetry operations and point group after the site has been
+appended.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>index</strong> (<em>int</em>) – Index to insert site.</li>
+<li><strong>species</strong> (<em>pymatgen.Specie</em>) – Species of inserted site.</li>
+<li><strong>coords</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Coordinates of inserted site.</li>
+<li><strong>validate_proximity</strong> (<em>bool</em>) – Whether to check if inserted site is
+too close to an existing site. Defaults to True.</li>
+<li><strong>properties</strong> (<em>dict</em>) – A dictionary of properties for the Site.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="cage.facetsym.Cage.pointgroup">
 <code class="descname">pointgroup</code><a class="headerlink" href="#cage.facetsym.Cage.pointgroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the Schoenflies PointGroup of the Cage molecule.
-:return: (pymatgen.symmetry.analyzer.PointGroup)</p>
+<dd><p>The Schoenflies PointGroup of the Cage molecule.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pymatgen.symmetry.analyzer.PointGroup</em></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="cage.facetsym.Cage.redefine_origin">
 <code class="descname">redefine_origin</code><span class="sig-paren">(</span><em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.redefine_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.redefine_origin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change the coordinates of the Facet, in order to change the origin.</p>
+<dd><p>Change the coordinates of the Cage, in order to redefine the origin.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>origin</strong> – (3x1 numpy.array) Origin coordinates</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>origin</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Origin coordinates.</td>
 </tr>
 </tbody>
 </table>
@@ -312,8 +374,15 @@ related to and using which symmetry operation:</p>
 <dl class="attribute">
 <dt id="cage.facetsym.Cage.symmops">
 <code class="descname">symmops</code><a class="headerlink" href="#cage.facetsym.Cage.symmops" title="Permalink to this definition">¶</a></dt>
-<dd><p>The symmetry operations of the Cage.
-:return: List of</p>
+<dd><p>The symmetry operations of the Cage.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>List of pymatgen.Symmop</em></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
