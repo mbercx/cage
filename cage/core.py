@@ -17,8 +17,7 @@ from pymatgen.core.structure import SiteCollection
 from pymatgen.core.operations import SymmOp
 
 """
-Tools to find the non-equivalent faces of fullerene shaped molecules.
-Still very much a work in progress.
+Core tools of the cage package. Defines the Cage, OccupiedCage and Facet class.
 """
 
 __author__ = "Marnik Bercx"
@@ -28,11 +27,13 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "14 JUN 2017"
 
+
+SYMMETRY_TOLERANCE = 1e-2
 # This is a tolerance value to determine the symmetry operations of the Cage.
 # It is also used to determine which facets are equivalent. The standard value
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
 # not found, it might be worth to try tweaking this value.
-SYMMETRY_TOLERANCE = 1e-2
+
 
 class Cage(Molecule):
     """
@@ -61,6 +62,9 @@ class Cage(Molecule):
                 a dict of sequences, e.g., {"magmom":[5,5,5,5]}. The
                 sequences have to be the same length as the atomic species
                 and fractional_coords. Defaults to None for no properties.
+
+        Returns:
+            (*cage.Cage*)
         """
         super(Cage, self).__init__(species, coords, charge, spin_multiplicity,
                                    validate_proximity, site_properties)
@@ -123,7 +127,7 @@ class Cage(Molecule):
             filename (string): Filename of the POSCAR file.
 
         Returns:
-            (*cage.facetsym.Cage*)
+            (*cage.Cage*)
         """
         # Import the structure from the POSCAR file
         structure = pmg.Structure.from_file(filename)
@@ -143,7 +147,7 @@ class Cage(Molecule):
                 cage.
 
         Returns:
-            (*cage.facetsym.Cage*)
+            (*cage.Cage*)
         """
         assert type(mol) is Molecule
         return cls(species=mol.species, coords=mol.cart_coords,
@@ -352,13 +356,15 @@ class Cage(Molecule):
                 *str_array* -- A structured array of type:
                     [('surf_facet', Facet), ('noneq_facet', Facet),
                     ('symmop', SymmOp)]
+
             tol (float): Tolerance for the equivalence condition, i.e. how much
                 the distance between the centers is allowed to be after
                 a symmetry operation.
 
         Returns:
-            (*List of cage.facetsym.Facets*) -- The list of facets with their corresponding non-equivalent facet
-                and symmetry operation. See the *fmt* argument.
+            (*List of cage.Facets*) -- The list of facets with their
+                corresponding non-equivalent facet and symmetry operation.
+                See the *fmt* argument.
         """
         if not self.facets:
             print("Please set up surface facets first")
@@ -414,9 +420,9 @@ class Cage(Molecule):
             start (int): Determines from which termination facet the chain is
                 constructed. This might be useful if the chain is not
                 constructed as the user would like.
-            symm_tol (float): Tolerance for the equivalence condition, i.e. how much
-                the distance between the centers is allowed to be after
-                a symmetry operation.
+            symm_tol (float): Tolerance for the equivalence condition, i.e.
+                how much the distance between the centers is allowed to be
+                after a symmetry operation.
             verbose (bool): Print information about the analysis procedure.
                 This is mainly useful when the result is not as expected.
 
@@ -425,6 +431,8 @@ class Cage(Molecule):
                 edge.
 
         """
+
+        #TODO This code needs cleanup and serious testing
 
         if verbose:
             print("")
@@ -454,7 +462,7 @@ class Cage(Molecule):
             for chain_facet in chain_facets:
 
                 # If a new facet has been appended, restart the loop
-                if new_chain_facet == False:
+                if not new_chain_facet:
 
                     # Find a facet that shares an edge
                     for facet in self.facets:
@@ -463,7 +471,7 @@ class Cage(Molecule):
                         # to one of the non-equivalent facets in the chain
                         if len(set(facet.sites) & set(chain_facet.sites)) == 2\
                                 and (facet_dict[facet][0] not in
-                                         chain_list_noneq_facets):
+                                     chain_list_noneq_facets):
 
                             chain_facets.append(facet)
                             chain_list_noneq_facets.append(
@@ -524,8 +532,8 @@ class Cage(Molecule):
                     leftover_facets.remove(facet)
                     number_links = 0
                     for leftover_facet in leftover_facets:
-                        if len(set(facet.sites)
-                                       & set(leftover_facet.sites)) == 2:
+                        if len(set(facet.sites) & set(leftover_facet.sites)) \
+                                                            == 2:
                             number_links += 1
 
                     options.append((facet, number_links))
@@ -555,7 +563,7 @@ class Cage(Molecule):
             share an edge.
 
         Returns:
-            (List of (cage.facetsym.Facet, cage.facetsym.Facet) Tuples) - The
+            (List of (cage.Facet, cage.Facet) Tuples) - The
                 non-equivalent facet links of the Cage.
         """
 
@@ -586,13 +594,12 @@ class Cage(Molecule):
             nonequivalent = True
             for noneq_link in noneq_links:
                 for symm in self.symmops:
-                    link_center = (link[0].center
-                                         + link[1].center)/2
+                    link_center = (link[0].center + link[1].center)/2
                     noneq_link_center = sum((noneq_link[0].center,
-                                          noneq_link[1].center))/2
+                                                noneq_link[1].center))/2
                     symm_link_center = symm.operate(link_center)
-                    distance = symm_link_center - noneq_link_center
-                    if np.linalg.norm(distance) < 1e-2:
+                    connection_vector = symm_link_center - noneq_link_center
+                    if np.linalg.norm(connection_vector) < 1e-2:
                         nonequivalent = False
 
             if nonequivalent:
@@ -601,21 +608,21 @@ class Cage(Molecule):
         return noneq_links
 
     def find_noneq_chain_links(self, symm_tol=SYMMETRY_TOLERANCE,
-                                     verbose=False):
+                               verbose=False):
         """
         Find the links between the facets of the chain that connects a
         set of non equivalent facets.
 
         Args:
-            symm_tol (float): Tolerance for the equivalence condition, i.e. how much
-                the distance between the centers is allowed to be after
-                a symmetry operation.
+            symm_tol (float): Tolerance for the equivalence condition, i.e.
+                how much the distance between the centers is allowed to be
+                after a symmetry operation.
             verbose (bool): Print information about the analysis procedure.
                 This is mainly useful when the result is not as expected.
 
         Returns:
-            (*List of (cage.facetsym.Facet, cage.facetsym.Facet) Tuples*) -- The
-                links between the Facets in the chain of non-equivalent
+            (*List of (cage.Facet, cage.Facet) Tuples*) --
+                The links between the Facets in the chain of non-equivalent
                 Facets.
 
         """
@@ -629,16 +636,16 @@ class Cage(Molecule):
 
         return chain_links
 
-    def find_furthest_facet(self, point):
+    def find_farthest_facet(self, point):
         """
         Find the Facet of the Molecule that is the farthest away from the point
         provided.
 
         Args:
-            point ():
+            point ((3,) numpy.ndarray): Point provided by user.
 
         Returns:
-            **
+            (*cage.Facet*)
         """
         distance = 0
         furthest_facet = None
@@ -655,8 +662,12 @@ class Cage(Molecule):
         """
         Find the Facet of the Molecule that is the closest to the point 
         provided.
-        :param point: 
-        :return:
+
+        Args:
+            point ((3,) numpy.ndarray): Point provided by user.
+
+        Returns:
+            (*cage.Facet*)
         """
         distance = 1e6
         closest_facet = None
@@ -678,18 +689,29 @@ class OccupiedCage(Cage):
     CATIONS = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('K'),
                pmg.Element('Mg'))
 
-    def __init__(self, species, coords, charge = 0, spin_multiplicity = None,
-                 validate_proximity = False, site_properties = None):
+    def __init__(self, species, coords, charge=0, spin_multiplicity=None,
+                 validate_proximity=False, site_properties=None):
         """
-        Initialize an OccupiedCage from the Cage as well as the Facets on which
-        there is a docked cation.
+        Initialize an OccupiedCage instance.
 
-        :param species:
-        :param coords:
-        :param charge:
-        :param spin_multiplicity:
-        :param validate_proximity:
-        :param site_properties:
+        Args:
+            species (List of pymatgen.Specie): List of atomic species. Possible
+                kinds of input include a list of dict of elements/species and
+                occupancies, a List of elements/specie specified as actual
+                Element/Specie, Strings ("Fe", "Fe2+") or atomic numbers
+                (1,56).
+            coords (List of (3,) numpy.ndarray): List of cartesian coordinates
+                of each species.
+            charge (float): Charge for the molecule. Defaults to 0.
+            validate_proximity (bool): Whether to check if there are sites
+                that are less than 1 Ang apart. Defaults to False.
+            site_properties (dict): Properties associated with the sites as
+                a dict of sequences, e.g., {"magmom":[5,5,5,5]}. The
+                sequences have to be the same length as the atomic species
+                and fractional_coords. Defaults to None for no properties.
+
+        Returns:
+            (*cage.Cage*)
         """
 
         super(OccupiedCage, self).__init__(species, coords, charge,
@@ -709,11 +731,14 @@ class OccupiedCage(Cage):
 
     def center(self, point=None):
         """
-        Center the OccupiedCage on the anion center, or a point of the user's
-        choosing.
+        Center the OccupiedCage around a point by updating the sites, i.e. find
+        the coordinates for the sites so that the geometric center **of the
+        anion** is moved to the point provided. In case no point is provided,
+        the anion is centered around the origin.
 
-        :param point:
-        :return:
+        Args:
+            point ((3,) numpy.ndarray): Point around which to center the
+                molecule.
         """
 
         anion_coords = [site.coords for site in self.sites
@@ -723,18 +748,31 @@ class OccupiedCage(Cage):
 
         super(OccupiedCage, self).center(anion_center)
 
-    def add_dock(self, dock, docking_point=None, cation='Li'):
+    def add_dock(self, dock, cation='Li', docking_point=None):
         """
-        Add a docking site to the OccupiedCage.
-        :return:
+        Add a docking site to the OccupiedCage. If the chemical symbol of the
+        cation is provided, the cation is appended to the OccupiedCage. In case
+        the cation is equal to *None*, the cation is assumed to be present and
+
+        Args:
+            dock (cage.Facet): The Facet on which the cation is docked.
+            cation (str): The chemical symbol of the cation element.
+            docking_point ((3,) numpy.ndarray): Docking coordinates of the
+                cation.
         """
-        if cation == None:
+
+        # Check if the dock is on of the facets in the OccupiedCage
+        if dock not in self.facets:
+            raise ValueError("Docking facet not found in the facet list of the"
+                             " OccupiedCage.")
+
+        if not cation:
             self._docks.append(dock)
         else:
             if docking_point:
                 self.append(pmg.Element(cation), docking_point)
                 self.set_charge_and_spin(self.charge,
-                                         self.spin_multiplicity- 1)
+                                         self.spin_multiplicity - 1)
 
             else:
                 cation_coord = dock.center + 2 * dock.normal
@@ -745,7 +783,7 @@ class OccupiedCage(Cage):
 
         self._facets = None
 
-        # TODO Add some checks
+        # TODO Add some more checks
 
     @classmethod
     def from_cage_and_facets(cls, cage, facets, docking_points=(),
@@ -774,6 +812,32 @@ class OccupiedCage(Cage):
 
         return occ_cage
 
+    @classmethod
+    def from_poscar(cls, filename):
+        """
+        Initialize an OccupiedCage from a VASP POSCAR file.
+
+        Args:
+            filename:
+
+        Returns:
+
+        """
+        pass #TODO
+
+    @classmethod
+    def from_file(cls, filename):
+        """
+        Initialize an OccupiedCage from a file.
+
+        Args:
+            filename:
+
+        Returns:
+
+        """
+        pass #TODO
+
     def remove_surface_facet(self, facet):
         """
 
@@ -784,7 +848,6 @@ class OccupiedCage(Cage):
             self._facets = surface_facets.remove(facet)
         else:
             print('Surface Facets have not been set up yet.')
-
 
     def find_surface_facets(self, ignore=None):
         """
@@ -823,7 +886,7 @@ class Facet(SiteCollection, MSONable):
         :param normal:
         """
         self._sites = sites
-        self._center = site_center(tuple(self.sites))
+        self._center = utils.site_center(tuple(self.sites))
         if normal is not None:
             self._normal = normal  # TODO Check if input normal makes sense
         else:
@@ -948,7 +1011,7 @@ class Facet(SiteCollection, MSONable):
         Find the intersection of the normal lines of the Facet and another one.
 
         Currently only works on an edge sharing Facet whose normal intersects
-        with this ones'.
+        with the normal of the facet.
 
         :return:
         """
@@ -1090,23 +1153,3 @@ class Facet(SiteCollection, MSONable):
         :return: angle value (in radians)
         """
         return utils.angle_between(coordinate - self._center, self._normal)
-
-
-# Utility functions that may be useful across classes
-
-def site_center(sites):
-    """
-    Find the center of a collection of sites.
-    :param sites: Tuple of Site objects
-    :return: Array of the cartesian coordinates of the center of the sites
-    """
-    return sum([site.coords for site in sites])/len(sites)
-
-
-def schoenflies_to_hm():
-    """
-    Function for converting the Schoenflies point group symbol to the Hermann
-    Manguin one.
-    :return:
-    """
-    pass  # TODO

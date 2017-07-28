@@ -50,7 +50,7 @@
 <span class="n">test_files_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">test_dir</span><span class="p">,</span> <span class="s1">&#39;testfiles&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Test_LandscapeAnalyzer"><a class="viewcode-back" href="../../../cage.tests.html#cage.tests.test_landscape.Test_LandscapeAnalyzer">[docs]</a><span class="k">def</span> <span class="nf">Test_LandscapeAnalyzer</span><span class="p">():</span>
-    <span class="kn">from</span> <span class="nn">cage.facetsym</span> <span class="k">import</span> <span class="n">Facet</span>
+    <span class="kn">from</span> <span class="nn">cage.core</span> <span class="k">import</span> <span class="n">Facet</span>
     <span class="n">facet</span> <span class="o">=</span> <span class="n">Facet</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">test_files_dir</span><span class="p">,</span> <span class="s1">&#39;facetcalc&#39;</span><span class="p">,</span>
                                          <span class="s1">&#39;facet.json&#39;</span><span class="p">))</span>
     <span class="kn">from</span> <span class="nn">cage.landscape</span> <span class="k">import</span> <span class="n">LandscapeAnalyzer</span>

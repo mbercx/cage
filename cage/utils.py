@@ -3,6 +3,10 @@
 import numpy as np
 import pymatgen.io.nwchem as nw
 
+"""
+A random collection of utility methods for other modules.
+"""
+
 def write_init_final(filename):
     """
     Quickly write out the initial and the final configuration of a nwchem
@@ -36,3 +40,19 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+def site_center(sites):
+    """
+    Find the geometric center of a collection of sites.
+    :param sites: Tuple of Site objects
+    :return: Array of the cartesian coordinates of the center of the sites
+    """
+    return sum([site.coords for site in sites])/len(sites)
+
+def schoenflies_to_hm():
+    """
+    Function for converting the Schoenflies point group symbol to the Hermann
+    Manguin one.
+    :return:
+    """
+    pass  # TODO

@@ -100,17 +100,17 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-cage.facetsym">
-<span id="cage-facetsym-module"></span><h2>cage.facetsym module<a class="headerlink" href="#module-cage.facetsym" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-cage.core">
+<span id="cage-core-module"></span><h2>cage.core module<a class="headerlink" href="#module-cage.core" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="cage.facetsym.Cage">
-<em class="property">class </em><code class="descclassname">cage.facetsym.</code><code class="descname">Cage</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>charge=0</em>, <em>spin_multiplicity=None</em>, <em>validate_proximity=False</em>, <em>site_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage">
+<em class="property">class </em><code class="descclassname">cage.core.</code><code class="descname">Cage</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>charge=0</em>, <em>spin_multiplicity=None</em>, <em>validate_proximity=False</em>, <em>site_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pymatgen.core.structure.Molecule</span></code></p>
-<p>A Cage is a pymatgen Molecule-derived object for molecules shaped similar
+<p>A Cage is a pymatgen.Molecule-based object for molecules shaped similar
 to fullerenes.</p>
 <dl class="method">
-<dt id="cage.facetsym.Cage.append">
-<code class="descname">append</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.append" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overwrite the append method of the Molecule class, in order to
 reset the symmetry operations and point group after the site has been
 appended.</p>
@@ -132,8 +132,8 @@ too close to an existing site. Defaults to True.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.center">
-<code class="descname">center</code><span class="sig-paren">(</span><em>point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.center" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.center">
+<code class="descname">center</code><span class="sig-paren">(</span><em>point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.center" title="Permalink to this definition">¶</a></dt>
 <dd><p>Center the Cage around a point by updating the sites, i.e. find the
 coordinates for the sites so that the geometric center is on the point
 provided. In case no point is provided, the molecule is centered around
@@ -150,8 +150,8 @@ molecule.</td>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.Cage.facets">
-<code class="descname">facets</code><a class="headerlink" href="#cage.facetsym.Cage.facets" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.facets">
+<code class="descname">facets</code><a class="headerlink" href="#cage.core.Cage.facets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Surface Facets of the Cage. Note that in case the surface facets have
 not been set up using <em>find.surface.facets()</em>, the property is equal to
 <em>None</em>.</p>
@@ -172,33 +172,43 @@ not been set up using <em>find.surface.facets()</em>, the property is equal to
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_closest_facet">
-<code class="descname">find_closest_facet</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_closest_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_closest_facet" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.find_closest_facet">
+<code class="descname">find_closest_facet</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_closest_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_closest_facet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the Facet of the Molecule that is the closest to the point
-provided.
-:param point:
-:return:</p>
+provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Point provided by user.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<em>cage.Facet</em>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_facet_connections">
-<code class="descname">find_facet_connections</code><span class="sig-paren">(</span><em>share_edge=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_facet_connections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_facet_connections" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the non-equivalent connections between facets of the cage
+<dt id="cage.core.Cage.find_facet_links">
+<code class="descname">find_facet_links</code><span class="sig-paren">(</span><em>share_edge=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_facet_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_facet_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the non-equivalent links between facets of the cage
 molecule. The facets can be connected by sharing an edge, or a vertex.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>share_edge</strong> (<em>bool</em>) – Only return connections between facets that</li>
+<li><strong>share_edge</strong> (<em>bool</em>) – Only return links between facets that</li>
 <li><strong>an edge.</strong> (<em>share</em>) – </li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Test</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(test)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>(List of (cage.Facet, cage.Facet) Tuples) - The</dt>
+<dd><p class="first last">non-equivalent facet links of the Cage.</p>
+</dd>
+</dl>
+</p>
 </td>
 </tr>
 </tbody>
@@ -206,32 +216,56 @@ molecule. The facets can be connected by sharing an edge, or a vertex.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_furthest_facet">
-<code class="descname">find_furthest_facet</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_furthest_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_furthest_facet" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.find_farthest_facet">
+<code class="descname">find_farthest_facet</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_farthest_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_farthest_facet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the Facet of the Molecule that is the farthest away from the point
-provided.
-:param point:
-:return:</p>
+provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Point provided by user.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<em>cage.Facet</em>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_noneq_chain_paths">
-<code class="descname">find_noneq_chain_paths</code><span class="sig-paren">(</span><em>symm_tol=0.05</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_noneq_chain_paths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_noneq_chain_paths" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the paths that connect the facets of the chain that connects a
+<dt id="cage.core.Cage.find_noneq_chain_links">
+<code class="descname">find_noneq_chain_links</code><span class="sig-paren">(</span><em>symm_tol=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_chain_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_chain_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the links between the facets of the chain that connects a
 set of non equivalent facets.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>symm_tol</strong> (<em>float</em>) – Tolerance for the equivalence condition, i.e.
+how much the distance between the centers is allowed to be
+after a symmetry operation.</li>
+<li><strong>verbose</strong> (<em>bool</em>) – Print information about the analysis procedure.
+This is mainly useful when the result is not as expected.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>(<em>List of (cage.Facet, cage.Facet) Tuples</em>) –</dt>
+<dd><p class="first last">The links between the Facets in the chain of non-equivalent
+Facets.</p>
+</dd>
+</dl>
+</p>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_noneq_facet_chain">
-<code class="descname">find_noneq_facet_chain</code><span class="sig-paren">(</span><em>start=0</em>, <em>symm_tol=0.05</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_noneq_facet_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_noneq_facet_chain" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.find_noneq_facet_chain">
+<code class="descname">find_noneq_facet_chain</code><span class="sig-paren">(</span><em>start=0</em>, <em>symm_tol=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_facet_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_facet_chain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find a chain of non equivalent facets, i.e. a collection of facets that
 are connected by edges. Automatically sorts the facets so they
 are connected by their neighbours in the list.</p>
@@ -243,15 +277,20 @@ are connected by their neighbours in the list.</p>
 <li><strong>start</strong> (<em>int</em>) – Determines from which termination facet the chain is
 constructed. This might be useful if the chain is not
 constructed as the user would like.</li>
-<li><strong>symm_tol</strong> (<em>float</em>) – Tolerance for the equivalence condition, i.e. how much
-the distance between the centers is allowed to be after
-a symmetry operation.</li>
+<li><strong>symm_tol</strong> (<em>float</em>) – Tolerance for the equivalence condition, i.e.
+how much the distance between the centers is allowed to be
+after a symmetry operation.</li>
 <li><strong>verbose</strong> (<em>bool</em>) – Print information about the analysis procedure.
 This is mainly useful when the result is not as expected.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>List of Facets</em> – A chain of facets connected by sharing an edge.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
+<dt>(<em>List of Facets</em>) – A chain of facets connected by sharing an</dt>
+<dd><p class="first last">edge.</p>
+</dd>
+</dl>
+</p>
 </td>
 </tr>
 </tbody>
@@ -259,8 +298,8 @@ This is mainly useful when the result is not as expected.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_noneq_facets">
-<code class="descname">find_noneq_facets</code><span class="sig-paren">(</span><em>tol=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_noneq_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_noneq_facets" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.find_noneq_facets">
+<code class="descname">find_noneq_facets</code><span class="sig-paren">(</span><em>tol=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_facets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the nonequivalent facets of the Cage.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -279,8 +318,8 @@ a symmetry operation.</td>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.find_surface_facets">
-<code class="descname">find_surface_facets</code><span class="sig-paren">(</span><em>ignore=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.find_surface_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.find_surface_facets" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.find_surface_facets">
+<code class="descname">find_surface_facets</code><span class="sig-paren">(</span><em>ignore=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_surface_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_surface_facets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find all the surface facets of the Cage object. A surface facet is
 defined as a facet for which all atoms of non-ignored species are on
 one side of the surface defined by the facet.</p>
@@ -298,25 +337,25 @@ surface facet determination.</td>
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.facetsym.Cage.from_molecule">
-<em class="property">classmethod </em><code class="descname">from_molecule</code><span class="sig-paren">(</span><em>mol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.from_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.from_molecule" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.from_molecule">
+<em class="property">classmethod </em><code class="descname">from_molecule</code><span class="sig-paren">(</span><em>mol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.from_molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.from_molecule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initializes a Cage from a Molecule.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mol</strong> (<em>pymatgen.Molecule</em>) – The molecule from which to initalize the
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mol</strong> (<em>pymatgen.Molecule</em>) – The molecule from which to initialize the
 cage.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><em>cage.facetsym.Cage</em></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<em>cage.Cage</em>)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.facetsym.Cage.from_poscar">
-<em class="property">classmethod </em><code class="descname">from_poscar</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.from_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.from_poscar" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.from_poscar">
+<em class="property">classmethod </em><code class="descname">from_poscar</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.from_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.from_poscar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imports a Cage from a VASP POSCAR file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -324,15 +363,15 @@ cage.</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>string</em>) – Filename of the POSCAR file.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><em>cage.facetsym.Cage</em></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<em>cage.Cage</em>)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.insert">
-<code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.insert" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.insert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overwrite the append method of the Molecule class, in order to
 reset the symmetry operations and point group after the site has been
 appended.</p>
@@ -355,22 +394,22 @@ too close to an existing site. Defaults to True.</li>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.Cage.pointgroup">
-<code class="descname">pointgroup</code><a class="headerlink" href="#cage.facetsym.Cage.pointgroup" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.pointgroup">
+<code class="descname">pointgroup</code><a class="headerlink" href="#cage.core.Cage.pointgroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>The Schoenflies PointGroup of the Cage molecule.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pymatgen.symmetry.analyzer.PointGroup</em></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(<em>pymatgen.symmetry.analyzer.PointGroup</em>)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.redefine_origin">
-<code class="descname">redefine_origin</code><span class="sig-paren">(</span><em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.redefine_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.redefine_origin" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.redefine_origin">
+<code class="descname">redefine_origin</code><span class="sig-paren">(</span><em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.redefine_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.redefine_origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the coordinates of the Cage, in order to redefine the origin.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -383,8 +422,8 @@ too close to an existing site. Defaults to True.</li>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.set_up_facet_list">
-<code class="descname">set_up_facet_list</code><span class="sig-paren">(</span><em>fmt='dict'</em>, <em>tol=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.set_up_facet_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.set_up_facet_list" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.set_up_facet_list">
+<code class="descname">set_up_facet_list</code><span class="sig-paren">(</span><em>fmt='dict'</em>, <em>tol=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.set_up_facet_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.set_up_facet_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up a List of the surface facets, and how they relate to the
 non-equivalent facets, i.e. which non-equivalent facet they can be
 related to and using which symmetry operation:</p>
@@ -410,8 +449,9 @@ a symmetry operation.</li>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><dl class="docutils">
-<dt>The list of facets with their corresponding non-equivalent facet</dt>
-<dd><p class="first last">and symmetry operation. See the <em>fmt</em> argument.</p>
+<dt>(<em>List of cage.Facets</em>) – The list of facets with their</dt>
+<dd><p class="first last">corresponding non-equivalent facet and symmetry operation.
+See the <em>fmt</em> argument.</p>
 </dd>
 </dl>
 </p>
@@ -422,35 +462,35 @@ a symmetry operation.</li>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.Cage.symmops">
-<code class="descname">symmops</code><a class="headerlink" href="#cage.facetsym.Cage.symmops" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.symmops">
+<code class="descname">symmops</code><a class="headerlink" href="#cage.core.Cage.symmops" title="Permalink to this definition">¶</a></dt>
 <dd><p>The symmetry operations of the Cage.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>List of pymatgen.Symmop</em></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(<em>List of pymatgen.Symmop</em>)</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Cage.to_poscar">
-<code class="descname">to_poscar</code><span class="sig-paren">(</span><em>filename='POSCAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Cage.to_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Cage.to_poscar" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Cage.to_poscar">
+<code class="descname">to_poscar</code><span class="sig-paren">(</span><em>filename='POSCAR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.to_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.to_poscar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes the Cage to a POSCAR file.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="cage.facetsym.Facet">
-<em class="property">class </em><code class="descclassname">cage.facetsym.</code><code class="descname">Facet</code><span class="sig-paren">(</span><em>sites</em>, <em>normal=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet">
+<em class="property">class </em><code class="descclassname">cage.core.</code><code class="descname">Facet</code><span class="sig-paren">(</span><em>sites</em>, <em>normal=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pymatgen.core.structure.SiteCollection</span></code>, <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Facet of a Molecule object, defined by a list of Sites.</p>
 <dl class="method">
-<dt id="cage.facetsym.Facet.angle_to_normal">
-<code class="descname">angle_to_normal</code><span class="sig-paren">(</span><em>coordinate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.angle_to_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.angle_to_normal" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.angle_to_normal">
+<code class="descname">angle_to_normal</code><span class="sig-paren">(</span><em>coordinate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.angle_to_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.angle_to_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the angle between the vector that connects the center and the
 coordinate and the normal.
 :param coordinate:
@@ -458,8 +498,8 @@ coordinate and the normal.
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.as_dict">
-<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.as_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.as_dict">
+<code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.as_dict" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -471,27 +511,27 @@ coordinate and the normal.
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.Facet.center">
-<code class="descname">center</code><a class="headerlink" href="#cage.facetsym.Facet.center" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.center">
+<code class="descname">center</code><a class="headerlink" href="#cage.core.Facet.center" title="Permalink to this definition">¶</a></dt>
 <dd><p>The center of the Facet.
 :return: Array of the center coordinates</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.copy" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.copy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.flip_normal">
-<code class="descname">flip_normal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.flip_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.flip_normal" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.flip_normal">
+<code class="descname">flip_normal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.flip_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.flip_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flip the direction of the surface normal of the Facet.
 :return:</p>
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.facetsym.Facet.from_dict">
-<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.from_dict" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.from_dict">
+<em class="property">classmethod </em><code class="descname">from_dict</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.from_dict" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -505,8 +545,8 @@ coordinate and the normal.
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.facetsym.Facet.from_file">
-<em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.from_file" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.from_file">
+<em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.from_file" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -520,8 +560,8 @@ coordinate and the normal.
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.facetsym.Facet.from_str">
-<em class="property">classmethod </em><code class="descname">from_str</code><span class="sig-paren">(</span><em>input_string</em>, <em>fmt='json'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.from_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.from_str" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.from_str">
+<em class="property">classmethod </em><code class="descname">from_str</code><span class="sig-paren">(</span><em>input_string</em>, <em>fmt='json'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.from_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.from_str" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -540,8 +580,8 @@ coordinate and the normal.
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.get_distance">
-<code class="descname">get_distance</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.get_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.get_distance" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.get_distance">
+<code class="descname">get_distance</code><span class="sig-paren">(</span><em>i</em>, <em>j</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.get_distance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.get_distance" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -560,11 +600,11 @@ coordinate and the normal.
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.get_normal_intersection">
-<code class="descname">get_normal_intersection</code><span class="sig-paren">(</span><em>other</em>, <em>method='gonio'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.get_normal_intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.get_normal_intersection" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.get_normal_intersection">
+<code class="descname">get_normal_intersection</code><span class="sig-paren">(</span><em>other</em>, <em>method='gonio'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.get_normal_intersection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.get_normal_intersection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the intersection of the normal lines of the Facet and another one.</p>
 <p>Currently only works on an edge sharing Facet whose normal intersects
-with this ones’.</p>
+with the normal of the facet.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -576,8 +616,8 @@ with this ones’.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.is_equivalent">
-<code class="descname">is_equivalent</code><span class="sig-paren">(</span><em>other</em>, <em>symmops</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.is_equivalent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.is_equivalent" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.is_equivalent">
+<code class="descname">is_equivalent</code><span class="sig-paren">(</span><em>other</em>, <em>symmops</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.is_equivalent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.is_equivalent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a Facet is equivalent to another Facet based on a list of
 symmetry operations,
 :param other:
@@ -586,29 +626,29 @@ symmetry operations,
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.Facet.normal">
-<code class="descname">normal</code><a class="headerlink" href="#cage.facetsym.Facet.normal" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.normal">
+<code class="descname">normal</code><a class="headerlink" href="#cage.core.Facet.normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Surface normal of the Facet
 :return: Array of the normal vector</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.redefine_origin">
-<code class="descname">redefine_origin</code><span class="sig-paren">(</span><em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.redefine_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.redefine_origin" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.redefine_origin">
+<code class="descname">redefine_origin</code><span class="sig-paren">(</span><em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.redefine_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.redefine_origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the coordinates of the Facet, in order to change the origin.
 :return:</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.Facet.sites">
-<code class="descname">sites</code><a class="headerlink" href="#cage.facetsym.Facet.sites" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.sites">
+<code class="descname">sites</code><a class="headerlink" href="#cage.core.Facet.sites" title="Permalink to this definition">¶</a></dt>
 <dd><p>The sites that define the Facet.
 :return: List of Sites</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.Facet.to">
-<code class="descname">to</code><span class="sig-paren">(</span><em>fmt='json'</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#Facet.to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.Facet.to" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.Facet.to">
+<code class="descname">to</code><span class="sig-paren">(</span><em>fmt='json'</em>, <em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.to" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -629,60 +669,76 @@ symmetry operations,
 </dd></dl>
 
 <dl class="class">
-<dt id="cage.facetsym.OccupiedCage">
-<em class="property">class </em><code class="descclassname">cage.facetsym.</code><code class="descname">OccupiedCage</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>charge=0</em>, <em>spin_multiplicity=None</em>, <em>validate_proximity=False</em>, <em>site_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#OccupiedCage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.OccupiedCage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cage.facetsym.Cage" title="cage.facetsym.Cage"><code class="xref py py-class docutils literal"><span class="pre">cage.facetsym.Cage</span></code></a></p>
+<dt id="cage.core.OccupiedCage">
+<em class="property">class </em><code class="descclassname">cage.core.</code><code class="descname">OccupiedCage</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>charge=0</em>, <em>spin_multiplicity=None</em>, <em>validate_proximity=False</em>, <em>site_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cage.core.Cage" title="cage.core.Cage"><code class="xref py py-class docutils literal"><span class="pre">cage.core.Cage</span></code></a></p>
 <p>A Cage Molecule that has one or more cations docked on it.</p>
 <dl class="attribute">
-<dt id="cage.facetsym.OccupiedCage.CATIONS">
-<code class="descname">CATIONS</code><em class="property"> = (Element Li, Element Na, Element K, Element Mg)</em><a class="headerlink" href="#cage.facetsym.OccupiedCage.CATIONS" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.OccupiedCage.CATIONS">
+<code class="descname">CATIONS</code><em class="property"> = (Element Li, Element Na, Element K, Element Mg)</em><a class="headerlink" href="#cage.core.OccupiedCage.CATIONS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.OccupiedCage.add_dock">
-<code class="descname">add_dock</code><span class="sig-paren">(</span><em>dock</em>, <em>docking_point=None</em>, <em>cation='Li'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#OccupiedCage.add_dock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.OccupiedCage.add_dock" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a docking site to the OccupiedCage.
-:return:</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="cage.facetsym.OccupiedCage.center">
-<code class="descname">center</code><span class="sig-paren">(</span><em>point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#OccupiedCage.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.OccupiedCage.center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Center the OccupiedCage on the anion center, or a point of the user’s
-choosing.</p>
+<dt id="cage.core.OccupiedCage.add_dock">
+<code class="descname">add_dock</code><span class="sig-paren">(</span><em>dock</em>, <em>cation='Li'</em>, <em>docking_point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.add_dock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.add_dock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a docking site to the OccupiedCage. If the chemical symbol of the
+cation is provided, the cation is appended to the OccupiedCage. In case
+the cation is equal to <em>None</em>, the cation is assumed to be present and</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dock</strong> (<em>cage.Facet</em>) – The Facet on which the cation is docked.</li>
+<li><strong>cation</strong> (<em>str</em>) – The chemical symbol of the cation element.</li>
+<li><strong>docking_point</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Docking coordinates of the
+cation.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cage.core.OccupiedCage.center">
+<code class="descname">center</code><span class="sig-paren">(</span><em>point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Center the OccupiedCage around a point by updating the sites, i.e. find
+the coordinates for the sites so that the geometric center <strong>of the
+anion</strong> is moved to the point provided. In case no point is provided,
+the anion is centered around the origin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Point around which to center the
+molecule.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.OccupiedCage.docks">
-<code class="descname">docks</code><a class="headerlink" href="#cage.facetsym.OccupiedCage.docks" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.OccupiedCage.docks">
+<code class="descname">docks</code><a class="headerlink" href="#cage.core.OccupiedCage.docks" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="cage.facetsym.OccupiedCage.facets">
-<code class="descname">facets</code><a class="headerlink" href="#cage.facetsym.OccupiedCage.facets" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.OccupiedCage.facets">
+<code class="descname">facets</code><a class="headerlink" href="#cage.core.OccupiedCage.facets" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="cage.facetsym.OccupiedCage.find_surface_facets">
-<code class="descname">find_surface_facets</code><span class="sig-paren">(</span><em>ignore=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#OccupiedCage.find_surface_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.OccupiedCage.find_surface_facets" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.OccupiedCage.find_surface_facets">
+<code class="descname">find_surface_facets</code><span class="sig-paren">(</span><em>ignore=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.find_surface_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.find_surface_facets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the surface facets of the OccupiedCage.
 :param ignore:
 :return:</p>
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.facetsym.OccupiedCage.from_cage_and_facets">
-<em class="property">classmethod </em><code class="descname">from_cage_and_facets</code><span class="sig-paren">(</span><em>cage</em>, <em>facets</em>, <em>docking_points=()</em>, <em>cation='Li'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#OccupiedCage.from_cage_and_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.OccupiedCage.from_cage_and_facets" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.OccupiedCage.from_cage_and_facets">
+<em class="property">classmethod </em><code class="descname">from_cage_and_facets</code><span class="sig-paren">(</span><em>cage</em>, <em>facets</em>, <em>docking_points=()</em>, <em>cation='Li'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.from_cage_and_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.from_cage_and_facets" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -699,9 +755,39 @@ choosing.</p>
 </table>
 </dd></dl>
 
+<dl class="classmethod">
+<dt id="cage.core.OccupiedCage.from_file">
+<em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize an OccupiedCage from a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="cage.core.OccupiedCage.from_poscar">
+<em class="property">classmethod </em><code class="descname">from_poscar</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.from_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.from_poscar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize an OccupiedCage from a VASP POSCAR file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – </td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
 <dl class="method">
-<dt id="cage.facetsym.OccupiedCage.remove_surface_facet">
-<code class="descname">remove_surface_facet</code><span class="sig-paren">(</span><em>facet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#OccupiedCage.remove_surface_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.OccupiedCage.remove_surface_facet" title="Permalink to this definition">¶</a></dt>
+<dt id="cage.core.OccupiedCage.remove_surface_facet">
+<code class="descname">remove_surface_facet</code><span class="sig-paren">(</span><em>facet</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.remove_surface_facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.remove_surface_facet" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -712,22 +798,6 @@ choosing.</p>
 </table>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="function">
-<dt id="cage.facetsym.schoenflies_to_hm">
-<code class="descclassname">cage.facetsym.</code><code class="descname">schoenflies_to_hm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#schoenflies_to_hm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.schoenflies_to_hm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function for converting the Schoenflies point group symbol to the Hermann
-Manguin one.
-:return:</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="cage.facetsym.site_center">
-<code class="descclassname">cage.facetsym.</code><code class="descname">site_center</code><span class="sig-paren">(</span><em>sites</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/facetsym.html#site_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.facetsym.site_center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find the center of a collection of sites.
-:param sites: Tuple of Site objects
-:return: Array of the cartesian coordinates of the center of the sites</p>
 </dd></dl>
 
 </div>
@@ -4566,6 +4636,22 @@ IStructures.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="cage.utils.schoenflies_to_hm">
+<code class="descclassname">cage.utils.</code><code class="descname">schoenflies_to_hm</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/utils.html#schoenflies_to_hm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.utils.schoenflies_to_hm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function for converting the Schoenflies point group symbol to the Hermann
+Manguin one.
+:return:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cage.utils.site_center">
+<code class="descclassname">cage.utils.</code><code class="descname">site_center</code><span class="sig-paren">(</span><em>sites</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/utils.html#site_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.utils.site_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the geometric center of a collection of sites.
+:param sites: Tuple of Site objects
+:return: Array of the cartesian coordinates of the center of the sites</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="cage.utils.unit_vector">
 <code class="descclassname">cage.utils.</code><code class="descname">unit_vector</code><span class="sig-paren">(</span><em>vector</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/utils.html#unit_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.utils.unit_vector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the unit vector of the vector.</p>
@@ -4581,9 +4667,9 @@ optimization.
 </dd></dl>
 
 </div>
-<div class="section" id="module-cage">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cage" title="Permalink to this headline">¶</a></h2>
-</div>
+<div class="section" id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-cage"></span></div>
 </div>
 
 
@@ -4597,12 +4683,12 @@ optimization.
 <li><a class="reference internal" href="#">cage package</a><ul>
 <li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cage.facetsym">cage.facetsym module</a></li>
+<li><a class="reference internal" href="#module-cage.core">cage.core module</a></li>
 <li><a class="reference internal" href="#module-cage.landscape">cage.landscape module</a></li>
 <li><a class="reference internal" href="#module-cage.path">cage.path module</a></li>
 <li><a class="reference internal" href="#module-cage.study">cage.study module</a></li>
 <li><a class="reference internal" href="#module-cage.utils">cage.utils module</a></li>
-<li><a class="reference internal" href="#module-cage">Module contents</a></li>
+<li><a class="reference internal" href="#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>

@@ -124,7 +124,7 @@ def main():
             raise IOError("Requested cation is not found in the molecule.")
 
         # Set up the occupied anion
-        occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
+        occmol = cage.core.OccupiedCage.from_molecule(mol)
         occmol.find_surface_facets(ignore=IGNORE)
         dock = occmol.find_closest_facet(cat_coords)
 
@@ -192,7 +192,7 @@ def main():
             # In case the molecules must be optimized, add the constraints and
             # optimization setup (DRIVER)
             if OPERATION == "optimize":
-                fixed_facet = occmol.find_furthest_facet(landscape.center)
+                fixed_facet = occmol.find_farthest_facet(landscape.center)
                 ALT_SETUP["constraints"] = find_constraints(occmol,
                                                             fixed_facet)
                 ALT_SETUP["driver"] = DRIVER_SETUP

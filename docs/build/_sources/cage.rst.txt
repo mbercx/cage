@@ -13,10 +13,10 @@ Subpackages
 Submodules
 ----------
 
-cage\.facetsym module
----------------------
+cage\.core module
+-----------------
 
-.. automodule:: cage.facetsym
+.. automodule:: cage.core
     :members:
     :undoc-members:
     :show-inheritance:

@@ -74,7 +74,7 @@ except IndexError:
 def main():
 
     # Load the POSCAR into a Cage
-    mol = cage.facetsym.Cage.from_poscar(filename)
+    mol = cage.core.Cage.from_poscar(filename)
     mol.find_surface_facets(IGNORE)
 
     noneq_facets = mol.find_noneq_facets()
@@ -84,9 +84,9 @@ def main():
     for ne_facet in noneq_facets:
 
         # Construct the occupied cage
-        occmol = cage.facetsym.OccupiedCage.from_cage_and_facets(mol,
-                                                                 (ne_facet,),
-                                                                 cation=CATION)
+        occmol = cage.core.OccupiedCage.from_cage_and_facets(mol,
+                                                             (ne_facet,),
+                                                             cation=CATION)
         occmol.find_surface_facets(IGNORE)
 
         total_mol = occmol.copy()
@@ -150,7 +150,7 @@ def main():
             # In case the molecules must be optimized, add the constraints and
             # optimization setup (DRIVER)
             if OPERATION == "optimize":
-                fixed_facet = mol.find_furthest_facet(landscape.center)
+                fixed_facet = mol.find_farthest_facet(landscape.center)
                 ALT_SETUP["constraints"] = find_constraints(mol, fixed_facet)
                 ALT_SETUP["driver"] = DRIVER_SETUP
 

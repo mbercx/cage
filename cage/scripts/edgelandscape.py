@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pylab import *
 
 from cage.landscape import LandscapeAnalyzer
-from cage.facetsym import Facet
+from cage.core import Facet
 
 """
 Plot the landscape of connected edges. This is some damn illegible code, but

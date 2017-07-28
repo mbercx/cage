@@ -6,7 +6,7 @@ import os
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
 
-from cage.facetsym import Cage
+from cage.core import Cage
 
 
 """
