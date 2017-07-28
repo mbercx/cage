@@ -17,12 +17,19 @@ import click
 @click.group()
 def main():
     """
+    Python tools to study cage=like anions for solid electrolytes in batteries.
+    """
+    pass
+
+@main.group()
+def setup():
+    """
     Python tools to set up NwChem calculations for investigating the local
     cation-anion interaction around cage-like molecules.
     """
     pass
 
-@main.command()
+@setup.command()
 @click.argument('filename')
 def optimize(filename):
     """ Set up the initial anion optimization. """
@@ -30,7 +37,7 @@ def optimize(filename):
 
     optimize(filename)
 
-@main.command()
+@setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
@@ -44,7 +51,7 @@ def dock(filename, cation, distance):
 
     docksetup(filename, cation, distance)
 
-@main.command()
+@setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--operation', '-O', default='energy')
@@ -57,7 +64,7 @@ def chain(filename, cation, operation, endradii, nradii, adensity):
 
     chainsetup(filename, cation, operation, endradii, nradii, adensity)
 
-@main.command()
+@setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
@@ -68,7 +75,7 @@ def path(filename, cation, distance, edges):
 
     pathsetup(filename, cation, distance, edges)
 
-@main.command()
+@setup.command()
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
 def neb(paths_dir, nimages):
@@ -77,7 +84,7 @@ def neb(paths_dir, nimages):
 
     nebsetup(paths_dir, nimages)
 
-@main.group()
+@setup.group()
 def twocat():
     """
     Set up calculations for anions with two cations. These require the results
@@ -104,3 +111,17 @@ def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
 
     twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose)
+
+@main.group()
+def analyze():
+    """
+    Python tools to analyze NwChem calculations for investigating the local
+    cation-anion interaction around cage-like molecules.
+    """
+    pass
+
+@analyze.command()
+def landscape():
+    """
+    Analyze the landscape
+    """
