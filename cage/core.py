@@ -357,7 +357,7 @@ class Cage(Molecule):
                 a symmetry operation.
 
         Returns:
-            The list of facets with their corresponding non-equivalent facet
+            (*List of cage.facetsym.Facets*) -- The list of facets with their corresponding non-equivalent facet
                 and symmetry operation. See the *fmt* argument.
         """
         if not self.facets:
