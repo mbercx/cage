@@ -2,10 +2,8 @@
 # Copyright (c) Marnik Bercx
 
 from monty.json import MSONable
-from cage.facetsym import Cage
+from cage.core import Cage
 
-import math
-import os
 import json
 
 import matplotlib.pyplot as plt
@@ -20,9 +18,6 @@ import cage.utils as utils
 Tools to set up and run calculations to study energy landscapes, specifically
 for Cage molecules.
 """
-
-# TODO Landscape should not be defined by vertices, but by points.
-# TODO Instead, make a method 'From vertices' to initialize landscape
 
 __author__ = "Marnik Bercx"
 __version__ = "0.1"

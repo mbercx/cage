@@ -11,7 +11,7 @@ import pymatgen.io.nwchem as nwchem
 
 import cage
 
-from cage.facetsym import Cage
+from cage.core import Cage
 
 """
 Script to set up the calculations for all the non-equivalent facets of a cage
@@ -50,16 +50,16 @@ GEO_SETUP = {"noautosym", "noautoz", 'nocenter', "units angstroms"}
 
 ALT_SETUP = {}
 
-DRIVER_SETUP = {"driver": {'loose': '', 'maxiter': '100'}}
+DRIVER_SETUP = {'loose': '', 'maxiter': '100'}
 
 
 def optimize(filename):
 
     try:
         # Load the POSCAR into a Cage
-        anion = cage.facetsym.Cage.from_poscar(filename)
+        anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        anion = cage.facetsym.Cage.from_file(filename)
+        anion = cage.core.Cage.from_file(filename)
 
     # Set the charge for the molecule
     if pmg.Element('C') in [site.specie for site in anion.sites]:
@@ -91,9 +91,9 @@ def docksetup(filename, cation, distance):
 
     try:
         # Load the POSCAR into a Cage
-        anion = cage.facetsym.Cage.from_poscar(filename)
+        anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        anion = cage.facetsym.Cage.from_file(filename)
+        anion = cage.core.Cage.from_file(filename)
 
     anion.find_surface_facets(ignore=IGNORE)
 
@@ -117,7 +117,7 @@ def docksetup(filename, cation, distance):
                    distance*neq_facet.normal)
 
         # Constrain the opposite facet
-        far_facet = mol.find_furthest_facet(neq_facet.center)
+        far_facet = mol.find_farthest_facet(neq_facet.center)
         ALT_SETUP['constraints'] = find_constraints(mol, far_facet.sites)
 
         # Set the driver settings for the optimization
@@ -158,13 +158,13 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
     # Load the Cage from the file
     try:
         # Load the POSCAR into a Cage
-        anion = cage.facetsym.Cage.from_poscar(filename)
+        anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        anion = cage.facetsym.Cage.from_file(filename)
+        anion = cage.core.Cage.from_file(filename)
 
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
-    edges = anion.find_noneq_chain_paths()
+    edges = anion.find_noneq_chain_links()
 
     total_mol = anion.copy()
 
@@ -251,9 +251,9 @@ def pathsetup(filename, cation, distance, edges):
     # Load the Cage from the file
     try:
         # Load the POSCAR into a Cage
-        anion = cage.facetsym.Cage.from_poscar(filename)
+        anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        anion = cage.facetsym.Cage.from_file(filename)
+        anion = cage.core.Cage.from_file(filename)
 
     # TODO Find charge automatically
     if pmg.Element('C') in [site.specie for site in anion.sites]:
@@ -265,7 +265,7 @@ def pathsetup(filename, cation, distance, edges):
     anion.find_surface_facets(ignore=IGNORE)
 
     # Find the paths, i.e. the List of facet combinations
-    paths = anion.find_facet_paths(share_edge=edges)
+    paths = anion.find_facet_links(share_edge=edges)
 
     tasks = [nwchem.NwTask(anion.charge, None, BASIS, theory='dft',
                            operation="optimize",
@@ -446,7 +446,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
             raise IOError("Requested cation is not found in the molecule.")
 
         # Set up the occupied anion
-        occmol = cage.facetsym.OccupiedCage.from_molecule(mol)
+        occmol = cage.core.OccupiedCage.from_molecule(mol)
         occmol.find_surface_facets(ignore=IGNORE)
         dock = occmol.find_closest_facet(cat_coords)
 
@@ -456,8 +456,8 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
         total_mol = occmol.copy()
 
         # Find the chain paths
-        paths = occmol.find_noneq_chain_paths(symm_tol=tolerance,
-                                              verbose=verbose)
+        paths = occmol.find_noneq_chain_links(symm_tol=tolerance,
+                                                    verbose=verbose)
 
         dock_dir = 'dock' + str(dock_number)
 
@@ -515,7 +515,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
             # In case the molecules must be optimized, add the constraints and
             # optimization setup (DRIVER)
             if operation == "optimize":
-                far_facet = occmol.find_furthest_facet(landscape.center)
+                far_facet = occmol.find_farthest_facet(landscape.center)
                 ALT_SETUP["constraints"] = find_constraints(occmol,
                                                             far_facet.sites)
                 ALT_SETUP['constraints'].join(

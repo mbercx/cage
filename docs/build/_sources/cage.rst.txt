@@ -1,18 +1,25 @@
 cage package
 ============
 
+Subpackages
+-----------
+
+.. toctree::
+
+    cage.cli
+    cage.scripts
+    cage.tests
+
 Submodules
 ----------
 
-cage\.facetsym module
----------------------
+cage\.core module
+-----------------
 
-.. automodule:: cage.facetsym
+.. automodule:: cage.core
     :members:
     :undoc-members:
     :show-inheritance:
-    :special-members:
-	__init__
 
 cage\.landscape module
 ----------------------

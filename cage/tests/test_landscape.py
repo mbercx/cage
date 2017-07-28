@@ -8,7 +8,7 @@ test_dir = os.path.dirname(tests.__file__)
 test_files_dir = os.path.join(test_dir, 'testfiles')
 
 def Test_LandscapeAnalyzer():
-    from cage.facetsym import Facet
+    from cage.core import Facet
     facet = Facet.from_file(os.path.join(test_files_dir, 'facetcalc',
                                          'facet.json'))
     from cage.landscape import LandscapeAnalyzer

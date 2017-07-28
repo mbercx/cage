@@ -67,7 +67,7 @@ except IndexError:
 def main():
 
     # Load the POSCAR into a Cage
-    mol = cage.facetsym.Cage.from_poscar(filename)
+    mol = cage.core.Cage.from_poscar(filename)
 
     # Find the non-equivalent facets
     facets = mol.find_noneq_facets()

@@ -10,9 +10,11 @@ Welcome to cage's documentation!
    :maxdepth: 2
    :caption: Contents:
    
-   preamble/intro
-   preamble/tutorial
+   intro
+   tutorial
 
+.. automodule:: cage 
+   :members:
 
 Indices and tables
 ==================

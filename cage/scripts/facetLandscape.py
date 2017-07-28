@@ -9,7 +9,7 @@ import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 import cage.utils as utils
-from cage.facetsym import Cage
+from cage.core import Cage
 
 """
 Script to extract all the necessary information from a facet energy landscape

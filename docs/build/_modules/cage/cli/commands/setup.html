@@ -1,0 +1,752 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cage.cli.commands.setup &#8212; cage 0.1a1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cage.cli.commands.setup</h1><div class="highlight"><pre>
+<span></span><span class="c1"># encoding: utf-8</span>
+<span class="c1"># Written for Python 3.6</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pymatgen</span> <span class="k">as</span> <span class="nn">pmg</span>
+<span class="kn">import</span> <span class="nn">pymatgen.io.nwchem</span> <span class="k">as</span> <span class="nn">nwchem</span>
+
+<span class="kn">import</span> <span class="nn">cage</span>
+
+<span class="kn">from</span> <span class="nn">cage.core</span> <span class="k">import</span> <span class="n">Cage</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Script to set up the calculations for all the non-equivalent facets of a cage</span>
+<span class="sd">molecule, defined by a VASP POSCAR file provided as an argument.</span>
+
+<span class="sd">This script is written specifically to study the facets of CxByHz molecules.</span>
+<span class="sd">In case you want to use it for anything else, it will probably need some</span>
+<span class="sd">adjustments.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">##############</span>
+<span class="c1"># PARAMETERS #</span>
+<span class="c1">##############</span>
+
+<span class="c1"># Facet recognition parameters</span>
+<span class="n">IGNORE</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Li&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Na&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">),</span>
+          <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;I&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Br&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">),</span>
+          <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">))</span>
+
+<span class="n">OUTPUT_FILE</span> <span class="o">=</span> <span class="s1">&#39;result.out&#39;</span>
+
+<span class="c1"># Calculation parameters</span>
+<span class="n">THEORY_SETUP</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iterations&#39;</span><span class="p">:</span> <span class="s1">&#39;300&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;xc&#39;</span><span class="p">:</span> <span class="s1">&#39;xpbe96 xpbe96&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;direct&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;smear&#39;</span><span class="p">:</span> <span class="s1">&#39;0.01&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;convergence energy&#39;</span><span class="p">:</span> <span class="s1">&#39;1e-4&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;convergence density&#39;</span><span class="p">:</span> <span class="s1">&#39;1e-2&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;convergence gradient&#39;</span><span class="p">:</span> <span class="s1">&#39;1e-2&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;convergence damp&#39;</span><span class="p">:</span> <span class="s1">&#39;70&#39;</span><span class="p">}</span>
+
+<span class="n">BASIS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;*&#39;</span><span class="p">:</span> <span class="s2">&quot;aug-cc-pVDZ&quot;</span><span class="p">}</span>
+
+<span class="n">GEO_SETUP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;noautosym&quot;</span><span class="p">,</span> <span class="s2">&quot;noautoz&quot;</span><span class="p">,</span> <span class="s1">&#39;nocenter&#39;</span><span class="p">,</span> <span class="s2">&quot;units angstroms&quot;</span><span class="p">}</span>
+
+<span class="n">ALT_SETUP</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="n">DRIVER_SETUP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;loose&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="s1">&#39;100&#39;</span><span class="p">}}</span>
+
+
+<div class="viewcode-block" id="optimize"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.optimize">[docs]</a><span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the POSCAR into a Cage</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c1"># Set the charge for the molecule</span>
+    <span class="k">if</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">anion</span><span class="o">.</span><span class="n">sites</span><span class="p">]:</span>
+        <span class="n">anion</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">anion</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Set up the geometry optimization</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">anion</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span>
+                           <span class="n">theory</span><span class="o">=</span><span class="s1">&#39;dft&#39;</span><span class="p">,</span>
+                           <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;optimize&quot;</span><span class="p">,</span>
+                           <span class="n">theory_directives</span><span class="o">=</span><span class="n">THEORY_SETUP</span><span class="p">,</span>
+                           <span class="n">alternate_directives</span><span class="o">=</span><span class="n">ALT_SETUP</span><span class="p">)]</span>
+
+    <span class="c1"># Set the driver settings for the optimization</span>
+    <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DRIVER_SETUP</span>
+
+    <span class="c1"># Set up input</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">nw_input</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">anion</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>
+    <span class="n">nw_input</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="docksetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.docksetup">[docs]</a><span class="k">def</span> <span class="nf">docksetup</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the POSCAR into a Cage</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">anion</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
+
+    <span class="c1"># Find the non-equivalent facets</span>
+    <span class="n">facets</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">find_noneq_facets</span><span class="p">()</span>
+
+    <span class="n">docking_dir</span> <span class="o">=</span> <span class="s1">&#39;docking&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">docking_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># For each docking point, set up the calculation input file</span>
+    <span class="n">dock_number</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">neq_facet</span> <span class="ow">in</span> <span class="n">facets</span><span class="p">:</span>
+
+        <span class="c1"># Set up the initial cation site</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">mol</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">()</span>
+        <span class="n">mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">neq_facet</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span>
+                   <span class="n">distance</span><span class="o">*</span><span class="n">neq_facet</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="c1"># Constrain the opposite facet</span>
+        <span class="n">far_facet</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">find_farthest_facet</span><span class="p">(</span><span class="n">neq_facet</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s1">&#39;constraints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_constraints</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">far_facet</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+
+        <span class="c1"># Set the driver settings for the optimization</span>
+        <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DRIVER_SETUP</span>
+
+        <span class="c1"># Set the charge for the molecule</span>
+        <span class="k">if</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">sites</span><span class="p">]:</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Set up the task for the calculations</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span>
+                               <span class="n">theory</span><span class="o">=</span><span class="s1">&#39;dft&#39;</span><span class="p">,</span>
+                               <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;optimize&quot;</span><span class="p">,</span>
+                               <span class="n">theory_directives</span><span class="o">=</span><span class="n">THEORY_SETUP</span><span class="p">,</span>
+                               <span class="n">alternate_directives</span><span class="o">=</span><span class="n">ALT_SETUP</span><span class="p">)]</span>
+
+        <span class="n">dock_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docking_dir</span><span class="p">,</span> <span class="s1">&#39;dock&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dock_number</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Set up input</span>
+        <span class="n">nw_input</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>
+        <span class="n">nw_input</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Write out a facet json file</span>
+        <span class="n">neq_facet</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="s1">&#39;facet.json&#39;</span><span class="p">))</span>
+
+        <span class="n">dock_number</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="chainsetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.chainsetup">[docs]</a><span class="k">def</span> <span class="nf">chainsetup</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">endradii</span><span class="p">,</span> <span class="n">nradii</span><span class="p">,</span> <span class="n">adensity</span><span class="p">):</span>
+
+    <span class="c1"># Load the Cage from the file</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the POSCAR into a Cage</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c1"># Find the chain edges, i.e. the paths between the edge sharing facets of</span>
+    <span class="c1"># the chain of non-equivalent facets.</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">find_noneq_chain_links</span><span class="p">()</span>
+
+    <span class="n">total_mol</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">chain_dir</span> <span class="o">=</span> <span class="s1">&#39;chain&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">chain_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># For each facet, set up the calculation input files</span>
+    <span class="n">edge_number</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+
+        <span class="c1"># Set up the edge directory</span>
+        <span class="n">edge_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chain_dir</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge_number</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Write out the molecule and path facets to the edge directory</span>
+        <span class="n">anion</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span> <span class="s2">&quot;mol.json&quot;</span><span class="p">))</span>
+        <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span>
+                                                     <span class="s2">&quot;init_facet.json&quot;</span><span class="p">))</span>
+        <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span>
+                                                     <span class="s2">&quot;final_facet.json&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Get copies so the originals aren&#39;t mutated</span>
+        <span class="n">edge_mol</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">facet1</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">facet2</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Set up the landscape</span>
+        <span class="n">landscape</span> <span class="o">=</span> <span class="n">set_up_edge_landscape</span><span class="p">(</span><span class="n">facet1</span><span class="p">,</span> <span class="n">facet2</span><span class="p">,</span>
+                                          <span class="n">endpoint_radii</span><span class="o">=</span><span class="n">endradii</span><span class="p">,</span>
+                                          <span class="n">number_of_radii</span><span class="o">=</span><span class="n">nradii</span><span class="p">,</span>
+                                          <span class="n">angle_density</span><span class="o">=</span><span class="n">adensity</span><span class="p">)</span>
+
+        <span class="c1"># Get the molecule for each landscape point</span>
+        <span class="n">molecules</span> <span class="o">=</span> <span class="n">set_up_molecules</span><span class="p">(</span><span class="n">edge_mol</span><span class="p">,</span> <span class="n">landscape</span><span class="p">,</span> <span class="n">cation</span><span class="p">)</span>
+
+        <span class="c1"># Set up an xyz file to visualize the edge</span>
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">landscape</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">total_mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">point</span><span class="p">,</span>
+                                 <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">edge_mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">point</span><span class="p">,</span>
+                                <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="n">edge_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span> <span class="s2">&quot;edge.xyz&quot;</span><span class="p">))</span>
+
+        <span class="c1"># In case the molecules must be optimized, add the constraints and</span>
+        <span class="c1"># optimization setup (DRIVER)</span>
+        <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;optimize&quot;</span><span class="p">:</span>
+            <span class="n">far_facet</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">find_furthest_facet</span><span class="p">(</span><span class="n">landscape</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+            <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s2">&quot;constraints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_constraints</span><span class="p">(</span><span class="n">anion</span><span class="p">,</span> <span class="n">far_facet</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+
+            <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s1">&#39;constraints&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anion</span><span class="o">.</span><span class="n">sites</span><span class="p">)))</span>  <span class="c1"># cation</span>
+            <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DRIVER_SETUP</span>
+
+        <span class="c1"># Set up the task for the calculations</span>
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">molecules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span>
+                               <span class="n">theory</span><span class="o">=</span><span class="s2">&quot;dft&quot;</span><span class="p">,</span>
+                               <span class="n">operation</span><span class="o">=</span><span class="n">operation</span><span class="p">,</span>
+                               <span class="n">theory_directives</span><span class="o">=</span><span class="n">THEORY_SETUP</span><span class="p">,</span>
+                               <span class="n">alternate_directives</span><span class="o">=</span><span class="n">ALT_SETUP</span><span class="p">)]</span>
+
+        <span class="c1"># Set up the input files</span>
+        <span class="n">study</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">Study</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+        <span class="n">study</span><span class="o">.</span><span class="n">set_up_input</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span> <span class="n">sort_comp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>
+
+        <span class="n">edge_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Set up an xyz file with all the paths</span>
+    <span class="n">total_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;total_mol.xyz&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="pathsetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.pathsetup">[docs]</a><span class="k">def</span> <span class="nf">pathsetup</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
+
+    <span class="c1"># Load the Cage from the file</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the POSCAR into a Cage</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="c1"># TODO Find charge automatically</span>
+    <span class="k">if</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">anion</span><span class="o">.</span><span class="n">sites</span><span class="p">]:</span>
+        <span class="n">anion</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">anion</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Find the surface facets</span>
+    <span class="n">anion</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
+
+    <span class="c1"># Find the paths, i.e. the List of facet combinations</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">find_facet_links</span><span class="p">(</span><span class="n">share_edge</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+
+    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">anion</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span> <span class="n">theory</span><span class="o">=</span><span class="s1">&#39;dft&#39;</span><span class="p">,</span>
+                           <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;optimize&quot;</span><span class="p">,</span>
+                           <span class="n">theory_directives</span><span class="o">=</span><span class="n">THEORY_SETUP</span><span class="p">,</span>
+                           <span class="n">alternate_directives</span><span class="o">=</span><span class="n">ALT_SETUP</span><span class="p">)]</span>
+
+    <span class="n">paths_dir</span> <span class="o">=</span> <span class="s1">&#39;paths&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">paths_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">path_number</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+
+        <span class="c1"># Set up the start and end molecules</span>
+        <span class="n">start_molecule</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">end_molecule</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">start_molecule</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span>
+                              <span class="n">distance</span> <span class="o">*</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+        <span class="n">end_molecule</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span>
+                            <span class="n">distance</span> <span class="o">*</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="c1"># Make the path directory</span>
+        <span class="n">path_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">paths_dir</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">path_number</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Write out the start and end molecule</span>
+        <span class="n">start_molecule</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span>
+                          <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="s1">&#39;start.xyz&#39;</span><span class="p">))</span>
+        <span class="n">end_molecule</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span>
+                        <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="s1">&#39;end.xyz&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Make the directories for the start and end molecules optimizations</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Set up the input</span>
+        <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">start_molecule</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span>
+        <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">end_molecule</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_dir</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span>
+
+        <span class="n">path_number</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="nebsetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.nebsetup">[docs]</a><span class="k">def</span> <span class="nf">nebsetup</span><span class="p">(</span><span class="n">paths_dir</span><span class="p">,</span> <span class="n">nimages</span><span class="p">):</span>
+
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">paths_dir</span><span class="p">)</span>
+
+    <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">d</span><span class="p">))]</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+
+        <span class="c1"># Get the output from the docking calculations</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">start_data</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span>
+                                                      <span class="n">OUTPUT_FILE</span><span class="p">))</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">end_data</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">,</span>
+                                                    <span class="n">OUTPUT_FILE</span><span class="p">))</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Failed to extract start and end images in &#39;</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span>
+                  <span class="s1">&#39;, ignoring directory...&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Set up the structures</span>
+        <span class="n">start_molecule</span> <span class="o">=</span> <span class="n">start_data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">end_molecule</span> <span class="o">=</span> <span class="n">end_data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">lattice</span> <span class="o">=</span> <span class="n">set_up_lattice</span><span class="p">(</span><span class="n">start_molecule</span><span class="p">)</span>
+
+        <span class="n">start_struct</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Structure</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">start_molecule</span><span class="o">.</span><span class="n">species</span><span class="p">,</span>
+                                     <span class="n">start_molecule</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
+                                     <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">end_struct</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Structure</span><span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">end_molecule</span><span class="o">.</span><span class="n">species</span><span class="p">,</span>
+                                   <span class="n">end_molecule</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
+                                   <span class="n">coords_are_cartesian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Interpolate to find the images</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="n">start_struct</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">end_struct</span><span class="p">,</span> <span class="n">nimages</span><span class="o">=</span><span class="n">nimages</span><span class="p">)</span>
+
+        <span class="n">molecules</span> <span class="o">=</span> <span class="p">[</span><span class="n">pmg</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">struct</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">]</span>
+
+        <span class="c1"># Move the lithium positions on an ellips (kind of)</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">start_molecule</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">end_molecule</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
+            <span class="n">lithium_coord</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
+            <span class="n">dist1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">start_molecule</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
+                                   <span class="o">-</span> <span class="n">lithium_coord</span><span class="p">)</span>
+            <span class="n">dist2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">end_molecule</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
+                                   <span class="o">-</span> <span class="n">lithium_coord</span><span class="p">)</span>
+            <span class="n">li_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">lithium_coord</span><span class="p">)</span>
+            <span class="n">new_radius</span> <span class="o">=</span> <span class="n">r2</span><span class="o">*</span><span class="n">dist1</span><span class="o">/</span><span class="p">(</span><span class="n">dist1</span> <span class="o">+</span> <span class="n">dist2</span><span class="p">)</span> <span class="o">+</span> <span class="n">r1</span><span class="o">*</span><span class="n">dist2</span><span class="o">/</span><span class="p">(</span><span class="n">dist1</span> <span class="o">+</span> <span class="n">dist2</span><span class="p">)</span>
+            <span class="n">translate_vector</span> <span class="o">=</span> <span class="n">lithium_coord</span><span class="o">/</span><span class="n">li_r</span><span class="o">*</span><span class="p">(</span><span class="n">new_radius</span><span class="o">-</span><span class="n">li_r</span><span class="p">)</span>
+            <span class="n">m</span><span class="o">.</span><span class="n">translate_sites</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">],</span> <span class="n">translate_vector</span><span class="p">)</span>
+
+        <span class="c1"># Make a path molecule to show the interpolation</span>
+        <span class="n">path_mol</span> <span class="o">=</span> <span class="n">start_molecule</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">sites</span><span class="p">]:</span>
+                <span class="n">path_mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coord</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">coord</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">path_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;path.xyz&#39;</span><span class="p">))</span>
+
+        <span class="c1"># Set up the input file</span>
+
+        <span class="c1"># Set the charge for the molecule</span>
+        <span class="c1"># TODO CALCULATE THE CHARGE SOMEHOW</span>
+        <span class="k">if</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">start_molecule</span><span class="o">.</span><span class="n">sites</span><span class="p">]:</span>
+            <span class="n">start_molecule</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_molecule</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">start_molecule</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span>
+                               <span class="n">theory</span><span class="o">=</span><span class="s1">&#39;dft&#39;</span><span class="p">,</span>
+                               <span class="n">operation</span><span class="o">=</span><span class="s2">&quot;neb&quot;</span><span class="p">,</span>
+                               <span class="n">theory_directives</span><span class="o">=</span><span class="n">THEORY_SETUP</span><span class="p">,</span>
+                               <span class="n">alternate_directives</span><span class="o">=</span><span class="n">ALT_SETUP</span><span class="p">),</span> <span class="p">]</span>
+
+        <span class="n">nw_input</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">start_molecule</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span>
+                                  <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>
+        <span class="n">nw_input</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span>
+
+        <span class="n">plot_images</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;path.neb&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="twocat_chainsetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.twocat_chainsetup">[docs]</a><span class="k">def</span> <span class="nf">twocat_chainsetup</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">endradii</span><span class="p">,</span> <span class="n">nradii</span><span class="p">,</span> <span class="n">adensity</span><span class="p">,</span>
+                      <span class="n">tolerance</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+
+    <span class="c1"># Get the docking directories</span>
+    <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="n">directory</span><span class="p">))]</span>
+
+    <span class="n">dock_number</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+
+        <span class="c1"># Extract the occupied cage</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Failed to extract output from &#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+                  <span class="o">+</span> <span class="s1">&#39;. Skipping...&#39;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Check if calculation has completed successfully</span>
+        <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: No task time information found in output file: &quot;</span>
+                  <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                  <span class="s2">&quot;The calculation might not have completed successfully.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: Error found in one of the calculations of &quot;</span>
+                      <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">))</span>
+
+        <span class="c1"># The final molecules in the optimization is used</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cat_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">sites</span>
+                          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Requested cation is not found in the molecule.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Set up the occupied anion</span>
+        <span class="n">occmol</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">OccupiedCage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="n">occmol</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
+        <span class="n">dock</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">find_closest_facet</span><span class="p">(</span><span class="n">cat_coords</span><span class="p">)</span>
+
+        <span class="n">occmol</span><span class="o">.</span><span class="n">add_dock</span><span class="p">(</span><span class="n">dock</span><span class="p">,</span> <span class="n">cation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">occmol</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
+
+        <span class="n">total_mol</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Find the chain paths</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">find_noneq_chain_links</span><span class="p">(</span><span class="n">symm_tol</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
+                                                    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">dock_dir</span> <span class="o">=</span> <span class="s1">&#39;dock&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dock_number</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># For each facet, set up the calculation input files</span>
+        <span class="n">edge_number</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+
+            <span class="c1"># Set up the edge directory</span>
+            <span class="n">edge_dir</span> <span class="o">=</span> <span class="s2">&quot;edge&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">edge_number</span><span class="p">)</span>
+            <span class="n">edge_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="n">edge_dir</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="c1"># Write out the molecule and path facets to the edge directory</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span> <span class="s2">&quot;mol.json&quot;</span><span class="p">))</span>
+            <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span>
+                                                         <span class="s2">&quot;init_facet.json&quot;</span><span class="p">))</span>
+            <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span>
+                                                         <span class="s2">&quot;final_facet.json&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Get copies so the originals aren&#39;t mutated</span>
+            <span class="n">edge_mol</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">facet1</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">facet2</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c1"># Set up the landscape</span>
+            <span class="n">landscape</span> <span class="o">=</span> <span class="n">set_up_edge_landscape</span><span class="p">(</span><span class="n">facet1</span><span class="p">,</span> <span class="n">facet2</span><span class="p">,</span>
+                                              <span class="n">endpoint_radii</span><span class="o">=</span><span class="n">endradii</span><span class="p">,</span>
+                                              <span class="n">number_of_radii</span><span class="o">=</span><span class="n">nradii</span><span class="p">,</span>
+                                              <span class="n">angle_density</span><span class="o">=</span><span class="n">adensity</span><span class="p">)</span>
+
+            <span class="c1"># Get the molecule for each landscape point</span>
+            <span class="n">molecules</span> <span class="o">=</span> <span class="n">set_up_molecules</span><span class="p">(</span><span class="n">edge_mol</span><span class="p">,</span> <span class="n">landscape</span><span class="p">,</span> <span class="n">cation</span><span class="p">)</span>
+
+            <span class="c1"># Set up an xyz file to visualize the edge</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">landscape</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">total_mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">point</span><span class="p">,</span>
+                                     <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">edge_mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">point</span><span class="p">,</span>
+                                    <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="n">edge_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span> <span class="s2">&quot;edge.xyz&quot;</span><span class="p">))</span>
+
+            <span class="c1"># In case the molecules must be optimized, add the constraints and</span>
+            <span class="c1"># optimization setup (DRIVER)</span>
+            <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s2">&quot;optimize&quot;</span><span class="p">:</span>
+                <span class="n">far_facet</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">find_farthest_facet</span><span class="p">(</span><span class="n">landscape</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+                <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s2">&quot;constraints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">find_constraints</span><span class="p">(</span><span class="n">occmol</span><span class="p">,</span>
+                                                            <span class="n">far_facet</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+                <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s1">&#39;constraints&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">sites</span><span class="p">)))</span>  <span class="c1"># cation</span>
+                <span class="n">ALT_SETUP</span><span class="p">[</span><span class="s2">&quot;driver&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DRIVER_SETUP</span>
+
+            <span class="c1"># Set up the task for the calculations</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">molecules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span>
+                                   <span class="n">theory</span><span class="o">=</span><span class="s2">&quot;dft&quot;</span><span class="p">,</span>
+                                   <span class="n">operation</span><span class="o">=</span><span class="n">operation</span><span class="p">,</span>
+                                   <span class="n">theory_directives</span><span class="o">=</span><span class="n">THEORY_SETUP</span><span class="p">,</span>
+                                   <span class="n">alternate_directives</span><span class="o">=</span><span class="n">ALT_SETUP</span><span class="p">)]</span>
+
+            <span class="c1"># Set up the input files</span>
+            <span class="n">study</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">study</span><span class="o">.</span><span class="n">Study</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">tasks</span><span class="p">)</span>
+            <span class="n">study</span><span class="o">.</span><span class="n">set_up_input</span><span class="p">(</span><span class="n">edge_dir</span><span class="p">,</span> <span class="n">sort_comp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                               <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>
+
+            <span class="n">edge_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Set up an xyz file with all the paths</span>
+        <span class="n">total_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span>
+                                                      <span class="s2">&quot;total_mol.xyz&quot;</span><span class="p">))</span></div>
+
+
+<span class="c1">###########</span>
+<span class="c1"># METHODS #</span>
+<span class="c1">###########</span>
+
+
+<div class="viewcode-block" id="set_up_edge_landscape"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.set_up_edge_landscape">[docs]</a><span class="k">def</span> <span class="nf">set_up_edge_landscape</span><span class="p">(</span><span class="n">facet1</span><span class="p">,</span> <span class="n">facet2</span><span class="p">,</span> <span class="n">endpoint_radii</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                          <span class="n">number_of_radii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle_density</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set up the Landscape to study the energy landscape between two facets.</span>
+
+<span class="sd">    The script creates a line, whose direction is determined by the vector</span>
+<span class="sd">    connecting the origin to the center of the first facet. The line endpoints</span>
+<span class="sd">    are determined by the endpoint_radii parameter. The line Landscape is then</span>
+<span class="sd">    extended by rotation along the axis defined by the cross product of the two</span>
+<span class="sd">    facet normals.</span>
+
+<span class="sd">    :param facet1:</span>
+<span class="sd">    :param facet2:</span>
+<span class="sd">    :param endpoint_radii:</span>
+<span class="sd">    :param number_of_radii:</span>
+<span class="sd">    :param angle_density:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">line_vector</span> <span class="o">=</span> <span class="n">facet1</span><span class="o">.</span><span class="n">center</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">facet1</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+    <span class="n">lands</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">landscape</span><span class="o">.</span><span class="n">Landscape</span><span class="o">.</span><span class="n">from_vertices</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">line_vector</span> <span class="o">*</span> <span class="n">endpoint_radii</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line_vector</span> <span class="o">*</span> <span class="n">endpoint_radii</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+        <span class="n">num</span><span class="o">=</span><span class="n">number_of_radii</span>
+    <span class="p">)</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">facet1</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">facet2</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">))</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span> <span class="o">*</span> <span class="n">angle</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+
+    <span class="n">lands</span><span class="o">.</span><span class="n">extend_by_rotation</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">angle_density</span><span class="p">,</span> <span class="n">remove_endline</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lands</span></div>
+
+
+<div class="viewcode-block" id="set_up_molecules"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.set_up_molecules">[docs]</a><span class="k">def</span> <span class="nf">set_up_molecules</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">landscape</span><span class="p">,</span> <span class="n">cation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set up the List of molecules from Landscape by adding the cation on the</span>
+<span class="sd">    various points of the landscape.</span>
+
+<span class="sd">    :param mol:</span>
+<span class="sd">    :param landscape:</span>
+<span class="sd">    :param cation:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Set up the cation Species</span>
+    <span class="n">cation</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Set up the List of Molecules</span>
+    <span class="n">molecules</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">landscape</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+        <span class="n">configuration</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># If carbon is in the molecule, the charge is -1, -2 otherwise</span>
+        <span class="c1"># TODO Find a good way to calculate the charge, if possible</span>
+        <span class="k">if</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">configuration</span><span class="o">.</span><span class="n">sites</span><span class="p">]:</span>
+            <span class="n">configuration</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">configuration</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Add the cation to the Molecule</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">configuration</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
+            <span class="n">molecules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ValueError detected when appending the Li site. &quot;</span>
+                  <span class="s2">&quot;Ignoring this point in the energy landscape.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">molecules</span></div>
+
+
+<div class="viewcode-block" id="find_constraints"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.find_constraints">[docs]</a><span class="k">def</span> <span class="nf">find_constraints</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">sites</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find the NwChem constraints for a selection of sites on a molecule.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Find the corresponding atom numbers in string format</span>
+    <span class="n">site_numbers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">sites</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">mol</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">:</span>
+            <span class="n">site_numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+    <span class="n">site_numbers</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">site_numbers</span><span class="p">)</span>
+
+    <span class="c1"># Set up the constraints on the atoms</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;fix atom&#39;</span><span class="p">:</span> <span class="n">site_numbers</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="set_up_lattice"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.set_up_lattice">[docs]</a><span class="k">def</span> <span class="nf">set_up_lattice</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param mol:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Find the distance between the origin and the furthest atom in the</span>
+    <span class="c1"># molecule</span>
+
+    <span class="n">max_distance</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">distance</span> <span class="o">&gt;</span> <span class="n">max_distance</span><span class="p">:</span>
+            <span class="n">max_distance</span> <span class="o">=</span> <span class="n">distance</span>
+
+    <span class="c1"># triple that, and use it to set up the lattice</span>
+
+    <span class="n">lat_const</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">max_distance</span><span class="p">)</span>
+    <span class="n">lattice</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Lattice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">lat_const</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">lat_const</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lat_const</span><span class="p">]]))</span>
+
+    <span class="k">return</span> <span class="n">lattice</span></div>
+
+<div class="viewcode-block" id="plot_images"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.plot_images">[docs]</a><span class="k">def</span> <span class="nf">plot_images</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;path.neb&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param molecules:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">))</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Marnik Bercx.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

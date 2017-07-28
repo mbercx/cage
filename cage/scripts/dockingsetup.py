@@ -72,7 +72,7 @@ for argument in args.keys():
 def main():
 
     # Load the POSCAR into a Cage
-    molecule = cage.facetsym.Cage.from_poscar(filename)
+    molecule = cage.core.Cage.from_poscar(filename)
     molecule.find_surface_facets()
 
     # Find the non-equivalent facets
