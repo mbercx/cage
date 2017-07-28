@@ -75,7 +75,7 @@ def main():
     mol.find_surface_facets(IGNORE)
 
     # Find the chain paths
-    paths = mol.find_noneq_chain_paths()
+    paths = mol.find_noneq_chain_connections()
 
     total_mol = mol.copy()
 

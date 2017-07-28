@@ -51,7 +51,7 @@ def main():
         mol.set_charge_and_spin(charge=-1)
 
     # Find the paths, i.e. the List of facet combinations
-    paths = mol.find_facet_paths()
+    paths = mol.find_facet_connections()
 
     tasks = [nw.NwTask(mol.charge, None, BASIS, theory='dft',
                        operation=OPERATION,

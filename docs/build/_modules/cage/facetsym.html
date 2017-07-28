@@ -131,7 +131,7 @@
 <span class="sd">        The Schoenflies PointGroup of the Cage molecule.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            *pymatgen.symmetry.analyzer.PointGroup*</span>
+<span class="sd">            :*pymatgen.symmetry.analyzer.PointGroup*</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="n">syman</span><span class="o">.</span><span class="n">PointGroupAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get_pointgroup</span><span class="p">()</span>
@@ -161,8 +161,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Imports a Cage from a VASP POSCAR file.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            filename (string): Filename of the POSCAR file.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            (cage.facetsym.Cage)</span>
+<span class="sd">            *cage.facetsym.Cage*</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Import the structure from the POSCAR file</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Structure</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -176,8 +179,13 @@
     <span class="k">def</span> <span class="nf">from_molecule</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">mol</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a Cage from a Molecule.</span>
-<span class="sd">        :param mol:</span>
-<span class="sd">        :return:</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol (pymatgen.Molecule): The molecule from which to initalize the</span>
+<span class="sd">                cage.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            *cage.facetsym.Cage*</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Molecule</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
@@ -338,10 +346,15 @@
 
 <div class="viewcode-block" id="Cage.find_noneq_facets"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.find_noneq_facets">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find all of the nonequivalent facets of the Cage.</span>
+<span class="sd">        Find the nonequivalent facets of the Cage.</span>
 
-<span class="sd">        :return: List of Facets</span>
-<span class="sd">        :param tol: Tolerance for the equivalence condition</span>
+<span class="sd">        Args:</span>
+<span class="sd">            tol (float): Tolerance for the equivalence condition, i.e. how much</span>
+<span class="sd">                the distance between the centers is allowed to be after</span>
+<span class="sd">                a symmetry operation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            *List of Facets*: A set of non-equivalent facets of the Cage.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please set up surface facets first&quot;</span><span class="p">)</span>
@@ -364,15 +377,30 @@
 
         <span class="k">return</span> <span class="n">facets_noneq</span></div>
 
-<div class="viewcode-block" id="Cage.set_up_facet_list"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.set_up_facet_list">[docs]</a>    <span class="k">def</span> <span class="nf">set_up_facet_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;str_array&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">):</span>
+<div class="viewcode-block" id="Cage.set_up_facet_list"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.set_up_facet_list">[docs]</a>    <span class="k">def</span> <span class="nf">set_up_facet_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set up a List of surface facets, and how they relate to the</span>
+<span class="sd">        Set up a List of the surface facets, and how they relate to the</span>
 <span class="sd">        non-equivalent facets, i.e. which non-equivalent facet they can be</span>
 <span class="sd">        related to and using which symmetry operation:</span>
 
 <span class="sd">        noneq_facet = symmop(facet)</span>
 
-<span class="sd">        :return:</span>
+<span class="sd">        Args:</span>
+<span class="sd">            fmt(str): Format of the Facet List. Can be either:</span>
+
+<span class="sd">                *dict* -- A dictionary with the facets as keys and the tuple</span>
+<span class="sd">                (noneq_facet, symmop) as the values.</span>
+
+<span class="sd">                *str_array* -- A structured array of type:</span>
+<span class="sd">                    [(&#39;surf_facet&#39;, Facet), (&#39;noneq_facet&#39;, Facet),</span>
+<span class="sd">                    (&#39;symmop&#39;, SymmOp)]</span>
+<span class="sd">            tol (float): Tolerance for the equivalence condition, i.e. how much</span>
+<span class="sd">                the distance between the centers is allowed to be after</span>
+<span class="sd">                a symmetry operation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The list of facets with their corresponding non-equivalent facet</span>
+<span class="sd">                and symmetry operation. See the *fmt* argument.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please set up surface facets first&quot;</span><span class="p">)</span>
@@ -421,14 +449,22 @@
                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a chain of non equivalent facets, i.e. a collection of facets that</span>
-<span class="sd">        are connected by edge paths. Automatically sorts the facets so they</span>
+<span class="sd">        are connected by edges. Automatically sorts the facets so they</span>
 <span class="sd">        are connected by their neighbours in the list.</span>
 
-<span class="sd">        :param start: Determines from which end_facet the chain is constructed.</span>
-<span class="sd">        :param symm_tol: Determines a tolerance value for the symmetry</span>
-<span class="sd">        analysis.</span>
-<span class="sd">        :param verbose: Print information about the analysis procedure.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Args:</span>
+<span class="sd">            start (int): Determines from which termination facet the chain is</span>
+<span class="sd">                constructed. This might be useful if the chain is not</span>
+<span class="sd">                constructed as the user would like.</span>
+<span class="sd">            symm_tol (float): Tolerance for the equivalence condition, i.e. how much</span>
+<span class="sd">                the distance between the centers is allowed to be after</span>
+<span class="sd">                a symmetry operation.</span>
+<span class="sd">            verbose (bool): Print information about the analysis procedure.</span>
+<span class="sd">                This is mainly useful when the result is not as expected.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            *List of Facets* -- A chain of facets connected by sharing an edge.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
@@ -482,8 +518,8 @@
                   <span class="s2">&quot; non-equivalent facets in chain.&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Find the end facets. These are defined as facets which only have one</span>
-        <span class="c1"># edge with other chain facets.</span>
+        <span class="c1"># Find the termination facets. These are defined as facets which only</span>
+        <span class="c1"># have one edge with other chain facets.</span>
         <span class="n">end_facets</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">chain_facets</span><span class="p">:</span>
             <span class="n">other_facets</span> <span class="o">=</span> <span class="n">chain_facets</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -500,10 +536,20 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">end_facets</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; end facets in chain.&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">end_facets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No termination facets found! Setting up chain &quot;</span>
+                             <span class="s2">&quot;aborted.&quot;</span><span class="p">)</span>
+
         <span class="c1"># Sort the chain:</span>
-        <span class="n">facet_chain</span> <span class="o">=</span> <span class="p">[</span><span class="n">end_facets</span><span class="p">[</span><span class="n">start</span><span class="p">]]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">facet_chain</span> <span class="o">=</span> <span class="p">[</span><span class="n">end_facets</span><span class="p">[</span><span class="n">start</span><span class="p">]]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The requested starting index is too large. Taking the final&quot;</span>
+                  <span class="s2">&quot; termination facet in the list.&quot;</span><span class="p">)</span>
+            <span class="n">facet_chain</span> <span class="o">=</span> <span class="p">[</span><span class="n">end_facets</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
         <span class="n">other_facets</span> <span class="o">=</span> <span class="n">chain_facets</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">other_facets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">end_facets</span><span class="p">[</span><span class="n">start</span><span class="p">])</span>
+        <span class="n">other_facets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">facet_chain</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">other_facets</span><span class="p">)):</span>
 
@@ -540,55 +586,59 @@
 
         <span class="k">return</span> <span class="n">facet_chain</span></div>
 
-<div class="viewcode-block" id="Cage.find_facet_paths"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.find_facet_paths">[docs]</a>    <span class="k">def</span> <span class="nf">find_facet_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Cage.find_facet_connections"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.find_facet_connections">[docs]</a>    <span class="k">def</span> <span class="nf">find_facet_connections</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find the non equivalent pathways between connected facets of the</span>
-<span class="sd">        cage molecule. The facets can be connected by sharing an edge,</span>
-<span class="sd">        or a vertex.</span>
+<span class="sd">        Find the non-equivalent connections between facets of the cage</span>
+<span class="sd">        molecule. The facets can be connected by sharing an edge, or a vertex.</span>
 
-<span class="sd">        :param share_edge: Only return paths between facets that share an edge.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Args:</span>
+<span class="sd">            share_edge (bool): Only return connections between facets that</span>
+<span class="sd">            share an edge.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (test): Test</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># Find all paths, i.e. possible combinations of surface facets</span>
-        <span class="n">paths</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="c1"># Find all connections, i.e. possible combinations of surface facets</span>
+        <span class="n">connections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
-        <span class="c1"># Find the paths that share a vertex (this automatically finds those</span>
-        <span class="c1"># that share an edge as well).</span>
-        <span class="n">vertex_sharing_paths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-            <span class="n">cross_section</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+        <span class="c1"># Find the connections that share a vertex (this automatically finds</span>
+        <span class="c1"># those that share an edge as well).</span>
+        <span class="n">vertex_sharing_connections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">connections</span><span class="p">:</span>
+            <span class="n">cross_section</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">connection</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">connection</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">cross_section</span><span class="p">:</span>
 
                 <span class="c1"># In case the user only wants edge-sharing paths, check that</span>
                 <span class="k">if</span> <span class="n">share_edge</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">vertex_sharing_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                        <span class="n">vertex_sharing_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
                 <span class="c1"># Else just add the path to the list</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">vertex_sharing_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="n">vertex_sharing_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
 
         <span class="c1"># Find the vertex sharing paths that are non equivalent</span>
-        <span class="n">non_eq_paths</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">vertex_sharing_paths</span><span class="p">:</span>
+        <span class="n">noneq_connections</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">vertex_sharing_connections</span><span class="p">:</span>
 
             <span class="c1"># Check to see if the path is equivalent with a path in the List of</span>
             <span class="c1"># non-equivalent paths</span>
             <span class="n">nonequivalent</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">for</span> <span class="n">non_eq_path</span> <span class="ow">in</span> <span class="n">non_eq_paths</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">noneq_connection</span> <span class="ow">in</span> <span class="n">noneq_connections</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">symm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmops</span><span class="p">:</span>
-                    <span class="n">path_center</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span> <span class="n">path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
-                    <span class="n">non_eq_path_center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">non_eq_path</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
-                                          <span class="n">non_eq_path</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
-                    <span class="n">symm_path_center</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">operate</span><span class="p">(</span><span class="n">path_center</span><span class="p">)</span>
-                    <span class="n">distance</span> <span class="o">=</span> <span class="n">symm_path_center</span> <span class="o">-</span> <span class="n">non_eq_path_center</span>
+                    <span class="n">connection_center</span> <span class="o">=</span> <span class="p">(</span><span class="n">connection</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span>
+                                         <span class="o">+</span> <span class="n">connection</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+                    <span class="n">noneq_connection_center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">noneq_connection</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
+                                          <span class="n">noneq_connection</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+                    <span class="n">symm_connection_center</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">operate</span><span class="p">(</span><span class="n">connection_center</span><span class="p">)</span>
+                    <span class="n">distance</span> <span class="o">=</span> <span class="n">symm_connection_center</span> <span class="o">-</span> <span class="n">noneq_connection_center</span>
                     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">distance</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-2</span><span class="p">:</span>
                         <span class="n">nonequivalent</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">if</span> <span class="n">nonequivalent</span><span class="p">:</span>
-                <span class="n">non_eq_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">noneq_connections</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">non_eq_paths</span></div>
+        <span class="k">return</span> <span class="n">noneq_connections</span></div>
 
 <div class="viewcode-block" id="Cage.find_noneq_chain_paths"><a class="viewcode-back" href="../../cage.html#cage.facetsym.Cage.find_noneq_chain_paths">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_chain_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symm_tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">,</span>
                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>

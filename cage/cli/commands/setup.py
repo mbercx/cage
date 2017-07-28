@@ -164,7 +164,7 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
 
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
-    edges = anion.find_noneq_chain_paths()
+    edges = anion.find_noneq_chain_links()
 
     total_mol = anion.copy()
 
@@ -265,7 +265,7 @@ def pathsetup(filename, cation, distance, edges):
     anion.find_surface_facets(ignore=IGNORE)
 
     # Find the paths, i.e. the List of facet combinations
-    paths = anion.find_facet_paths(share_edge=edges)
+    paths = anion.find_facet_links(share_edge=edges)
 
     tasks = [nwchem.NwTask(anion.charge, None, BASIS, theory='dft',
                            operation="optimize",
@@ -456,8 +456,8 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
         total_mol = occmol.copy()
 
         # Find the chain paths
-        paths = occmol.find_noneq_chain_paths(symm_tol=tolerance,
-                                              verbose=verbose)
+        paths = occmol.find_noneq_chain_links(symm_tol=tolerance,
+                                                    verbose=verbose)
 
         dock_dir = 'dock' + str(dock_number)
 

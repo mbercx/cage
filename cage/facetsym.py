@@ -31,20 +31,20 @@ __date__ = "14 JUN 2017"
 # This is a tolerance value to determine the symmetry operations of the Cage.
 # It is also used to determine which facets are equivalent. The standard value
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
-# not found, it might be a good idea to try tweaking this value.
-SYMMETRY_TOLERANCE = 5e-2
+# not found, it might be worth to try tweaking this value.
+SYMMETRY_TOLERANCE = 1e-2
 
 class Cage(Molecule):
     """
-    A Cage is a pymatgen Molecule-derived object for molecules shaped similar
+    A Cage is a pymatgen.Molecule-based object for molecules shaped similar
     to fullerenes.
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
                  validate_proximity=False, site_properties=None):
         """
-        Create a Cage instance. The Cage molecule is automatically centered
-        on its geometric center.
+        Create a Cage instance. The Cage molecule's geometric center is
+        automatically centered on the origin.
 
         Args:
             species (List of pymatgen.Specie): List of atomic species. Possible
@@ -89,7 +89,7 @@ class Cage(Molecule):
         The Schoenflies PointGroup of the Cage molecule.
 
         Returns:
-            :*pymatgen.symmetry.analyzer.PointGroup*
+            (*pymatgen.symmetry.analyzer.PointGroup*)
         """
         if not self._pointgroup:
             self._pointgroup = syman.PointGroupAnalyzer(self).get_pointgroup()
@@ -102,7 +102,7 @@ class Cage(Molecule):
         The symmetry operations of the Cage.
 
         Returns:
-            *List of pymatgen.Symmop*
+            (*List of pymatgen.Symmop*)
         """
         if not self._symmops:
             # Set up the point group analyzer
@@ -119,8 +119,11 @@ class Cage(Molecule):
         """
         Imports a Cage from a VASP POSCAR file.
 
+        Args:
+            filename (string): Filename of the POSCAR file.
+
         Returns:
-            (cage.facetsym.Cage)
+            (*cage.facetsym.Cage*)
         """
         # Import the structure from the POSCAR file
         structure = pmg.Structure.from_file(filename)
@@ -134,8 +137,13 @@ class Cage(Molecule):
     def from_molecule(cls, mol):
         """
         Initializes a Cage from a Molecule.
-        :param mol:
-        :return:
+
+        Args:
+            mol (pymatgen.Molecule): The molecule from which to initialize the
+                cage.
+
+        Returns:
+            (*cage.facetsym.Cage*)
         """
         assert type(mol) is Molecule
         return cls(species=mol.species, coords=mol.cart_coords,
@@ -198,29 +206,29 @@ class Cage(Molecule):
         #TODO Expand the algorithm to more sites
 
         # Find all the sites which should not be ignored
-        sites_valid = []
+        valid_sites = []
         for site in self.sites:
             if site.specie not in ignore:
-                sites_valid.append(site)
+                valid_sites.append(site)
 
         # Find all of the Facets from combinations of three valid Sites
-        facets_all = []
-        for combination in combinations(sites_valid, 3):
-            facets_all.append(Facet(list(combination)))
+        all_facets = []
+        for combination in combinations(valid_sites, 3):
+            all_facets.append(Facet(list(combination)))
 
-        # Flip the normal of the facets in case it points to the origin
-        for facet in facets_all:
+        # Flip the normal of the facets in case it points to the center of mass
+        # of the Cage
+        for facet in all_facets:
             if facet.angle_to_normal(self.center_of_mass) < math.pi/2:
                 facet.flip_normal()
 
         # Find all the facets that are "on the surface"
         facets_surf = []
-        for facet in facets_all:
+        for facet in all_facets:
 
             # Calculate the angles between all valid sites and surface normal
-            site_angles = []
-            for site in sites_valid:
-                site_angles.append(facet.angle_to_normal(site.coords))
+            site_angles = [facet.angle_to_normal(site.coords)
+                           for site in valid_sites]
 
             # If all the angles are larger than pi/2, it's a surface site
             all_angles_smaller = True
@@ -296,10 +304,15 @@ class Cage(Molecule):
 
     def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
-        Find all of the nonequivalent facets of the Cage.
+        Find the nonequivalent facets of the Cage.
 
-        :return: List of Facets
-        :param tol: Tolerance for the equivalence condition
+        Args:
+            tol (float): Tolerance for the equivalence condition, i.e. how much
+                the distance between the centers is allowed to be after
+                a symmetry operation.
+
+        Returns:
+            *List of Facets*: A set of non-equivalent facets of the Cage.
         """
         if not self.facets:
             print("Please set up surface facets first")
@@ -322,15 +335,30 @@ class Cage(Molecule):
 
         return facets_noneq
 
-    def set_up_facet_list(self, fmt='str_array', tol=SYMMETRY_TOLERANCE):
+    def set_up_facet_list(self, fmt='dict', tol=SYMMETRY_TOLERANCE):
         """
-        Set up a List of surface facets, and how they relate to the
+        Set up a List of the surface facets, and how they relate to the
         non-equivalent facets, i.e. which non-equivalent facet they can be
         related to and using which symmetry operation:
 
         noneq_facet = symmop(facet)
 
-        :return:
+        Args:
+            fmt(str): Format of the Facet List. Can be either:
+
+                *dict* -- A dictionary with the facets as keys and the tuple
+                (noneq_facet, symmop) as the values.
+
+                *str_array* -- A structured array of type:
+                    [('surf_facet', Facet), ('noneq_facet', Facet),
+                    ('symmop', SymmOp)]
+            tol (float): Tolerance for the equivalence condition, i.e. how much
+                the distance between the centers is allowed to be after
+                a symmetry operation.
+
+        Returns:
+            The list of facets with their corresponding non-equivalent facet
+                and symmetry operation. See the *fmt* argument.
         """
         if not self.facets:
             print("Please set up surface facets first")
@@ -379,14 +407,23 @@ class Cage(Molecule):
                                verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
-        are connected by edge paths. Automatically sorts the facets so they
+        are connected by edges. Automatically sorts the facets so they
         are connected by their neighbours in the list.
 
-        :param start: Determines from which end_facet the chain is constructed.
-        :param symm_tol: Determines a tolerance value for the symmetry
-        analysis.
-        :param verbose: Print information about the analysis procedure.
-        :return:
+        Args:
+            start (int): Determines from which termination facet the chain is
+                constructed. This might be useful if the chain is not
+                constructed as the user would like.
+            symm_tol (float): Tolerance for the equivalence condition, i.e. how much
+                the distance between the centers is allowed to be after
+                a symmetry operation.
+            verbose (bool): Print information about the analysis procedure.
+                This is mainly useful when the result is not as expected.
+
+        Returns:
+            (*List of Facets*) -- A chain of facets connected by sharing an
+                edge.
+
         """
 
         if verbose:
@@ -440,8 +477,8 @@ class Cage(Molecule):
                   " non-equivalent facets in chain.")
             print("")
 
-        # Find the end facets. These are defined as facets which only have one
-        # edge with other chain facets.
+        # Find the termination facets. These are defined as facets which only
+        # have one edge with other chain facets.
         end_facets = []
         for facet in chain_facets:
             other_facets = chain_facets.copy()
@@ -458,10 +495,20 @@ class Cage(Molecule):
             print("Found " + str(len(end_facets)) + " end facets in chain.")
             print("")
 
+        if len(end_facets) == 0:
+            raise ValueError("No termination facets found! Setting up chain "
+                             "aborted.")
+
         # Sort the chain:
-        facet_chain = [end_facets[start]]
+        try:
+            facet_chain = [end_facets[start]]
+        except IndexError:
+            print("The requested starting index is too large. Taking the final"
+                  " termination facet in the list.")
+            facet_chain = [end_facets[-1]]
+
         other_facets = chain_facets.copy()
-        other_facets.remove(end_facets[start])
+        other_facets.remove(facet_chain[0])
 
         for i in range(len(other_facets)):
 
@@ -472,16 +519,16 @@ class Cage(Molecule):
                 # See if the facet connects to the last facet in the chain
                 if len(set(facet.sites) & set(facet_chain[-1].sites)) == 2:
 
-                    # Check the amount of connections this next facet has
+                    # Check the amount of links this next facet has
                     leftover_facets = other_facets.copy()
                     leftover_facets.remove(facet)
-                    number_connections = 0
+                    number_links = 0
                     for leftover_facet in leftover_facets:
                         if len(set(facet.sites)
                                        & set(leftover_facet.sites)) == 2:
-                            number_connections += 1
+                            number_links += 1
 
-                    options.append((facet, number_connections))
+                    options.append((facet, number_links))
 
             if len(options) == 1:
                 facet_chain.append(options[0][0])
@@ -498,80 +545,100 @@ class Cage(Molecule):
 
         return facet_chain
 
-    def find_facet_paths(self, share_edge=False):
+    def find_facet_links(self, share_edge=False):
         """
-        Find the non equivalent pathways between connected facets of the
-        cage molecule. The facets can be connected by sharing an edge,
-        or a vertex.
+        Find the non-equivalent links between facets of the cage
+        molecule. The facets can be connected by sharing an edge, or a vertex.
 
-        :param share_edge: Only return paths between facets that share an edge.
-        :return:
+        Args:
+            share_edge (bool): Only return links between facets that
+            share an edge.
+
+        Returns:
+            (List of (cage.facetsym.Facet, cage.facetsym.Facet) Tuples) - The
+                non-equivalent facet links of the Cage.
         """
 
-        # Find all paths, i.e. possible combinations of surface facets
-        paths = list(combinations(self.facets, 2))
+        # Find all links, i.e. possible combinations of surface facets
+        links = list(combinations(self.facets, 2))
 
-        # Find the paths that share a vertex (this automatically finds those
-        # that share an edge as well).
-        vertex_sharing_paths = []
-        for path in paths:
-            cross_section = set(path[0].sites) & set(path[1].sites)
+        # Find the links that share a vertex (this automatically finds
+        # those that share an edge as well).
+        vertex_sharing_links = []
+        for link in links:
+            cross_section = set(link[0].sites) & set(link[1].sites)
             if cross_section:
 
                 # In case the user only wants edge-sharing paths, check that
                 if share_edge:
                     if len(cross_section) == 2:
-                        vertex_sharing_paths.append(path)
+                        vertex_sharing_links.append(link)
                 # Else just add the path to the list
                 else:
-                    vertex_sharing_paths.append(path)
+                    vertex_sharing_links.append(link)
 
         # Find the vertex sharing paths that are non equivalent
-        non_eq_paths = []
-        for path in vertex_sharing_paths:
+        noneq_links = []
+        for link in vertex_sharing_links:
 
             # Check to see if the path is equivalent with a path in the List of
             # non-equivalent paths
             nonequivalent = True
-            for non_eq_path in non_eq_paths:
+            for noneq_link in noneq_links:
                 for symm in self.symmops:
-                    path_center = (path[0].center + path[1].center)/2
-                    non_eq_path_center = sum((non_eq_path[0].center,
-                                          non_eq_path[1].center))/2
-                    symm_path_center = symm.operate(path_center)
-                    distance = symm_path_center - non_eq_path_center
+                    link_center = (link[0].center
+                                         + link[1].center)/2
+                    noneq_link_center = sum((noneq_link[0].center,
+                                          noneq_link[1].center))/2
+                    symm_link_center = symm.operate(link_center)
+                    distance = symm_link_center - noneq_link_center
                     if np.linalg.norm(distance) < 1e-2:
                         nonequivalent = False
 
             if nonequivalent:
-                non_eq_paths.append(path)
+                noneq_links.append(link)
 
-        return non_eq_paths
+        return noneq_links
 
-    def find_noneq_chain_paths(self, symm_tol=SYMMETRY_TOLERANCE,
-                               verbose=False):
+    def find_noneq_chain_links(self, symm_tol=SYMMETRY_TOLERANCE,
+                                     verbose=False):
         """
-        Find the paths that connect the facets of the chain that connects a
+        Find the links between the facets of the chain that connects a
         set of non equivalent facets.
 
-        :return:
+        Args:
+            symm_tol (float): Tolerance for the equivalence condition, i.e. how much
+                the distance between the centers is allowed to be after
+                a symmetry operation.
+            verbose (bool): Print information about the analysis procedure.
+                This is mainly useful when the result is not as expected.
+
+        Returns:
+            (*List of (cage.facetsym.Facet, cage.facetsym.Facet) Tuples*) -- The
+                links between the Facets in the chain of non-equivalent
+                Facets.
+
         """
 
         facet_chain = self.find_noneq_facet_chain(symm_tol=symm_tol,
                                                   verbose=verbose)
 
-        chain_paths = []
+        chain_links = []
         for index in range(len(facet_chain)-1):
-            chain_paths.append((facet_chain[index], facet_chain[index + 1]))
+            chain_links.append((facet_chain[index], facet_chain[index + 1]))
 
-        return chain_paths
+        return chain_links
 
     def find_furthest_facet(self, point):
         """
         Find the Facet of the Molecule that is the farthest away from the point
         provided.
-        :param point: 
-        :return:
+
+        Args:
+            point ():
+
+        Returns:
+            **
         """
         distance = 0
         furthest_facet = None

@@ -92,7 +92,7 @@ def main():
         total_mol = occmol.copy()
 
         # Find the chain paths
-        paths = occmol.find_noneq_chain_paths()
+        paths = occmol.find_noneq_chain_connections()
 
         facet_dir = 'facet' + str(ne_facet_number)
 

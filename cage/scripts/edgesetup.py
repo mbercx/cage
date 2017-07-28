@@ -78,7 +78,7 @@ def main():
     mol.find_surface_facets(IGNORE)
 
     # Find the non-equivalent paths
-    paths = mol.find_facet_paths()
+    paths = mol.find_facet_connections()
 
     # Find the edge paths
     edge_paths = []
