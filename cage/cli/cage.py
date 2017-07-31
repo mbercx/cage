@@ -17,7 +17,8 @@ import click
 @click.group()
 def main():
     """
-    Python tools to study cage=like anions for solid electrolytes in batteries.
+    Python tools for studying cage-like anions for solid electrolytes in
+    batteries.
     """
     pass
 
@@ -44,8 +45,7 @@ def optimize(filename):
 def dock(filename, cation, distance):
     """
     Set up the docking sites. It is recommended to use an anion which has
-    first been optimize using cage optimize.
-
+    first been optimize using 'cage setup optimize'.
     """
     from cage.cli.commands.setup import docksetup
 
@@ -125,3 +125,14 @@ def landscape():
     """
     Analyze the landscape
     """
+
+@main.group()
+def util():
+    """
+    A set of utility scripts for the cage package.
+    """
+    pass
+
+@util.command()
+def geo():
+    """ Write the initial and final geometry."""
