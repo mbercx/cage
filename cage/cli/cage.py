@@ -25,8 +25,10 @@ def main():
 @main.group()
 def setup():
     """
-    Python tools to set up NwChem calculations for investigating the local
-    cation-anion interaction around cage-like molecules.
+    Set up Nwchem calculations for the anion.
+
+    Tools for investigating the local cation-anion interaction around cage-like
+    molecules.
     """
     pass
 
@@ -41,7 +43,7 @@ def optimize(filename):
 @setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
-@click.option('--distance', '-d', default=2)
+@click.option('--distance', '-d', default=2.0)
 def dock(filename, cation, distance):
     """
     Set up the docking sites. It is recommended to use an anion which has
@@ -87,8 +89,10 @@ def neb(paths_dir, nimages):
 @setup.group()
 def twocat():
     """
-    Set up calculations for anions with two cations. These require the results
-    from docking calculations for single cations on the anion.
+    Set up calculations for anions with two cations.
+
+    These require the results from docking calculations for single cations on
+    the anion.
     """
     pass
 
@@ -115,8 +119,10 @@ def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
 @main.group()
 def analyze():
     """
-    Python tools to analyze NwChem calculations for investigating the local
-    cation-anion interaction around cage-like molecules.
+    Analyze the results from NwChem calculations.
+
+    Allows a quick analysis of the output of several calculations to quickly
+    visualize results.
     """
     pass
 
