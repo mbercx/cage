@@ -789,11 +789,21 @@ class OccupiedCage(Cage):
     def from_cage_and_facets(cls, cage, facets, docking_points=(),
                              cation='Li'):
         """
+        Initialize an OccupiedCage from a Cage object and a tuple of facets.
 
-        :param cage:
-        :param facets:
-        :param docking_points:
-        :param cation:
+        Args:
+            cage (cage.Cage): The anion on which the cations are docked.
+            facets (tuple): Tuple of cage.Facets on which the cations are
+                docked.
+            docking_points (tuple): Tuple of (3,) numpy.ndarray coordinates
+                that define the docking coordinates of the corresponding
+                docking Facets.
+            cation(str): Chemical symbol of the cation. In case *None* is
+                given, the docking sites are considered to already have a
+                cation present.
+
+        Returns:
+            (*cage.OccupiedCage*)
         """
         occ_cage = cls(species=cage.species, coords=cage.cart_coords,
                        charge=cage.charge,
@@ -840,10 +850,14 @@ class OccupiedCage(Cage):
 
     def remove_surface_facet(self, facet):
         """
+        Remove a surface facet from the list of facets of an OccupiedCage.
 
-        :return:
+        Args:
+            facet (cage.Facet): The facet which is to be removed from the
+                molecule.
         """
         surface_facets = self.facets
+
         if surface_facets:
             self._facets = surface_facets.remove(facet)
         else:
@@ -851,9 +865,12 @@ class OccupiedCage(Cage):
 
     def find_surface_facets(self, ignore=None):
         """
-        Find the surface facets of the OccupiedCage.
-        :param ignore:
-        :return:
+        Find the surface facets of the OccupiedCage, minus the facets which
+        have a docked cation.
+
+        Args:
+            ignore (Tuple of Elements/Species): The elements to ignore for the
+                surface facet determination.
         """
         mol = self.copy()
         anion = [site.coords for site in mol.sites
@@ -881,9 +898,12 @@ class Facet(SiteCollection, MSONable):
 
     def __init__(self, sites, normal=None):
         """
-        Initialize a Facet with the provided sites.
-        :param sites:
-        :param normal:
+        Initialize a Facet from a list of sites.
+
+        Args:
+            sites (list): List of pymatgen.Sites that define the facet.
+            normal (numpy.ndarray): (3,) Numpy array that defines the normal
+                vector of the facet.
         """
         self._sites = sites
         self._center = utils.site_center(tuple(self.sites))
@@ -894,8 +914,15 @@ class Facet(SiteCollection, MSONable):
 
     def _find_normal(self):
         """
-        Finds the normal vector of the surface, pointing away from the origin
+        Finds the normal vector of the facet.
+
+        By convention, the normal of the facet is a vector perpendicular to
+        the surface with length equal to one and pointing away from the origin.
+
+        Returns:
+            (*numpy.ndarray*) -- Normal of the facet.
         """
+
         normal = np.cross(self._sites[0].coords - self._sites[1].coords,
                           self._sites[0].coords - self._sites[2].coords)
 
@@ -905,6 +932,10 @@ class Facet(SiteCollection, MSONable):
         return normal
 
     def __str__(self):
+        """
+        Returns:
+            (*str*) -- String representation of the facet.
+        """
         output = ['Facet with sites:']
         for site in self.sites:
             output.append(site.__str__())
@@ -913,11 +944,16 @@ class Facet(SiteCollection, MSONable):
 
     def __eq__(self, other):
         """
-        Check if two Facets are the same.
-        :param other:
-        :return:
+        Check if the Facet is equal to another. Two facets are only equal if
+        they have the same sites and normal.
+
+        Args:
+            other (cage.Facet): Facet for comparison.
+
+        Returns:
+            (*bool*) - Whether or not the facets are equal.
         """
-        if (len(set(self.sites) & set(other.sites)) == 3) and \
+        if (len(set(self.sites) & set(other.sites)) == len(self.sites)) and \
                 np.allclose(self.normal, other.normal, atol=1e-3):
             return True
         else:
@@ -925,18 +961,27 @@ class Facet(SiteCollection, MSONable):
 
     def __hash__(self):
         """
-        Make Facet hashable.
-        :return:
+        Make Facet hashable. This is valuable in order to e.g. make it a key
+        in dictionaries.
+
+        Returns:
+            (*int*) -- Hash of the Facet.
         """
         return hash(str(self))
 
     @classmethod
     def from_str(cls, input_string, fmt="json"):
         """
+        Initialize a Facet from a string.
 
-        :param input_string:
-        :param fmt:
-        :return:
+        Currently only supports 'json' formats.
+
+        Args:
+            input_string (str): String from which the Facet is initialized.
+            fmt (str): Format of the string representation.
+
+        Returns:
+            (*cage.Facet*)
         """
         if fmt == "json":
             d = json.loads(input_string)
@@ -948,9 +993,15 @@ class Facet(SiteCollection, MSONable):
     @classmethod
     def from_file(cls, filename):
         """
+        Initialize a Facet from a file.
 
-        :param filename:
-        :return:
+        Currently only supports 'json' formats.
+
+        Args:
+            filename (str): File in which the Facet is stored.
+
+        Returns:
+            (*cage.Facet*)
         """
         with zopen(filename) as file:
             contents = file.read()
@@ -960,9 +1011,14 @@ class Facet(SiteCollection, MSONable):
     @classmethod
     def from_dict(cls, d):
         """
+        Initialize a Facet from a dictionary.
 
-        :param d:
-        :return:
+        Args:
+            d (dict): Dictionary of the Facet properties, i.e. 'sites' and
+                'normal'.
+
+        Returns:
+            (*cage.Facet*)
         """
         sites = []
         for site in d['sites']:
@@ -972,8 +1028,10 @@ class Facet(SiteCollection, MSONable):
 
     def as_dict(self):
         """
+        Return a dictionary representation of the Facet.
 
-        :return:
+        Returns:
+            (*dict*)
         """
         d = {"@module": self.__class__.__module__,
              "@class": self.__class__.__name__,
@@ -984,14 +1042,19 @@ class Facet(SiteCollection, MSONable):
             del site_dict["@class"]
             d["sites"].append(site_dict)
         d['normal'] = self.normal.tolist()
+
         return d
 
     def to(self, fmt="json", filename=None):
         """
+        Write the Facet to a file.
 
-        :param fmt:
-        :param filename:
-        :return:
+        Currently support only the 'json' format.
+
+        Args:
+            fmt (str): Format of the file.
+            filename (str): Name of the file to which the facet should be
+                written.
         """
         if fmt == "json":
             if filename:
@@ -1004,77 +1067,66 @@ class Facet(SiteCollection, MSONable):
                                       "supported.")
 
     def copy(self):
+        """
+        Make a copy of the Facet.
+
+        Returns:
+            (*cage.Facet*)
+
+        """
         return Facet(self._sites, self._normal)
 
-    def get_normal_intersection(self, other, method='gonio'):
+    def get_normal_intersection(self, other):
         """
         Find the intersection of the normal lines of the Facet and another one.
 
         Currently only works on an edge sharing Facet whose normal intersects
-        with the normal of the facet.
+        with the normal of the facet. In case the normals do not intersect,
+        an approximation is given.
 
-        :return:
+        Args:
+            other (cage.Facet): Facet which shares an edge with this one.
+
+        Returns:
+            (*numpy.ndarray*) -- (3,) Numpy array of the intersection
+                coordinates.
         """
 
-        if method == 'gonio':
+        #TODO This method needs improvement.
 
-            edge = set(self.sites) & set(other.sites)
-            if len(edge) != 2:
-                raise ValueError('Provided facet does not share an edge. '
-                                 'Goniometric method will not work.')
+        edge = set(self.sites) & set(other.sites)
+        if len(edge) != 2:
+            raise ValueError('Provided facet does not share an edge.')
 
-            edge_middle = sum([site.coords for site in edge]) / 2
+        edge_middle = sum([site.coords for site in edge]) / 2
 
-            y1 = utils.distance(self.center, edge_middle)
-            y2 = utils.distance(other.center, edge_middle)
-            beta = utils.angle_between(self.normal, other.normal)
-            psi = math.atan2(math.sin(beta), (y1 / y2 + math.cos(beta)))
-            theta = beta - psi
-            r = y1 / math.sin(theta)
-            r1 = r * math.cos(theta)
-            r2 = r * math.cos(psi)
+        y1 = utils.distance(self.center, edge_middle)
+        y2 = utils.distance(other.center, edge_middle)
+        beta = utils.angle_between(self.normal, other.normal)
+        psi = math.atan2(math.sin(beta), (y1 / y2 + math.cos(beta)))
+        theta = beta - psi
+        r = y1 / math.sin(theta)
+        r1 = r * math.cos(theta)
+        r2 = r * math.cos(psi)
 
-            intersection1 = self.center - r1 * utils.unit_vector(self.normal)
-            intersection2 = other.center - r2 * utils.unit_vector(other.normal)
+        intersection1 = self.center - r1 * utils.unit_vector(self.normal)
+        intersection2 = other.center - r2 * utils.unit_vector(other.normal)
 
-            if utils.distance(intersection1, intersection2) < 1e-4:
-                return intersection1
-            else:
-                print('Could not find perfect intersection. Returned closest '
-                      'result.')
-                return (intersection1 + intersection2)/2
-
-        # Brute method. Currently abandoned
-        #
-        # elif method == 'brute':
-        #     lines = []
-        #     for facet in facets:
-        #         line = Landscape.from_vertices([facet.center,
-        #                                         facet.center - 5 *
-        #                                         facet.normal],
-        #                                        density=int(1e2))
-        #         lines.append(line)
-        #
-        #     intersection = None
-        #     distance = 1e3
-        #     for point1 in lines[0].points:
-        #         for point2 in lines[1].points:
-        #             if utils.distance(point1, point2) < distance:
-        #                 distance = utils.distance(point1, point2)
-        #                 intersection = point1
-        #     if distance < 1e-2:
-        #         return intersection
-        #     else:
-        #         print('Brute force method failed.')
-        #         return None
-
+        if utils.distance(intersection1, intersection2) < 1e-4:
+            return intersection1
         else:
-            NotImplementedError("Unknown method.")
+            print('Could not find perfect intersection. Returned average '
+                  'between two best results on the respective normal lines.')
+            return (intersection1 + intersection2)/2
 
     def redefine_origin(self, origin):
         """
-        Change the coordinates of the Facet, in order to change the origin.
-        :return:
+        Adjust the coordinates of the Facet, in order to redefine the origin.
+
+        Args:
+            origin (numpy.ndarray): (3,) Numpy array of the new origin's
+                coordinates.
+
         """
         # Find the new coordinates
         new_coords = np.array(self.cart_coords) - origin
@@ -1092,25 +1144,38 @@ class Facet(SiteCollection, MSONable):
 
     def get_distance(self, i, j):
         """
+        Calculate the distance between two sites.
 
-        :param i:
-        :param j:
-        :return:
+        Args:
+            i:
+            j:
+
+        Returns:
+
         """
         pass  #TODO
 
-    def is_equivalent(self, other, symmops):
+    def is_equivalent(self, other, symmops, tol=SYMMETRY_TOLERANCE):
         """
         Check if a Facet is equivalent to another Facet based on a list of
-        symmetry operations,
-        :param other:
-        :param symmops:
-        :return:
+        symmetry operations.
+
+        Args:
+            other (cage.Facet): Facet with which to compare the Facet.
+            symmops (list): List of pymatgen.Symmop instances which are used
+                to determine equivalency.
+            tol (float): Tolerance for the equivalence condition, i.e. how much
+                the distance between the centers is allowed to be after
+                a symmetry operation.
+
+        Returns:
+            (*bool*) - Whether or not the facet is equivalent to the other
+                facet.
         """
         is_equivalent = False
         for symm in symmops:
             symm_center = symm.operate(self.center)
-            if np.linalg.norm(symm_center, other.center) < 1e-2:
+            if np.linalg.norm(symm_center, other.center) < tol:
                 is_equivalent = True
         return is_equivalent
 
