@@ -270,9 +270,9 @@ class Cage(Molecule):
     def insert(self, index, species, coords, validate_proximity=True,
                properties=None):
         """
-        Overwrite the append method of the Molecule class, in order to
+        Overwrite the insert method of the Molecule class, in order to
         reset the symmetry operations and point group after the site has been
-        appended.
+        inserted.
 
         Args:
             index (int): Index to insert site.
@@ -282,7 +282,7 @@ class Cage(Molecule):
                 too close to an existing site. Defaults to True.
             properties (dict): A dictionary of properties for the Site.
         """
-        super(Cage, self).append(species, coords, validate_proximity,
+        super(Cage, self).insert(index, species, coords, validate_proximity,
                                  properties)
         self._symmops = None
         self._pointgroup = None
@@ -304,7 +304,7 @@ class Cage(Molecule):
         super(Cage, self).append(species, coords, validate_proximity,
                                  properties)
         self._symmops = None
-        self._pointgroup = None
+        #self._pointgroup = None
 
     def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
