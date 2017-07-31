@@ -134,5 +134,10 @@ def util():
     pass
 
 @util.command()
-def geo():
-    """ Write the initial and final geometry."""
+@click.argument('output_file')
+def geo(output_file):
+    """ Write the initial and final geometry of a nwchem optimization. """
+    from cage.cli.commands.util import geo
+
+    geo(output_file=output_file)
+
