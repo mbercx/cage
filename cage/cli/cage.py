@@ -42,8 +42,10 @@ def optimize(filename):
 @click.option('--distance', '-d', default=2.0)
 def dock(filename, cation, distance):
     """
-    Set up the docking sites. It is recommended to use an anion which has
-    first been optimize using 'cage setup optimize'.
+    Set up the docking sites.
+
+    It is recommended to use an anion which has first been optimize using
+    'cage setup optimize'.
     """
     from cage.cli.commands.setup import docksetup
 
@@ -80,7 +82,10 @@ def path(filename, cation, distance, edges):
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
 def neb(paths_dir, nimages):
-    """ Set up the paths between facets that share a vertex. """
+    """
+    Set up the nudged elastic band calculation.
+
+    """
     from cage.cli.commands.setup import nebsetup
 
     nebsetup(paths_dir, nimages)
