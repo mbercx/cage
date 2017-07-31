@@ -237,21 +237,32 @@ class Cage(Molecule):
         facets_surf = []
         for facet in all_facets:
 
-            # Calculate the angles between all valid sites and surface normal
-            site_angles = [facet.angle_to_normal(site.coords)
-                           for site in valid_sites]
-
             # If all the angles are larger than pi/2, it's a surface site
             all_angles_smaller = True
-            for angle in site_angles:
-                if angle + 0.01 < math.pi/2:
+
+            for site in valid_sites:
+
+                angle = facet.angle_to_normal(site.coords)
+
+                # For angles sufficiently close to pi/2, add the site to the
+                # facet
+                if abs(angle - math.pi/2) < ANGLE_TOLERANCE:
+                    facet.add_site(site)
+
+                elif angle - math.pi/2 < -ANGLE_TOLERANCE:
                     all_angles_smaller = False
 
+            # Now check if the facet isn't already part of the surface facets
+            facet_in_list = False
+
+            for surf_facet in facets_surf:
+                if len(set(facet.sites) & set(surf_facet.sites)) \
+                    == len(facet.sites):
+                    facet_in_list = True
+
             # In that case, add it to the surface sites
-            if all_angles_smaller:
+            if all_angles_smaller and not facet_in_list:
                 facets_surf.append(facet)
-
-
 
         self._facets = facets_surf
 
