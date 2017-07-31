@@ -41,6 +41,7 @@ ANGLE_TOLERANCE = math.pi/10
 # site and the normal of the Facet should be pi/2. This parameters allows a
 # deviation of the angle up to ANGLE_TOLERANCE
 
+
 class Cage(Molecule):
     """
     A Cage is a pymatgen.Molecule-based object for molecules shaped similar
@@ -250,6 +251,8 @@ class Cage(Molecule):
             if all_angles_smaller:
                 facets_surf.append(facet)
 
+
+
         self._facets = facets_surf
 
     def redefine_origin(self, origin):
@@ -310,7 +313,7 @@ class Cage(Molecule):
         super(Cage, self).append(species, coords, validate_proximity,
                                  properties)
         self._symmops = None
-        #self._pointgroup = None
+        self._pointgroup = None
 
     def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
@@ -407,7 +410,7 @@ class Cage(Molecule):
                 facet_dict[facet_list[i][0]] = (facet_list[i][1],
                                                 facet_list[i][2])
 
-            if len(facet_dict.keys())  == len(self.facets):
+            if len(facet_dict.keys()) == len(self.facets):
                 return facet_dict
             else:
                 raise ValueError("Obtained number of facets in dict is not "
@@ -838,7 +841,7 @@ class OccupiedCage(Cage):
         Returns:
 
         """
-        pass #TODO
+        pass  #TODO
 
     @classmethod
     def from_file(cls, filename):
@@ -851,7 +854,7 @@ class OccupiedCage(Cage):
         Returns:
 
         """
-        pass #TODO
+        pass  #TODO
 
     def remove_surface_facet(self, facet):
         """
