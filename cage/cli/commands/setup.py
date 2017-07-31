@@ -14,12 +14,11 @@ import cage
 from cage.core import Cage
 
 """
-Script to set up the calculations for all the non-equivalent facets of a cage
-molecule, defined by a VASP POSCAR file provided as an argument.
+Scripts to set up calculations for studying the geometry and energy landscapes 
+around cage-like molecules.
 
-This script is written specifically to study the facets of CxByHz molecules.
-In case you want to use it for anything else, it will probably need some
-adjustments.
+These scripts were written specifically to study CxByXz molecules. In case you 
+want to use it for anything else, they might need some adjustments.
 
 """
 
