@@ -34,6 +34,12 @@ SYMMETRY_TOLERANCE = 1e-2
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
 # not found, it might be worth to try tweaking this value.
 
+ANGLE_TOLERANCE = math.pi/10
+# This value is important when determining whether or not a new site is a part
+# of the facet. In principle, the site should be in the plane of the facet,
+# i.e. the angle between the line connecting the center of the facet and the
+# site and the normal of the Facet should be pi/2. This parameters allows a
+# deviation of the angle up to ANGLE_TOLERANCE
 
 class Cage(Molecule):
     """
@@ -401,8 +407,7 @@ class Cage(Molecule):
                 facet_dict[facet_list[i][0]] = (facet_list[i][1],
                                                 facet_list[i][2])
 
-            if sum([len(facet_list) for facet_list in facet_dict.values()])\
-                    == len(self.facets):
+            if len(facet_dict.keys())  == len(self.facets):
                 return facet_dict
             else:
                 raise ValueError("Obtained number of facets in dict is not "
@@ -894,7 +899,6 @@ class Facet(SiteCollection, MSONable):
     """
 
     #TODO Allow the facet to contain more than three sites
-    #TODO Write those docstrings you lazy bastard!
 
     def __init__(self, sites, normal=None):
         """
@@ -923,8 +927,13 @@ class Facet(SiteCollection, MSONable):
             (*numpy.ndarray*) -- Normal of the facet.
         """
 
-        normal = np.cross(self._sites[0].coords - self._sites[1].coords,
-                          self._sites[0].coords - self._sites[2].coords)
+        if len(self.sites) == 3:
+            normal = np.cross(self._sites[0].coords - self._sites[1].coords,
+                              self._sites[0].coords - self._sites[2].coords)
+        else:
+            #TODO Make an average of possible normals
+            normal = np.cross(self._sites[0].coords - self._sites[1].coords,
+                              self._sites[0].coords - self._sites[2].coords)
 
         # Make length of the normal equal to 1
         normal = normal/np.linalg.norm(normal)
@@ -953,6 +962,8 @@ class Facet(SiteCollection, MSONable):
         Returns:
             (*bool*) - Whether or not the facets are equal.
         """
+        #TODO Check method for facets with more than 3 vertices
+
         if (len(set(self.sites) & set(other.sites)) == len(self.sites)) and \
                 np.allclose(self.normal, other.normal, atol=1e-3):
             return True
@@ -968,6 +979,30 @@ class Facet(SiteCollection, MSONable):
             (*int*) -- Hash of the Facet.
         """
         return hash(str(self))
+
+    @property
+    def sites(self):
+        """
+        The sites that define the Facet.
+        :return: List of Sites
+        """
+        return self._sites
+
+    @property
+    def center(self):
+        """
+        The center of the Facet.
+        :return: Array of the center coordinates
+        """
+        return self._center
+
+    @property
+    def normal(self):
+        """
+        Surface normal of the Facet
+        :return: Array of the normal vector
+        """
+        return self._normal
 
     @classmethod
     def from_str(cls, input_string, fmt="json"):
@@ -1076,6 +1111,30 @@ class Facet(SiteCollection, MSONable):
         """
         return Facet(self._sites, self._normal)
 
+    def add_site(self, site):
+        """
+        Add a site to the facet. Will only work in case the site is in the
+        surface defined by the facet.
+
+        Args:
+            site (pymatgen.core.sites.Site): The site that will be added to
+                the facet.
+        """
+
+        # Check if the site is in the surface defined by the facet
+        angle = self.angle_to_normal(site.coords)
+        if abs(angle - math.pi/2) > ANGLE_TOLERANCE:
+            raise ValueError("Angle to facet normal deviates too much from "
+                             "pi/2. A site cannot be added to the facet if "
+                             "it is not in the same plane.")
+
+        # Add the site to the list of sites of the facet
+        self._sites.append(site)
+
+        self._center = utils.site_center(tuple(self.sites))
+
+        #TODO Find the new normal, but make sure it doesn't flip direction
+
     def get_normal_intersection(self, other):
         """
         Find the intersection of the normal lines of the Facet and another one.
@@ -1092,7 +1151,7 @@ class Facet(SiteCollection, MSONable):
                 coordinates.
         """
 
-        #TODO This method needs improvement.
+        #TODO This method needs improvement, i.e. to be made more general
 
         edge = set(self.sites) & set(other.sites)
         if len(edge) != 2:
@@ -1178,30 +1237,6 @@ class Facet(SiteCollection, MSONable):
             if np.linalg.norm(symm_center, other.center) < tol:
                 is_equivalent = True
         return is_equivalent
-
-    @property
-    def sites(self):
-        """
-        The sites that define the Facet.
-        :return: List of Sites
-        """
-        return self._sites
-
-    @property
-    def center(self):
-        """
-        The center of the Facet.
-        :return: Array of the center coordinates
-        """
-        return self._center
-
-    @property
-    def normal(self):
-        """
-        Surface normal of the Facet
-        :return: Array of the normal vector
-        """
-        return self._normal
 
     def flip_normal(self):
         """
