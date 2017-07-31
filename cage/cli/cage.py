@@ -1,18 +1,11 @@
-"""
-cage
 
-Usage:
-    cage -h | --help
-    cage dock
-    cage chain
-
-Options:
-    -h --help
-
-"""
-
-from cage import __version__ as VERSION
 import click
+
+"""
+Command Line Interface for the cage package.
+
+"""
+
 
 @click.group()
 def main():
@@ -21,6 +14,7 @@ def main():
     batteries.
     """
     pass
+
 
 @main.group()
 def setup():
@@ -32,6 +26,7 @@ def setup():
     """
     pass
 
+
 @setup.command()
 @click.argument('filename')
 def optimize(filename):
@@ -39,6 +34,7 @@ def optimize(filename):
     from cage.cli.commands.setup import optimize
 
     optimize(filename)
+
 
 @setup.command()
 @click.argument('filename')
@@ -53,6 +49,7 @@ def dock(filename, cation, distance):
 
     docksetup(filename, cation, distance)
 
+
 @setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
@@ -66,6 +63,7 @@ def chain(filename, cation, operation, endradii, nradii, adensity):
 
     chainsetup(filename, cation, operation, endradii, nradii, adensity)
 
+
 @setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
@@ -77,6 +75,7 @@ def path(filename, cation, distance, edges):
 
     pathsetup(filename, cation, distance, edges)
 
+
 @setup.command()
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
@@ -85,6 +84,7 @@ def neb(paths_dir, nimages):
     from cage.cli.commands.setup import nebsetup
 
     nebsetup(paths_dir, nimages)
+
 
 @setup.group()
 def twocat():
@@ -95,6 +95,7 @@ def twocat():
     the anion.
     """
     pass
+
 
 @twocat.command()
 @click.argument('dock_dir')
@@ -116,6 +117,7 @@ def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
     twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose)
 
+
 @main.group()
 def analyze():
     """
@@ -126,11 +128,13 @@ def analyze():
     """
     pass
 
+
 @analyze.command()
 def landscape():
     """
     Analyze the landscape
     """
+
 
 @main.group()
 def util():
@@ -139,6 +143,7 @@ def util():
     """
     pass
 
+
 @util.command()
 @click.argument('output_file')
 def geo(output_file):
@@ -146,4 +151,3 @@ def geo(output_file):
     from cage.cli.commands.util import geo
 
     geo(output_file=output_file)
-
