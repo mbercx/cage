@@ -1,0 +1,335 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>cage.cli.commands.analyze &#8212; cage 0.1a1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.1a1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cage.cli.commands.analyze</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Encoding: utf-8</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">interpolate</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">cage.landscape</span> <span class="k">import</span> <span class="n">LandscapeAnalyzer</span>
+<span class="kn">from</span> <span class="nn">cage.core</span> <span class="k">import</span> <span class="n">Facet</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Analysis tools for the data produced by calculation set up using the cage setup</span>
+<span class="sd">tools. Requires expansion.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">START_FACET</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 0 or 1 -&gt; determines facet to start chain from</span>
+
+<span class="c1">#TODO This code needs serious improvement. It&#39;s damn near illegible</span>
+
+
+<div class="viewcode-block" id="landscape"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.analyze.landscape">[docs]</a><span class="k">def</span> <span class="nf">landscape</span><span class="p">(</span><span class="n">lands_dir</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">energy_range</span><span class="p">,</span> <span class="n">inter_mesh</span><span class="p">,</span> <span class="n">contour_levels</span><span class="p">,</span>
+              <span class="n">verbose</span><span class="p">):</span>
+
+    <span class="n">contour_levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="n">energy_range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">energy_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span><span class="n">contour_levels</span><span class="p">]</span>
+
+    <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">lands_dir</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extracting Landscape data from &quot;</span> <span class="o">+</span> <span class="n">lands_dir</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># TODO Make this part ignore directories that do not have the right files</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">[[</span><span class="n">LandscapeAnalyzer</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span>
+                                                       <span class="s1">&#39;landscape.json&#39;</span><span class="p">)),</span>
+              <span class="p">[</span><span class="n">Facet</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;init_facet.json&#39;</span><span class="p">)),</span>
+              <span class="n">Facet</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;final_facet.json&#39;</span><span class="p">))]]</span>
+             <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">analyze_cation_energies</span><span class="p">(</span><span class="n">facet</span><span class="o">=</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cation</span><span class="o">=</span><span class="n">cation</span><span class="p">)</span>
+
+    <span class="c1"># TODO Make landscapes and paths connected via dictionary</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Analyzing facets...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Find all the facets in the paths</span>
+    <span class="n">facets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">facet</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">facets</span><span class="p">:</span>
+                <span class="n">facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Looking for end facets...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Find end_facets</span>
+    <span class="n">end_facets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">facet</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">end_facets</span><span class="p">:</span>
+                <span class="n">end_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">end_facets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+
+    <span class="c1"># Check if the chain is connected</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">end_facets</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Edges are not connected in a chain. Aborting...&#39;</span><span class="p">)</span>
+    <span class="c1"># TODO Handle case of circular connection of paths</span>
+
+    <span class="c1"># Find the starting path</span>
+    <span class="n">facet_chain</span> <span class="o">=</span> <span class="p">[</span><span class="n">end_facets</span><span class="p">[</span><span class="n">START_FACET</span><span class="p">],</span> <span class="p">]</span>
+    <span class="n">path_chain</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">landscape_chain</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Constructing chain...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">facet_chain</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">facets</span><span class="p">):</span>
+
+        <span class="n">last_facet</span> <span class="o">=</span> <span class="n">facet_chain</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Last Facet:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">last_facet</span><span class="p">))</span>
+
+        <span class="c1"># Find the path that connects to the last facet and is not already in</span>
+        <span class="c1"># the path chain</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path_chain</span> <span class="ow">and</span> <span class="n">last_facet</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">other_facet</span> <span class="o">=</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">other_facet</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">last_facet</span><span class="p">)</span>
+                <span class="n">other_facet</span> <span class="o">=</span> <span class="n">other_facet</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Other Facet:&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">other_facet</span><span class="p">))</span>
+
+                <span class="n">facet_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other_facet</span><span class="p">)</span>
+
+                <span class="c1"># Make sure that the landscape edge is set up in the right</span>
+                <span class="c1"># direction.</span>
+                <span class="k">if</span> <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">last_facet</span><span class="p">:</span>
+
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Flipped path (before):&#39;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+
+                    <span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Flipped path (after):&#39;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+
+                    <span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flip_coordinates</span><span class="p">(</span><span class="s1">&#39;Angle&#39;</span><span class="p">)</span>
+
+                <span class="n">landscape_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">path_chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;----------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Facet Chain:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">facet_chain</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">facet</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;----------------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Path Chain:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">path_chain</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;From&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;To&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+    <span class="c1"># Interpolate the landscapes to a uniform mesh</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-----------&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finding proper radii and angles...&quot;</span><span class="p">)</span>
+    <span class="c1"># Find the proper radii</span>
+    <span class="n">min_max_radius</span> <span class="o">=</span> <span class="mf">1e6</span>
+    <span class="n">max_min_radius</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">lands</span> <span class="ow">in</span> <span class="n">landscape_chain</span><span class="p">:</span>
+        <span class="n">rmax</span> <span class="o">=</span> <span class="n">lands</span><span class="o">.</span><span class="n">datapoints</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">rmax</span> <span class="o">&lt;</span> <span class="n">min_max_radius</span><span class="p">:</span>
+            <span class="n">min_max_radius</span> <span class="o">=</span> <span class="n">rmax</span>
+        <span class="n">rmin</span> <span class="o">=</span> <span class="n">lands</span><span class="o">.</span><span class="n">datapoints</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">rmin</span> <span class="o">&gt;</span> <span class="n">max_min_radius</span><span class="p">:</span>
+            <span class="n">max_min_radius</span> <span class="o">=</span> <span class="n">rmin</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Largest minimal radius = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_min_radius</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Smallest maximal radius = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_max_radius</span><span class="p">))</span>
+
+    <span class="c1"># Adjust the angles to make one angle coordinate for all edges</span>
+    <span class="n">facet_angles</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">landscape_chain</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">datapoints</span><span class="p">[</span><span class="s1">&#39;Angle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+
+    <span class="k">for</span> <span class="n">lands</span> <span class="ow">in</span> <span class="n">landscape_chain</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Maximum angle = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">facet_angles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">lands</span><span class="o">.</span><span class="n">datapoints</span><span class="p">[</span><span class="s1">&#39;Angle&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">facet_angles</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">facet_angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lands</span><span class="o">.</span><span class="n">datapoints</span><span class="p">[</span><span class="s1">&#39;Angle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+    <span class="n">all_radii</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_angles</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_energy</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Interpolate the landscapes</span>
+    <span class="k">for</span> <span class="n">lands</span> <span class="ow">in</span> <span class="n">landscape_chain</span><span class="p">:</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">lands</span><span class="o">.</span><span class="n">datapoints</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">],</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">,</span> <span class="s1">&#39;Angle&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Find the number of radii and angles</span>
+        <span class="n">r_init</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nangles</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="nb">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">][</span><span class="n">nangles</span><span class="p">]</span> <span class="o">-</span> <span class="n">r_init</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+            <span class="n">nangles</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nradii</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">/</span> <span class="n">nangles</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-----------&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of Angles = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nangles</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of Radii = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nradii</span><span class="p">))</span>
+
+        <span class="c1"># Get the right format for the data</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Distance&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nradii</span><span class="p">,</span> <span class="n">nangles</span><span class="p">)</span>  <span class="c1"># [::nradii]</span>
+        <span class="n">angles</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Angle&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nradii</span><span class="p">,</span> <span class="n">nangles</span><span class="p">)</span>  <span class="c1"># [:nangles]</span>
+        <span class="n">energy</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Energy&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nradii</span><span class="p">,</span> <span class="n">nangles</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shape angles: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">angles</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shape radii: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">radii</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shape energy: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">energy</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="n">new_angles</span><span class="p">,</span> <span class="n">new_radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span>
+                                <span class="n">angles</span><span class="o">.</span><span class="n">min</span><span class="p">():</span><span class="n">angles</span><span class="o">.</span><span class="n">max</span><span class="p">():</span><span class="n">inter_mesh</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                <span class="n">max_min_radius</span><span class="p">:</span><span class="n">min_max_radius</span><span class="p">:</span><span class="n">inter_mesh</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-------------&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shape new_angles: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_angles</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Shape new_radii: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_radii</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="n">tck</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">bisplrep</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">energy</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+        <span class="n">new_energy</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">bisplev</span><span class="p">(</span><span class="n">new_angles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">new_radii</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
+                                         <span class="n">tck</span><span class="p">)</span>
+
+        <span class="n">all_radii</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_radii</span><span class="p">)</span>
+        <span class="n">all_angles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_angles</span><span class="p">)</span>
+        <span class="n">all_energy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_energy</span><span class="p">)</span>
+
+    <span class="n">total_radii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">all_radii</span><span class="p">))</span>
+    <span class="n">total_angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">all_angles</span><span class="p">))</span>
+    <span class="n">total_energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">all_energy</span><span class="p">))</span>
+    <span class="n">total_energy</span> <span class="o">-=</span> <span class="n">total_energy</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="c1"># Plot the landscape</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">total_angles</span><span class="p">,</span> <span class="n">total_radii</span><span class="p">,</span> <span class="n">total_energy</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">energy_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+               <span class="n">vmax</span><span class="o">=</span><span class="n">energy_range</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;viridis&#39;</span><span class="p">)</span>
+    <span class="n">cbar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+    <span class="n">cbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="s1">&#39;Energy (eV)&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">total_angles</span><span class="p">,</span> <span class="n">total_radii</span><span class="p">,</span> <span class="n">total_energy</span><span class="p">,</span> <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span>
+                     <span class="n">levels</span><span class="o">=</span><span class="n">contour_levels</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">facet_angles</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">angle</span><span class="p">,</span> <span class="n">angle</span><span class="p">],</span> <span class="p">[</span><span class="n">total_radii</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">total_radii</span><span class="o">.</span><span class="n">max</span><span class="p">()],</span>
+                 <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">xlabel</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">facet_angles</span><span class="p">)):</span>
+        <span class="n">xlabel</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;$\Omega_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;$&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Angle&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;$r$ ($\mathrm{\AA}$)&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">,</span> <span class="n">fontname</span><span class="o">=</span><span class="s1">&#39;Georgia&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">facet_angles</span><span class="p">,</span> <span class="n">xlabel</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="s1">&#39;x-large&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">inline_spacing</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%1.1f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">manual</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Marnik Bercx.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
