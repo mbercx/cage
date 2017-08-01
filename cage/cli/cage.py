@@ -135,11 +135,21 @@ def analyze():
 
 
 @analyze.command()
-def landscape():
+@click.argument('lands_dir')
+@click.option('--cation', '-C', default='Li')
+@click.option('--energy_range', '-E', default=())
+@click.option('--interp_mesh', '-I', default=(0.003, 0.01))
+@click.option('--contour_levels', '-l', default=0.1)
+@click.option('--verbose', '-v', default=False)
+def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
+              verbose):
     """
-    Analyze the landscape
+    Analyze the landscape data.
     """
+    from cage.cli.commands.analyze import landscape
 
+    landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
+              verbose)
 
 @main.group()
 def util():
