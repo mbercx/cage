@@ -27,6 +27,7 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "16 JUN 2017"
 
+
 class Landscape(MSONable):
     """
     A discrete mesh representing a line, area or volume.
@@ -103,8 +104,9 @@ class Landscape(MSONable):
         Extends the landscape using a axis vector and turning all the vertices
         in the landscape around the origin by a value and direction determined
         by the axis vector.
-        :param vector:
-        :return:
+
+        Args:
+            axis (numpy.ndarray):
         """
         # TODO Extend this method so it also allows rotations around other points than origin
 

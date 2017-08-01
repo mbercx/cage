@@ -174,6 +174,9 @@ class Cage(Molecule):
         provided. In case no point is provided, the molecule is centered around
         the origin.
 
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
         Args:
             point ((3,) numpy.ndarray): Point around which to center the
                 molecule.
@@ -199,7 +202,87 @@ class Cage(Molecule):
                                   properties=prop))
 
         self._sites = sites
-        #TODO ADJUST FACET PROPERTIES!!!!
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def redefine_origin(self, origin):
+        """
+        Change the coordinates of the Cage, in order to redefine the origin.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
+        Args:
+            origin ((3,) numpy.ndarray): Origin coordinates.
+        """
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - origin
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def insert(self, index, species, coords, validate_proximity=True,
+               properties=None):
+        """
+        Overwrite the insert method of the Molecule class, in order to
+        reset the facets, symmetry operations and point group after the site
+        has been inserted.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
+        Args:
+            index (int): Index to insert site.
+            species (pymatgen.Specie): Species of inserted site.
+            coords ((3,) numpy.ndarray): Coordinates of inserted site.
+            validate_proximity (bool): Whether to check if inserted site is
+                too close to an existing site. Defaults to True.
+            properties (dict): A dictionary of properties for the Site.
+        """
+        super(Cage, self).insert(index, species, coords, validate_proximity,
+                                 properties)
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def append(self, species, coords, validate_proximity=True,
+               properties=None):
+        """
+        Overwrite the append method of the Molecule class, in order to
+        reset the facets, symmetry operations and point group after the site
+        has been appended.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
+        Args:
+            species (pymatgen.Specie): Species of inserted site.
+            coords ((3,) numpy.ndarray): Coordinates of inserted site.
+            validate_proximity (bool): Whether to check if inserted site is
+                too close to an existing site. Defaults to True.
+            properties (dict): A dictionary of properties for the Site.
+        """
+        super(Cage, self).append(species, coords, validate_proximity,
+                                 properties)
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
 
     def find_surface_facets(self, ignore=()):
         """
@@ -261,7 +344,7 @@ class Cage(Molecule):
 
             for surf_facet in facets_surf:
                 if len(set(facet.sites) & set(surf_facet.sites)) \
-                    == len(facet.sites):
+                        == len(facet.sites):
                     facet_in_list = True
 
             # In that case, add it to the surface sites
@@ -269,66 +352,6 @@ class Cage(Molecule):
                 facets_surf.append(facet)
 
         self._facets = facets_surf
-
-    def redefine_origin(self, origin):
-        """
-        Change the coordinates of the Cage, in order to redefine the origin.
-
-        Args:
-            origin ((3,) numpy.ndarray): Origin coordinates.
-        """
-        # Find the new coordinates
-        new_coords = np.array(self.cart_coords) - origin
-
-        # Update the sites
-        sites = []
-        for i in range(len(self.species)):
-            prop = None
-            if self.site_properties:
-                prop = {k: v[i] for k, v in self.site_properties.items()}
-            sites.append(pmg.Site(self.species[i], new_coords[i],
-                                  properties=prop))
-
-        self._sites = sites
-
-    def insert(self, index, species, coords, validate_proximity=True,
-               properties=None):
-        """
-        Overwrite the insert method of the Molecule class, in order to
-        reset the symmetry operations and point group after the site has been
-        inserted.
-
-        Args:
-            index (int): Index to insert site.
-            species (pymatgen.Specie): Species of inserted site.
-            coords ((3,) numpy.ndarray): Coordinates of inserted site.
-            validate_proximity (bool): Whether to check if inserted site is
-                too close to an existing site. Defaults to True.
-            properties (dict): A dictionary of properties for the Site.
-        """
-        super(Cage, self).insert(index, species, coords, validate_proximity,
-                                 properties)
-        self._symmops = None
-        self._pointgroup = None
-
-    def append(self, species, coords, validate_proximity=True,
-               properties=None):
-        """
-        Overwrite the append method of the Molecule class, in order to
-        reset the symmetry operations and point group after the site has been
-        appended.
-
-        Args:
-            species (pymatgen.Specie): Species of inserted site.
-            coords ((3,) numpy.ndarray): Coordinates of inserted site.
-            validate_proximity (bool): Whether to check if inserted site is
-                too close to an existing site. Defaults to True.
-            properties (dict): A dictionary of properties for the Site.
-        """
-        super(Cage, self).append(species, coords, validate_proximity,
-                                 properties)
-        self._symmops = None
-        self._pointgroup = None
 
     def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
@@ -502,9 +525,10 @@ class Cage(Molecule):
                             # Check if the facet shares an edge and is not
                             # related to one of the non-equivalent facets in
                             # the chain
-                            if len(set(facet.sites) & set(chain_facet.sites)) \
-                                    == 2 and (facet_dict[facet][0] not in
-                                         chain_list_noneq_facets):
+                            if len(set(facet.sites) & set(chain_facet.sites))\
+                                    == 2 and \
+                                    (facet_dict[facet][0]
+                                     not in chain_list_noneq_facets):
 
                                 chain_facets.append(facet)
                                 chain_list_noneq_facets.append(
@@ -592,7 +616,7 @@ class Cage(Molecule):
     def find_facet_links(self, share_edge=False):
         """
         Find the non-equivalent links between facets of the cage
-        molecule. The facets can be connected by sharing an edge, or a vertex.
+        molecule. The facets can be connected by sharing an edge, or a site.
 
         Args:
             share_edge (bool): Only return links between facets that
@@ -606,9 +630,9 @@ class Cage(Molecule):
         # Find all links, i.e. possible combinations of surface facets
         links = list(combinations(self.facets, 2))
 
-        # Find the links that share a vertex (this automatically finds
+        # Find the links that share a site (this automatically finds
         # those that share an edge as well).
-        vertex_sharing_links = []
+        site_sharing_links = []
         for link in links:
             cross_section = set(link[0].sites) & set(link[1].sites)
             if cross_section:
@@ -616,14 +640,14 @@ class Cage(Molecule):
                 # In case the user only wants edge-sharing paths, check that
                 if share_edge:
                     if len(cross_section) == 2:
-                        vertex_sharing_links.append(link)
+                        site_sharing_links.append(link)
                 # Else just add the path to the list
                 else:
-                    vertex_sharing_links.append(link)
+                    site_sharing_links.append(link)
 
-        # Find the vertex sharing paths that are non equivalent
+        # Find the site sharing paths that are non equivalent
         noneq_links = []
-        for link in vertex_sharing_links:
+        for link in site_sharing_links:
 
             # Check to see if the path is equivalent with a path in the List of
             # non-equivalent paths
@@ -632,7 +656,7 @@ class Cage(Molecule):
                 for symm in self.symmops:
                     link_center = (link[0].center + link[1].center)/2
                     noneq_link_center = sum((noneq_link[0].center,
-                                                noneq_link[1].center))/2
+                                             noneq_link[1].center))/2
                     symm_link_center = symm.operate(link_center)
                     connection_vector = symm_link_center - noneq_link_center
                     if np.linalg.norm(connection_vector) < 1e-2:
@@ -728,7 +752,8 @@ class OccupiedCage(Cage):
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
                  validate_proximity=False, site_properties=None):
         """
-        Initialize an OccupiedCage instance.
+        Initialize an OccupiedCage instance. The geometric center of the anion
+        is automatically centered on the origin.
 
         Args:
             species (List of pymatgen.Specie): List of atomic species. Possible
@@ -772,6 +797,9 @@ class OccupiedCage(Cage):
         anion** is moved to the point provided. In case no point is provided,
         the anion is centered around the origin.
 
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
         Args:
             point ((3,) numpy.ndarray): Point around which to center the
                 molecule.
@@ -800,12 +828,20 @@ class OccupiedCage(Cage):
                                   properties=prop))
 
         self._sites = sites
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
 
     def add_dock(self, dock, cation=None, docking_point=None):
         """
         Add a docking site to the OccupiedCage. If the chemical symbol of the
         cation is provided, the cation is appended to the OccupiedCage. In case
         the cation is equal to *None*, the cation is assumed to be present and
+        the facet is simply designated as a dock.
+
+        Note: If a cation is appended to the molecule. running this method will
+        reset the facets and symmetry information to None.
 
         Args:
             dock (cage.Facet): The Facet on which the cation is docked.
@@ -833,8 +869,6 @@ class OccupiedCage(Cage):
                 self.set_charge_and_spin(self.charge,
                                          self.spin_multiplicity - 1)
                 self._docks.append(dock)
-
-        self._facets = None
 
         # TODO Add some more checks
 
