@@ -58,6 +58,7 @@ def optimize(filename):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     # Set the charge for the molecule
@@ -95,6 +96,7 @@ def docksetup(filename, cation, distance, verbose):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     if verbose:
@@ -136,9 +138,9 @@ def docksetup(filename, cation, distance, verbose):
 
         # Set up the initial cation site
         mol = anion.copy()
-        mol.find_surface_facets(ignore=IGNORE)
         mol.append(pmg.Specie(cation, 1), neq_facet.center +
-                   distance*neq_facet.normal)
+                   distance * neq_facet.normal)
+        mol.find_surface_facets(ignore=IGNORE)
 
         if verbose:
             print("Finding constraints for the calculation...")
@@ -156,7 +158,9 @@ def docksetup(filename, cation, distance, verbose):
         else:
             mol.set_charge_and_spin(charge=-1)
 
-        print("Setting up the task...")
+        if verbose:
+            print("Setting up the task...")
+
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(mol.charge, None, BASIS,
                                theory='dft',
@@ -171,7 +175,8 @@ def docksetup(filename, cation, distance, verbose):
         except FileExistsError:
             pass
 
-        print("Setting up the input file...")
+        if verbose:
+            print("Setting up the input file...")
 
         # Set up input
         nw_input = nwchem.NwInput(mol, tasks, geometry_options=GEO_SETUP)
@@ -194,10 +199,12 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
+    anion.find_surface_facets(ignore=IGNORE)
     edges = anion.find_noneq_chain_links()
 
     total_mol = anion.copy()
@@ -277,7 +284,7 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
         edge_number += 1
 
     # Set up an xyz file with all the paths
-    total_mol.to(fmt="xyz", filename="total_mol.xyz")
+    total_mol.to(fmt="xyz", filename=os.path.join(chain_dir, "total_mol.xyz"))
 
 
 def pathsetup(filename, cation, distance, edges):
@@ -287,6 +294,7 @@ def pathsetup(filename, cation, distance, edges):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     # TODO Find charge automatically
@@ -449,6 +457,13 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
     dock_number = 1
 
+    chain_dir = 'twocat_chain'
+    try:
+        os.mkdir(chain_dir)
+    except FileExistsError:
+        pass
+
+
     for directory in dir_list:
 
         # Extract the occupied cage
@@ -494,7 +509,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
         paths = occmol.find_noneq_chain_links(symm_tol=tolerance,
                                                     verbose=verbose)
 
-        dock_dir = 'dock' + str(dock_number)
+        dock_dir = os.path.join(chain_dir, 'dock' + str(dock_number))
 
         try:
             os.mkdir(dock_dir)
