@@ -432,7 +432,8 @@ class Cage(Molecule):
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
-    def find_noneq_facet_chain(self, start=0, facets=(), symm_tol=SYMMETRY_TOLERANCE,
+    def find_noneq_facet_chain(self, start=0, facets=(),
+                               symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
@@ -1286,15 +1287,18 @@ class Facet(SiteCollection, MSONable):
     def flip_normal(self):
         """
         Flip the direction of the surface normal of the Facet.
-        :return:
         """
         self._normal = -self._normal
 
-    def angle_to_normal(self, coordinate):
+    def angle_to_normal(self, point):
         """
         Find the angle between the vector that connects the center and the
-        coordinate and the normal.
-        :param coordinate:
-        :return: angle value (in radians)
+        point and the normal.
+
+        Args:
+            point (numpy.ndarray): Coordinates of the point.
+
+        Returns:
+            (*float*): Angle to the normal of the facet.
         """
-        return utils.angle_between(coordinate - self._center, self._normal)
+        return utils.angle_between(point - self._center, self._normal)
