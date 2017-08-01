@@ -256,7 +256,6 @@ class Cage(Molecule):
                 elif angle - math.pi/2 < -ANGLE_TOLERANCE:
                     all_angles_smaller = False
 
-
             # Now check if the facet isn't already part of the surface facets
             facet_in_list = False
 
@@ -268,7 +267,6 @@ class Cage(Molecule):
             # In that case, add it to the surface sites
             if all_angles_smaller and not facet_in_list:
                 facets_surf.append(facet)
-
 
         self._facets = facets_surf
 

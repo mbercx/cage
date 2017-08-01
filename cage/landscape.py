@@ -3,12 +3,14 @@
 
 from monty.json import MSONable
 from cage.core import Cage
+from matplotlib.pyplot import subplots
 
 import json
+import math
+import os
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from pylab import *
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
 import numpy as np

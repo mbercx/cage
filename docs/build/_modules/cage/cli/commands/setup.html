@@ -56,12 +56,11 @@
 <span class="kn">from</span> <span class="nn">cage.core</span> <span class="k">import</span> <span class="n">Cage</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Script to set up the calculations for all the non-equivalent facets of a cage</span>
-<span class="sd">molecule, defined by a VASP POSCAR file provided as an argument.</span>
+<span class="sd">Scripts to set up calculations for studying the geometry and energy landscapes </span>
+<span class="sd">around cage-like molecules.</span>
 
-<span class="sd">This script is written specifically to study the facets of CxByHz molecules.</span>
-<span class="sd">In case you want to use it for anything else, it will probably need some</span>
-<span class="sd">adjustments.</span>
+<span class="sd">These scripts were written specifically to study CxByXz molecules. In case you </span>
+<span class="sd">want to use it for anything else, they might need some adjustments.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -92,7 +91,7 @@
 
 <span class="n">ALT_SETUP</span> <span class="o">=</span> <span class="p">{}</span>
 
-<span class="n">DRIVER_SETUP</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;driver&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;loose&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="s1">&#39;100&#39;</span><span class="p">}}</span>
+<span class="n">DRIVER_SETUP</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;loose&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="s1">&#39;100&#39;</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="optimize"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.optimize">[docs]</a><span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
@@ -489,6 +488,7 @@
 
         <span class="c1"># Set up the occupied anion</span>
         <span class="n">occmol</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">OccupiedCage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="n">occmol</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
         <span class="n">occmol</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
         <span class="n">dock</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">find_closest_facet</span><span class="p">(</span><span class="n">cat_coords</span><span class="p">)</span>
 

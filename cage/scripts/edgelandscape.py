@@ -5,7 +5,6 @@ import os
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
-from pylab import *
 
 from cage.landscape import LandscapeAnalyzer
 from cage.core import Facet
