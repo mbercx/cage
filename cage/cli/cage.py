@@ -40,7 +40,8 @@ def optimize(filename):
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2.0)
-def dock(filename, cation, distance):
+@click.option('--verbose', '-v', is_flag=True)
+def dock(filename, cation, distance, verbose):
     """
     Set up the docking sites.
 
@@ -49,7 +50,7 @@ def dock(filename, cation, distance):
     """
     from cage.cli.commands.setup import docksetup
 
-    docksetup(filename, cation, distance)
+    docksetup(filename, cation, distance, verbose)
 
 
 @setup.command()
@@ -140,7 +141,7 @@ def analyze():
 @click.option('--energy_range', '-E', default=())
 @click.option('--interp_mesh', '-I', default=(0.003, 0.01))
 @click.option('--contour_levels', '-l', default=0.1)
-@click.option('--verbose', '-v', default=False)
+@click.option('--verbose', '-v', is_flag=True)
 def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
               verbose):
     """

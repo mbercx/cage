@@ -86,7 +86,10 @@ def optimize(filename):
     nw_input.write_file(os.path.join('optimize', 'input'))
 
 
-def docksetup(filename, cation, distance):
+def docksetup(filename, cation, distance, verbose):
+
+    if verbose:
+        print("Loading structure file " + filename + "...")
 
     try:
         # Load the POSCAR into a Cage
@@ -94,10 +97,22 @@ def docksetup(filename, cation, distance):
     except ValueError:
         anion = cage.core.Cage.from_file(filename)
 
+    if verbose:
+        print("Setting up surface facets...")
+
     anion.find_surface_facets(ignore=IGNORE)
+
+    if verbose:
+        print("Found " + str(len(anion.facets)) + " facets.")
+
+    if verbose:
+        print("Studying symmetry...")
 
     # Find the non-equivalent facets
     facets = anion.find_noneq_facets()
+
+    if verbose:
+        print("Found " + str(len(facets)) + " non-equivalent facets.")
 
     docking_dir = 'docking'
     try:
@@ -105,15 +120,28 @@ def docksetup(filename, cation, distance):
     except FileExistsError:
         pass
 
+    if verbose:
+        print("Setting up docking calculations...")
+
     # For each docking point, set up the calculation input file
     dock_number = 1
     for neq_facet in facets:
 
+        if verbose:
+            print("")
+            print("DOCK " + str(dock_number))
+            print("------")
+            print("")
+            print("Setting up cation site...")
+
         # Set up the initial cation site
         mol = anion.copy()
-        mol.find_surface_facets()
+        mol.find_surface_facets(ignore=IGNORE)
         mol.append(pmg.Specie(cation, 1), neq_facet.center +
                    distance*neq_facet.normal)
+
+        if verbose:
+            print("Finding constraints for the calculation...")
 
         # Constrain the opposite facet
         far_facet = mol.find_farthest_facet(neq_facet.center)
@@ -128,6 +156,7 @@ def docksetup(filename, cation, distance):
         else:
             mol.set_charge_and_spin(charge=-1)
 
+        print("Setting up the task...")
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(mol.charge, None, BASIS,
                                theory='dft',
@@ -142,8 +171,14 @@ def docksetup(filename, cation, distance):
         except FileExistsError:
             pass
 
+        print("Setting up the input file...")
+
         # Set up input
         nw_input = nwchem.NwInput(mol, tasks, geometry_options=GEO_SETUP)
+
+        if verbose:
+            print("Writing input file for dock " + str(dock_number) + "...")
+
         nw_input.write_file(os.path.join(dock_dir, 'input'))
 
         # Write out a facet json file
