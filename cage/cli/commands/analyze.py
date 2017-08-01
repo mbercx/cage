@@ -19,17 +19,19 @@ START_FACET = 0  # 0 or 1 -> determines facet to start chain from
 #TODO This code needs serious improvement. It's damn near illegible
 
 
-def landscape(lands_dir, cation, energy_range, inter_mesh, contour_levels,
-              verbose):
+def landscape_analysis(lands_dir, cation, energy_range, interp_mesh,
+                       contour_levels, verbose):
 
-    contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
+    lands_dir = os.path.abspath(lands_dir)
 
-    dir_list = [os.path.abspath(directory)
-                for directory in os.listdir(lands_dir)
-                if os.path.isdir(directory)]
+    dir_list = [os.path.abspath(os.path.join(lands_dir, file))
+                for file in os.listdir(lands_dir)
+                if os.path.isdir(os.path.join(lands_dir, file))]
 
     if verbose:
         print("Extracting Landscape data from " + lands_dir + "...")
+        for directory in dir_list:
+            print(directory)
 
     # TODO Make this part ignore directories that do not have the right files
     edges = [[LandscapeAnalyzer.from_file(os.path.join(directory,
@@ -37,6 +39,9 @@ def landscape(lands_dir, cation, energy_range, inter_mesh, contour_levels,
               [Facet.from_file(os.path.join(directory, 'init_facet.json')),
               Facet.from_file(os.path.join(directory, 'final_facet.json'))]]
              for directory in dir_list]
+
+    if verbose:
+        print("Found " + str(len(edges)) + " directories with landscape data.")
 
     for edge in edges:
         edge[0].analyze_cation_energies(facet=edge[1][0], cation=cation)
@@ -52,6 +57,9 @@ def landscape(lands_dir, cation, energy_range, inter_mesh, contour_levels,
         for facet in edge[1]:
             if facet not in facets:
                 facets.append(facet)
+
+    if verbose:
+        print("Found " + str(len(facets)) + " facets.")
 
     if verbose:
         print("Looking for end facets...")
@@ -206,8 +214,8 @@ def landscape(lands_dir, cation, energy_range, inter_mesh, contour_levels,
             print('Shape energy: ' + str(energy.shape))
 
         new_angles, new_radii = np.mgrid[
-                                angles.min():angles.max():inter_mesh[0],
-                                max_min_radius:min_max_radius:inter_mesh[1]
+                                angles.min():angles.max():interp_mesh[0],
+                                max_min_radius:min_max_radius:interp_mesh[1]
                                 ]
 
         if verbose:
@@ -228,6 +236,12 @@ def landscape(lands_dir, cation, energy_range, inter_mesh, contour_levels,
     total_angles = np.concatenate(tuple(all_angles))
     total_energy = np.concatenate(tuple(all_energy))
     total_energy -= total_energy.min()
+
+    # If no energy range is specified by the user, take (min, max)
+    if energy_range == (0.0, 0.0):
+        energy_range = (total_energy.min(), total_energy.max())
+
+    contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
 
     # Plot the landscape
     plt.figure()

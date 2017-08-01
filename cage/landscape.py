@@ -10,7 +10,6 @@ import math
 import os
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
 import numpy as np
@@ -89,7 +88,7 @@ class Landscape(MSONable):
                 vector = vertices[1] - vertices[0]
                 length = np.linalg.norm(vector)
                 unitvector = vector / length
-                npoints = num # int(length * num + 1)
+                npoints = num  # int(length * num + 1)
                 mesh_distance = length / npoints
                 points = []
                 for i in range(npoints):
@@ -173,7 +172,7 @@ class LandscapeAnalyzer(MSONable):
     """
     An analyzer class for interpreting data from calculations on a landscape.
     """
-    def __init__(self, data, datapoints=None, software="nwchem"):
+    def __init__(self, data, datapoints=(), software="nwchem"):
         """
         Initialize an instance of LandscapeAnalyzer. This method will rarely
         be used directly. Usually a LandscapeAnalyzer is initialized from a
@@ -326,7 +325,7 @@ class LandscapeAnalyzer(MSONable):
         :param coord_name:
         :return:
         """
-        if self._datapoints == None:
+        if len(self._datapoints) == 0:
             raise ValueError('No processed data present.')
 
         data = self._datapoints
@@ -339,8 +338,8 @@ class LandscapeAnalyzer(MSONable):
         Plot the energy landscape from the datapoints.
         :return:
         """
-        if self.datapoints == None:
-            self.analyze_energies()
+        if len(self._datapoints) == 0:
+            self.analyze_cation_energies()
 
         data = self.datapoints
 
