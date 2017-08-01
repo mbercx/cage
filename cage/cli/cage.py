@@ -27,6 +27,20 @@ def setup():
     pass
 
 
+
+
+
+@main.group()
+def util():
+    """
+    A set of utility scripts for the cage package.
+    """
+    pass
+
+
+# SETUP COMMANDS
+
+
 @setup.command()
 @click.argument('filename')
 def optimize(filename):
@@ -138,7 +152,7 @@ def analyze():
 @analyze.command()
 @click.argument('lands_dir')
 @click.option('--cation', '-C', default='Li')
-@click.option('--energy_range', '-E', default=())
+@click.option('--energy_range', '-E', default=(0.0, 0.0))
 @click.option('--interp_mesh', '-I', default=(0.003, 0.01))
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option('--verbose', '-v', is_flag=True)
@@ -147,17 +161,14 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
     """
     Analyze the landscape data.
     """
-    from cage.cli.commands.analyze import landscape
+    from cage.cli.commands.analyze import landscape_analysis
 
-    landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
-              verbose)
-
-@main.group()
-def util():
-    """
-    A set of utility scripts for the cage package.
-    """
-    pass
+    landscape_analysis(lands_dir=lands_dir,
+                       cation=cation,
+                       energy_range=energy_range,
+                       interp_mesh=interp_mesh,
+                       contour_levels=contour_levels,
+                       verbose=verbose)
 
 
 @util.command()
