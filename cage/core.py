@@ -34,7 +34,7 @@ SYMMETRY_TOLERANCE = 1e-2
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
 # not found, it might be worth to try tweaking this value.
 
-ANGLE_TOLERANCE = math.pi/10
+ANGLE_TOLERANCE = math.pi/20
 # This value is important when determining whether or not a new site is a part
 # of the facet. In principle, the site should be in the plane of the facet,
 # i.e. the angle between the line connecting the center of the facet and the
@@ -156,7 +156,7 @@ class Cage(Molecule):
         Returns:
             (*cage.Cage*)
         """
-        assert type(mol) is Molecule
+        assert type(mol) is Molecule or type(mol) is Cage
         return cls(species=mol.species, coords=mol.cart_coords,
                    charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
                    site_properties=mol.site_properties)
@@ -199,6 +199,7 @@ class Cage(Molecule):
                                   properties=prop))
 
         self._sites = sites
+        #TODO ADJUST FACET PROPERTIES!!!!
 
     def find_surface_facets(self, ignore=()):
         """
@@ -213,8 +214,6 @@ class Cage(Molecule):
             ignore (Tuple of Elements/Species): The elements to ignore for the
                 surface facet determination.
         """
-
-        #TODO Expand the algorithm to more sites
 
         # Find all the sites which should not be ignored
         valid_sites = []
@@ -240,9 +239,14 @@ class Cage(Molecule):
             # If all the angles are larger than pi/2, it's a surface site
             all_angles_smaller = True
 
-            for site in valid_sites:
+            # Check the other sites in the molecule
+            other_sites = valid_sites.copy()
+            for site in facet.sites:
+                other_sites.remove(site)
 
-                angle = facet.angle_to_normal(site.coords)
+            for site in other_sites:
+
+                angle = abs(facet.angle_to_normal(site.coords))
 
                 # For angles sufficiently close to pi/2, add the site to the
                 # facet
@@ -251,6 +255,7 @@ class Cage(Molecule):
 
                 elif angle - math.pi/2 < -ANGLE_TOLERANCE:
                     all_angles_smaller = False
+
 
             # Now check if the facet isn't already part of the surface facets
             facet_in_list = False
@@ -263,6 +268,7 @@ class Cage(Molecule):
             # In that case, add it to the surface sites
             if all_angles_smaller and not facet_in_list:
                 facets_surf.append(facet)
+
 
         self._facets = facets_surf
 
@@ -387,7 +393,7 @@ class Cage(Molecule):
                 See the *fmt* argument.
         """
         if not self.facets:
-            print("Please set up surface facets first")
+            print("Please set up surface facets first.")
             return []
 
         facet_list = []
@@ -428,7 +434,7 @@ class Cage(Molecule):
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
-    def find_noneq_facet_chain(self, start=0, symm_tol=SYMMETRY_TOLERANCE,
+    def find_noneq_facet_chain(self, start=0, facets=(), symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
@@ -439,6 +445,9 @@ class Cage(Molecule):
             start (int): Determines from which termination facet the chain is
                 constructed. This might be useful if the chain is not
                 constructed as the user would like.
+            facets (tuple): Tuple of Facets which are to be used for the
+                chain. In case no facets are provided, the full list of
+                non-equivalent facets will be used.
             symm_tol (float): Tolerance for the equivalence condition, i.e.
                 how much the distance between the centers is allowed to be
                 after a symmetry operation.
@@ -462,42 +471,51 @@ class Cage(Molecule):
             print("Looking for non-equivalent facets...")
 
         facet_dict = self.set_up_facet_list('dict', tol=symm_tol)
-        noneq_facets = self.find_noneq_facets(tol=symm_tol)
 
-        if verbose:
-            print("Found " + str(len(noneq_facets)) +
-                  " non-equivalent facets.")
-            print("")
+        # If no facets are provided, set up the connected non-equivalent facets
+        if facets == ():
+            noneq_facets = self.find_noneq_facets(tol=symm_tol)
+            chain_length = len(noneq_facets)
 
-        # Find the facets in the chain
-        chain_facets = [noneq_facets[0]]
-        chain_list_noneq_facets = [noneq_facets[0]]
+            if verbose:
+                print("Found " + str(len(noneq_facets)) +
+                      " non-equivalent facets.")
+                print("")
 
-        while len(chain_facets) < len(noneq_facets):
+            # Find the facets in the chain, i.e. connect the non-equivalent
+            # facets
+            chain_facets = [noneq_facets[0]]
+            chain_list_noneq_facets = [noneq_facets[0]]
 
-            new_chain_facet = False
+            while len(chain_facets) < len(noneq_facets):
 
-            # Loop over the facets in the chain
-            for chain_facet in chain_facets:
+                new_chain_facet = False
 
-                # If a new facet has been appended, restart the loop
-                if not new_chain_facet:
+                # Loop over the facets in the chain
+                for chain_facet in chain_facets:
 
-                    # Find a facet that shares an edge
-                    for facet in self.facets:
+                    # If a new facet has been appended, restart the loop
+                    if not new_chain_facet:
 
-                        # Check if the facet shares an edge and is not related
-                        # to one of the non-equivalent facets in the chain
-                        if len(set(facet.sites) & set(chain_facet.sites)) == 2\
-                                and (facet_dict[facet][0] not in
-                                     chain_list_noneq_facets):
+                        # Find a facet that shares an edge
+                        for facet in self.facets:
 
-                            chain_facets.append(facet)
-                            chain_list_noneq_facets.append(
-                                facet_dict[facet][0]
-                            )
-                            new_chain_facet = True
-                            break
+                            # Check if the facet shares an edge and is not
+                            # related to one of the non-equivalent facets in
+                            # the chain
+                            if len(set(facet.sites) & set(chain_facet.sites)) \
+                                    == 2 and (facet_dict[facet][0] not in
+                                         chain_list_noneq_facets):
+
+                                chain_facets.append(facet)
+                                chain_list_noneq_facets.append(
+                                    facet_dict[facet][0]
+                                )
+                                new_chain_facet = True
+                                break
+        else:
+            chain_facets = facets
+            chain_length = len(facets)
 
         if verbose:
             print("Found " + str(len(chain_facets)) +
@@ -567,8 +585,8 @@ class Cage(Molecule):
                         other_facets.remove(option[0])
                         break
 
-        if len(facet_chain) < len(noneq_facets):
-            print('WARNING: Could not connect all nonequivalent facets.')
+        if len(facet_chain) < chain_length:
+            print('WARNING: Could not connect all facets.')
 
         return facet_chain
 
@@ -765,9 +783,26 @@ class OccupiedCage(Cage):
 
         anion_center = sum(anion_coords)/len(anion_coords)
 
-        super(OccupiedCage, self).center(anion_center)
+        if point is not None:
+            anion_center -= point
 
-    def add_dock(self, dock, cation='Li', docking_point=None):
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - anion_center
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
+
+    def add_dock(self, dock, cation=None, docking_point=None):
         """
         Add a docking site to the OccupiedCage. If the chemical symbol of the
         cation is provided, the cation is appended to the OccupiedCage. In case
@@ -911,8 +946,6 @@ class Facet(SiteCollection, MSONable):
     """
     Facet of a Molecule object, defined by a list of Sites.
     """
-
-    #TODO Allow the facet to contain more than three sites
 
     def __init__(self, sites, normal=None):
         """

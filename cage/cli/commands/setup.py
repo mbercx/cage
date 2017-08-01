@@ -446,6 +446,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
         # Set up the occupied anion
         occmol = cage.core.OccupiedCage.from_molecule(mol)
+        occmol.center()
         occmol.find_surface_facets(ignore=IGNORE)
         dock = occmol.find_closest_facet(cat_coords)
 
