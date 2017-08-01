@@ -100,6 +100,7 @@
         <span class="c1"># Load the POSCAR into a Cage</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># If that fails, try other file formats supported by pymatgen</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
     <span class="c1"># Set the charge for the molecule</span>
@@ -128,18 +129,34 @@
     <span class="n">nw_input</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;optimize&#39;</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="docksetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.docksetup">[docs]</a><span class="k">def</span> <span class="nf">docksetup</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">distance</span><span class="p">):</span>
+<div class="viewcode-block" id="docksetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.docksetup">[docs]</a><span class="k">def</span> <span class="nf">docksetup</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading structure file &quot;</span> <span class="o">+</span> <span class="n">filename</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Load the POSCAR into a Cage</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># If that fails, try other file formats supported by pymatgen</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up surface facets...&quot;</span><span class="p">)</span>
 
     <span class="n">anion</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anion</span><span class="o">.</span><span class="n">facets</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; facets.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Studying symmetry...&quot;</span><span class="p">)</span>
+
     <span class="c1"># Find the non-equivalent facets</span>
     <span class="n">facets</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">find_noneq_facets</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">facets</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; non-equivalent facets.&quot;</span><span class="p">)</span>
 
     <span class="n">docking_dir</span> <span class="o">=</span> <span class="s1">&#39;docking&#39;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -147,15 +164,28 @@
     <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
         <span class="k">pass</span>
 
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up docking calculations...&quot;</span><span class="p">)</span>
+
     <span class="c1"># For each docking point, set up the calculation input file</span>
     <span class="n">dock_number</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="k">for</span> <span class="n">neq_facet</span> <span class="ow">in</span> <span class="n">facets</span><span class="p">:</span>
 
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DOCK &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dock_number</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;------&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up cation site...&quot;</span><span class="p">)</span>
+
         <span class="c1"># Set up the initial cation site</span>
         <span class="n">mol</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">mol</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">()</span>
         <span class="n">mol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Specie</span><span class="p">(</span><span class="n">cation</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">neq_facet</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span>
-                   <span class="n">distance</span><span class="o">*</span><span class="n">neq_facet</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+                   <span class="n">distance</span> <span class="o">*</span> <span class="n">neq_facet</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+        <span class="n">mol</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finding constraints for the calculation...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Constrain the opposite facet</span>
         <span class="n">far_facet</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">find_farthest_facet</span><span class="p">(</span><span class="n">neq_facet</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
@@ -169,6 +199,9 @@
             <span class="n">mol</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">mol</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up the task...&quot;</span><span class="p">)</span>
 
         <span class="c1"># Set up the task for the calculations</span>
         <span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">nwchem</span><span class="o">.</span><span class="n">NwTask</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">BASIS</span><span class="p">,</span>
@@ -184,8 +217,15 @@
         <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
             <span class="k">pass</span>
 
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up the input file...&quot;</span><span class="p">)</span>
+
         <span class="c1"># Set up input</span>
         <span class="n">nw_input</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwInput</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">tasks</span><span class="p">,</span> <span class="n">geometry_options</span><span class="o">=</span><span class="n">GEO_SETUP</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing input file for dock &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dock_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+
         <span class="n">nw_input</span><span class="o">.</span><span class="n">write_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">,</span> <span class="s1">&#39;input&#39;</span><span class="p">))</span>
 
         <span class="c1"># Write out a facet json file</span>
@@ -201,10 +241,12 @@
         <span class="c1"># Load the POSCAR into a Cage</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># If that fails, try other file formats supported by pymatgen</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
     <span class="c1"># Find the chain edges, i.e. the paths between the edge sharing facets of</span>
     <span class="c1"># the chain of non-equivalent facets.</span>
+    <span class="n">anion</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
     <span class="n">edges</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">find_noneq_chain_links</span><span class="p">()</span>
 
     <span class="n">total_mol</span> <span class="o">=</span> <span class="n">anion</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -284,7 +326,7 @@
         <span class="n">edge_number</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="c1"># Set up an xyz file with all the paths</span>
-    <span class="n">total_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;total_mol.xyz&quot;</span><span class="p">)</span></div>
+    <span class="n">total_mol</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chain_dir</span><span class="p">,</span> <span class="s2">&quot;total_mol.xyz&quot;</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="pathsetup"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.setup.pathsetup">[docs]</a><span class="k">def</span> <span class="nf">pathsetup</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">cation</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">edges</span><span class="p">):</span>
@@ -294,6 +336,7 @@
         <span class="c1"># Load the POSCAR into a Cage</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># If that fails, try other file formats supported by pymatgen</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="n">cage</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
     <span class="c1"># TODO Find charge automatically</span>
@@ -456,6 +499,13 @@
 
     <span class="n">dock_number</span> <span class="o">=</span> <span class="mi">1</span>
 
+    <span class="n">chain_dir</span> <span class="o">=</span> <span class="s1">&#39;twocat_chain&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">chain_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+
     <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
 
         <span class="c1"># Extract the occupied cage</span>
@@ -501,7 +551,7 @@
         <span class="n">paths</span> <span class="o">=</span> <span class="n">occmol</span><span class="o">.</span><span class="n">find_noneq_chain_links</span><span class="p">(</span><span class="n">symm_tol</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
                                                     <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
-        <span class="n">dock_dir</span> <span class="o">=</span> <span class="s1">&#39;dock&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dock_number</span><span class="p">)</span>
+        <span class="n">dock_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chain_dir</span><span class="p">,</span> <span class="s1">&#39;dock&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">dock_number</span><span class="p">))</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dock_dir</span><span class="p">)</span>

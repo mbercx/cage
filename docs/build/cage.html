@@ -114,8 +114,10 @@ to fullerenes.</p>
 <dt id="cage.core.Cage.append">
 <code class="descname">append</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overwrite the append method of the Molecule class, in order to
-reset the symmetry operations and point group after the site has been
-appended.</p>
+reset the facets, symmetry operations and point group after the site
+has been appended.</p>
+<p>Note: Running this method will reset the facets and symmetry
+information to None.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -140,6 +142,8 @@ too close to an existing site. Defaults to True.</li>
 coordinates for the sites so that the geometric center is on the point
 provided. In case no point is provided, the molecule is centered around
 the origin.</p>
+<p>Note: Running this method will reset the facets and symmetry
+information to None.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -194,7 +198,7 @@ provided.</p>
 <dt id="cage.core.Cage.find_facet_links">
 <code class="descname">find_facet_links</code><span class="sig-paren">(</span><em>share_edge=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_facet_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_facet_links" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the non-equivalent links between facets of the cage
-molecule. The facets can be connected by sharing an edge, or a vertex.</p>
+molecule. The facets can be connected by sharing an edge, or a site.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -378,8 +382,10 @@ cage.</td>
 <dt id="cage.core.Cage.insert">
 <code class="descname">insert</code><span class="sig-paren">(</span><em>index</em>, <em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.insert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Overwrite the insert method of the Molecule class, in order to
-reset the symmetry operations and point group after the site has been
-inserted.</p>
+reset the facets, symmetry operations and point group after the site
+has been inserted.</p>
+<p>Note: Running this method will reset the facets and symmetry
+information to None.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -416,6 +422,8 @@ too close to an existing site. Defaults to True.</li>
 <dt id="cage.core.Cage.redefine_origin">
 <code class="descname">redefine_origin</code><span class="sig-paren">(</span><em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.redefine_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.redefine_origin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the coordinates of the Cage, in order to redefine the origin.</p>
+<p>Note: Running this method will reset the facets and symmetry
+information to None.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -511,11 +519,21 @@ the facet.</td>
 
 <dl class="method">
 <dt id="cage.core.Facet.angle_to_normal">
-<code class="descname">angle_to_normal</code><span class="sig-paren">(</span><em>coordinate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.angle_to_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.angle_to_normal" title="Permalink to this definition">¶</a></dt>
+<code class="descname">angle_to_normal</code><span class="sig-paren">(</span><em>point</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.angle_to_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.angle_to_normal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the angle between the vector that connects the center and the
-coordinate and the normal.
-:param coordinate:
-:return: angle value (in radians)</p>
+point and the normal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>numpy.ndarray</em>) – Coordinates of the point.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Angle to the normal of the facet.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<em>float</em>)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -556,8 +574,7 @@ coordinate and the normal.
 <dl class="method">
 <dt id="cage.core.Facet.flip_normal">
 <code class="descname">flip_normal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet.flip_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet.flip_normal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flip the direction of the surface normal of the Facet.
-:return:</p>
+<dd><p>Flip the direction of the surface normal of the Facet.</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -755,7 +772,10 @@ written.</li>
 <code class="descname">add_dock</code><span class="sig-paren">(</span><em>dock</em>, <em>cation=None</em>, <em>docking_point=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.add_dock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.add_dock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a docking site to the OccupiedCage. If the chemical symbol of the
 cation is provided, the cation is appended to the OccupiedCage. In case
-the cation is equal to <em>None</em>, the cation is assumed to be present and</p>
+the cation is equal to <em>None</em>, the cation is assumed to be present and
+the facet is simply designated as a dock.</p>
+<p>Note: If a cation is appended to the molecule. running this method will
+reset the facets and symmetry information to None.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -779,6 +799,8 @@ cation.</li>
 the coordinates for the sites so that the geometric center <strong>of the
 anion</strong> is moved to the point provided. In case no point is provided,
 the anion is centered around the origin.</p>
+<p>Note: Running this method will reset the facets and symmetry
+information to None.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -925,9 +947,15 @@ molecule.</td>
 <code class="descname">extend_by_rotation</code><span class="sig-paren">(</span><em>axis</em>, <em>density=10</em>, <em>remove_endline=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.extend_by_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.extend_by_rotation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extends the landscape using a axis vector and turning all the vertices
 in the landscape around the origin by a value and direction determined
-by the axis vector.
-:param vector:
-:return:</p>
+by the axis vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>axis</strong> (<em>numpy.ndarray</em>) – </td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -992,7 +1020,7 @@ a line).</p>
 
 <dl class="class">
 <dt id="cage.landscape.LandscapeAnalyzer">
-<em class="property">class </em><code class="descclassname">cage.landscape.</code><code class="descname">LandscapeAnalyzer</code><span class="sig-paren">(</span><em>data</em>, <em>datapoints=None</em>, <em>software='nwchem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">cage.landscape.</code><code class="descname">LandscapeAnalyzer</code><span class="sig-paren">(</span><em>data</em>, <em>datapoints=()</em>, <em>software='nwchem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
 <p>An analyzer class for interpreting data from calculations on a landscape.</p>
 <dl class="method">
