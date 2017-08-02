@@ -70,15 +70,22 @@ def dock(filename, cation, distance, verbose):
 @setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
+@click.option('--facets', '-f', default=tuple)
 @click.option('--operation', '-O', default='energy')
 @click.option('--endradii', '-e', default=(3, 6))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
-def chain(filename, cation, operation, endradii, nradii, adensity):
+def chain(filename, cation, facets, operation, endradii, nradii, adensity):
     """ Set up a 2D landscape along the chain of non-equivalent facets. """
     from cage.cli.commands.setup import chainsetup
 
-    chainsetup(filename, cation, operation, endradii, nradii, adensity)
+    chainsetup(filename=filename,
+               facets=facets,
+               cation=cation,
+               operation=operation,
+               endradii=endradii,
+               nradii=nradii,
+               adensity=adensity)
 
 
 @setup.command()

@@ -192,7 +192,8 @@ def docksetup(filename, cation, distance, verbose):
         dock_number += 1
 
 
-def chainsetup(filename, cation, operation, endradii, nradii, adensity):
+def chainsetup(filename, cation, facets, operation, endradii, nradii,
+               adensity):
 
     # Load the Cage from the file
     try:
