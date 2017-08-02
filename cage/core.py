@@ -455,7 +455,7 @@ class Cage(Molecule):
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
-    def find_noneq_facet_chain(self, start=0, facets=(),
+    def find_noneq_facet_chain(self, start=0, facets=tuple,
                                symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
@@ -495,7 +495,7 @@ class Cage(Molecule):
         facet_dict = self.set_up_facet_list('dict', tol=symm_tol)
 
         # If no facets are provided, set up the connected non-equivalent facets
-        if facets == ():
+        if facets == tuple:
             noneq_facets = self.find_noneq_facets(tol=symm_tol)
             chain_length = len(noneq_facets)
 
@@ -564,8 +564,11 @@ class Cage(Molecule):
             print("")
 
         if len(end_facets) == 0:
-            raise ValueError("No termination facets found! Setting up chain "
-                             "aborted.")
+            end_facets = chain_facets
+            print('Could not find a termination facet. Starting chain buildup '
+                  'from the first facet in the list.')
+            # raise ValueError("No termination facets found! Setting up chain "
+            #                  "aborted.")
 
         # Sort the chain:
         try:
@@ -667,13 +670,16 @@ class Cage(Molecule):
 
         return noneq_links
 
-    def find_noneq_chain_links(self, symm_tol=SYMMETRY_TOLERANCE,
+    def find_noneq_chain_links(self, facets=tuple, symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
         Find the links between the facets of the chain that connects a
         set of non equivalent facets.
 
         Args:
+            facets (tuple): Tuple of Facets which are to be used for the
+                chain. In case no facets are provided, the full list of
+                non-equivalent facets will be used.
             symm_tol (float): Tolerance for the equivalence condition, i.e.
                 how much the distance between the centers is allowed to be
                 after a symmetry operation.
@@ -684,10 +690,9 @@ class Cage(Molecule):
             (*List of (cage.Facet, cage.Facet) Tuples*) --
                 The links between the Facets in the chain of non-equivalent
                 Facets.
-
         """
-
-        facet_chain = self.find_noneq_facet_chain(symm_tol=symm_tol,
+        facet_chain = self.find_noneq_facet_chain(facets=facets,
+                                                  symm_tol=symm_tol,
                                                   verbose=verbose)
 
         chain_links = []
