@@ -76,6 +76,13 @@
 <span class="c1"># of 1E-2 is usually pretty good. In case the right non-equivalent facets are</span>
 <span class="c1"># not found, it might be worth to try tweaking this value.</span>
 
+<span class="n">ANGLE_TOLERANCE</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">20</span>
+<span class="c1"># This value is important when determining whether or not a new site is a part</span>
+<span class="c1"># of the facet. In principle, the site should be in the plane of the facet,</span>
+<span class="c1"># i.e. the angle between the line connecting the center of the facet and the</span>
+<span class="c1"># site and the normal of the Facet should be pi/2. This parameters allows a</span>
+<span class="c1"># deviation of the angle up to ANGLE_TOLERANCE</span>
+
 
 <div class="viewcode-block" id="Cage"><a class="viewcode-back" href="../../cage.html#cage.core.Cage">[docs]</a><span class="k">class</span> <span class="nc">Cage</span><span class="p">(</span><span class="n">Molecule</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -191,7 +198,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            (*cage.Cage*)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Molecule</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Molecule</span> <span class="ow">or</span> <span class="nb">type</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Cage</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
                    <span class="n">charge</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span> <span class="n">spin_multiplicity</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">spin_multiplicity</span><span class="p">,</span>
                    <span class="n">site_properties</span><span class="o">=</span><span class="n">mol</span><span class="o">.</span><span class="n">site_properties</span><span class="p">)</span></div>
@@ -208,6 +215,9 @@
 <span class="sd">        coordinates for the sites so that the geometric center is on the point</span>
 <span class="sd">        provided. In case no point is provided, the molecule is centered around</span>
 <span class="sd">        the origin.</span>
+
+<span class="sd">        Note: Running this method will reset the facets and symmetry</span>
+<span class="sd">        information to None.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            point ((3,) numpy.ndarray): Point around which to center the</span>
@@ -233,7 +243,88 @@
             <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                                   <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facet_dict</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Cage.redefine_origin"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.redefine_origin">[docs]</a>    <span class="k">def</span> <span class="nf">redefine_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the coordinates of the Cage, in order to redefine the origin.</span>
+
+<span class="sd">        Note: Running this method will reset the facets and symmetry</span>
+<span class="sd">        information to None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            origin ((3,) numpy.ndarray): Origin coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Find the new coordinates</span>
+        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin</span>
+
+        <span class="c1"># Update the sites</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                  <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facet_dict</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Cage.insert"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwrite the insert method of the Molecule class, in order to</span>
+<span class="sd">        reset the facets, symmetry operations and point group after the site</span>
+<span class="sd">        has been inserted.</span>
+
+<span class="sd">        Note: Running this method will reset the facets and symmetry</span>
+<span class="sd">        information to None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (int): Index to insert site.</span>
+<span class="sd">            species (pymatgen.Specie): Species of inserted site.</span>
+<span class="sd">            coords ((3,) numpy.ndarray): Coordinates of inserted site.</span>
+<span class="sd">            validate_proximity (bool): Whether to check if inserted site is</span>
+<span class="sd">                too close to an existing site. Defaults to True.</span>
+<span class="sd">            properties (dict): A dictionary of properties for the Site.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="p">,</span>
+                                 <span class="n">properties</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facet_dict</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Cage.append"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overwrite the append method of the Molecule class, in order to</span>
+<span class="sd">        reset the facets, symmetry operations and point group after the site</span>
+<span class="sd">        has been appended.</span>
+
+<span class="sd">        Note: Running this method will reset the facets and symmetry</span>
+<span class="sd">        information to None.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            species (pymatgen.Specie): Species of inserted site.</span>
+<span class="sd">            coords ((3,) numpy.ndarray): Coordinates of inserted site.</span>
+<span class="sd">            validate_proximity (bool): Whether to check if inserted site is</span>
+<span class="sd">                too close to an existing site. Defaults to True.</span>
+<span class="sd">            properties (dict): A dictionary of properties for the Site.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="p">,</span>
+                                 <span class="n">properties</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facet_dict</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Cage.find_surface_facets"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_surface_facets">[docs]</a>    <span class="k">def</span> <span class="nf">find_surface_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -248,8 +339,6 @@
 <span class="sd">            ignore (Tuple of Elements/Species): The elements to ignore for the</span>
 <span class="sd">                surface facet determination.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1">#TODO Expand the algorithm to more sites</span>
 
         <span class="c1"># Find all the sites which should not be ignored</span>
         <span class="n">valid_sites</span> <span class="o">=</span> <span class="p">[]</span>
@@ -272,81 +361,39 @@
         <span class="n">facets_surf</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">all_facets</span><span class="p">:</span>
 
-            <span class="c1"># Calculate the angles between all valid sites and surface normal</span>
-            <span class="n">site_angles</span> <span class="o">=</span> <span class="p">[</span><span class="n">facet</span><span class="o">.</span><span class="n">angle_to_normal</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-                           <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">valid_sites</span><span class="p">]</span>
-
             <span class="c1"># If all the angles are larger than pi/2, it&#39;s a surface site</span>
             <span class="n">all_angles_smaller</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">for</span> <span class="n">angle</span> <span class="ow">in</span> <span class="n">site_angles</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">angle</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+
+            <span class="c1"># Check the other sites in the molecule</span>
+            <span class="n">other_sites</span> <span class="o">=</span> <span class="n">valid_sites</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">facet</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
+                <span class="n">other_sites</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">other_sites</span><span class="p">:</span>
+
+                <span class="n">angle</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">angle_to_normal</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">))</span>
+
+                <span class="c1"># For angles sufficiently close to pi/2, add the site to the</span>
+                <span class="c1"># facet</span>
+                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ANGLE_TOLERANCE</span><span class="p">:</span>
+                    <span class="n">facet</span><span class="o">.</span><span class="n">add_site</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">angle</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">ANGLE_TOLERANCE</span><span class="p">:</span>
                     <span class="n">all_angles_smaller</span> <span class="o">=</span> <span class="kc">False</span>
 
+            <span class="c1"># Now check if the facet isn&#39;t already part of the surface facets</span>
+            <span class="n">facet_in_list</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">for</span> <span class="n">surf_facet</span> <span class="ow">in</span> <span class="n">facets_surf</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">surf_facet</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span> \
+                        <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">sites</span><span class="p">):</span>
+                    <span class="n">facet_in_list</span> <span class="o">=</span> <span class="kc">True</span>
+
             <span class="c1"># In that case, add it to the surface sites</span>
-            <span class="k">if</span> <span class="n">all_angles_smaller</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">all_angles_smaller</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">facet_in_list</span><span class="p">:</span>
                 <span class="n">facets_surf</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="n">facets_surf</span></div>
-
-<div class="viewcode-block" id="Cage.redefine_origin"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.redefine_origin">[docs]</a>    <span class="k">def</span> <span class="nf">redefine_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Change the coordinates of the Cage, in order to redefine the origin.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            origin ((3,) numpy.ndarray): Origin coordinates.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Find the new coordinates</span>
-        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin</span>
-
-        <span class="c1"># Update the sites</span>
-        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
-            <span class="n">prop</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
-                <span class="n">prop</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                  <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span></div>
-
-<div class="viewcode-block" id="Cage.insert"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.insert">[docs]</a>    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-               <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Overwrite the append method of the Molecule class, in order to</span>
-<span class="sd">        reset the symmetry operations and point group after the site has been</span>
-<span class="sd">        appended.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            index (int): Index to insert site.</span>
-<span class="sd">            species (pymatgen.Specie): Species of inserted site.</span>
-<span class="sd">            coords ((3,) numpy.ndarray): Coordinates of inserted site.</span>
-<span class="sd">            validate_proximity (bool): Whether to check if inserted site is</span>
-<span class="sd">                too close to an existing site. Defaults to True.</span>
-<span class="sd">            properties (dict): A dictionary of properties for the Site.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="p">,</span>
-                                 <span class="n">properties</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span></div>
-
-<div class="viewcode-block" id="Cage.append"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-               <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Overwrite the append method of the Molecule class, in order to</span>
-<span class="sd">        reset the symmetry operations and point group after the site has been</span>
-<span class="sd">        appended.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            species (pymatgen.Specie): Species of inserted site.</span>
-<span class="sd">            coords ((3,) numpy.ndarray): Coordinates of inserted site.</span>
-<span class="sd">            validate_proximity (bool): Whether to check if inserted site is</span>
-<span class="sd">                too close to an existing site. Defaults to True.</span>
-<span class="sd">            properties (dict): A dictionary of properties for the Site.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">validate_proximity</span><span class="p">,</span>
-                                 <span class="n">properties</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 <div class="viewcode-block" id="Cage.find_noneq_facets"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_facets">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -409,7 +456,7 @@
 <span class="sd">                See the *fmt* argument.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please set up surface facets first&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please set up surface facets first.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[]</span>
 
         <span class="n">facet_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -443,15 +490,15 @@
                 <span class="n">facet_dict</span><span class="p">[</span><span class="n">facet_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="n">facet_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
                                                 <span class="n">facet_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">])</span>
 
-            <span class="k">if</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">facet_list</span><span class="p">)</span> <span class="k">for</span> <span class="n">facet_list</span> <span class="ow">in</span> <span class="n">facet_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>\
-                    <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">facet_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">facet_dict</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Obtained number of facets in dict is not &quot;</span>
                                  <span class="s2">&quot;equal to number of surface facets. &quot;</span>
                                  <span class="s2">&quot;Something must have gone wrong.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Cage.find_noneq_facet_chain"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_facet_chain">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facet_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">symm_tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">,</span>
+<div class="viewcode-block" id="Cage.find_noneq_facet_chain"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_facet_chain">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facet_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">facets</span><span class="o">=</span><span class="p">(),</span>
+                               <span class="n">symm_tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">,</span>
                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find a chain of non equivalent facets, i.e. a collection of facets that</span>
@@ -462,6 +509,9 @@
 <span class="sd">            start (int): Determines from which termination facet the chain is</span>
 <span class="sd">                constructed. This might be useful if the chain is not</span>
 <span class="sd">                constructed as the user would like.</span>
+<span class="sd">            facets (tuple): Tuple of Facets which are to be used for the</span>
+<span class="sd">                chain. In case no facets are provided, the full list of</span>
+<span class="sd">                non-equivalent facets will be used.</span>
 <span class="sd">            symm_tol (float): Tolerance for the equivalence condition, i.e.</span>
 <span class="sd">                how much the distance between the centers is allowed to be</span>
 <span class="sd">                after a symmetry operation.</span>
@@ -485,42 +535,52 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Looking for non-equivalent facets...&quot;</span><span class="p">)</span>
 
         <span class="n">facet_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_up_facet_list</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">)</span>
-        <span class="n">noneq_facets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_noneq_facets</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">))</span> <span class="o">+</span>
-                  <span class="s2">&quot; non-equivalent facets.&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="c1"># If no facets are provided, set up the connected non-equivalent facets</span>
+        <span class="k">if</span> <span class="n">facets</span> <span class="o">==</span> <span class="p">():</span>
+            <span class="n">noneq_facets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_noneq_facets</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">)</span>
+            <span class="n">chain_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">)</span>
 
-        <span class="c1"># Find the facets in the chain</span>
-        <span class="n">chain_facets</span> <span class="o">=</span> <span class="p">[</span><span class="n">noneq_facets</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-        <span class="n">chain_list_noneq_facets</span> <span class="o">=</span> <span class="p">[</span><span class="n">noneq_facets</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">))</span> <span class="o">+</span>
+                      <span class="s2">&quot; non-equivalent facets.&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
-        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">chain_facets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">):</span>
+            <span class="c1"># Find the facets in the chain, i.e. connect the non-equivalent</span>
+            <span class="c1"># facets</span>
+            <span class="n">chain_facets</span> <span class="o">=</span> <span class="p">[</span><span class="n">noneq_facets</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">chain_list_noneq_facets</span> <span class="o">=</span> <span class="p">[</span><span class="n">noneq_facets</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
 
-            <span class="n">new_chain_facet</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">chain_facets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">):</span>
 
-            <span class="c1"># Loop over the facets in the chain</span>
-            <span class="k">for</span> <span class="n">chain_facet</span> <span class="ow">in</span> <span class="n">chain_facets</span><span class="p">:</span>
+                <span class="n">new_chain_facet</span> <span class="o">=</span> <span class="kc">False</span>
 
-                <span class="c1"># If a new facet has been appended, restart the loop</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">new_chain_facet</span><span class="p">:</span>
+                <span class="c1"># Loop over the facets in the chain</span>
+                <span class="k">for</span> <span class="n">chain_facet</span> <span class="ow">in</span> <span class="n">chain_facets</span><span class="p">:</span>
 
-                    <span class="c1"># Find a facet that shares an edge</span>
-                    <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
+                    <span class="c1"># If a new facet has been appended, restart the loop</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">new_chain_facet</span><span class="p">:</span>
 
-                        <span class="c1"># Check if the facet shares an edge and is not related</span>
-                        <span class="c1"># to one of the non-equivalent facets in the chain</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">chain_facet</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span>\
-                                <span class="ow">and</span> <span class="p">(</span><span class="n">facet_dict</span><span class="p">[</span><span class="n">facet</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span>
-                                     <span class="n">chain_list_noneq_facets</span><span class="p">):</span>
+                        <span class="c1"># Find a facet that shares an edge</span>
+                        <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
 
-                            <span class="n">chain_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
-                            <span class="n">chain_list_noneq_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                <span class="n">facet_dict</span><span class="p">[</span><span class="n">facet</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="p">)</span>
-                            <span class="n">new_chain_facet</span> <span class="o">=</span> <span class="kc">True</span>
-                            <span class="k">break</span>
+                            <span class="c1"># Check if the facet shares an edge and is not</span>
+                            <span class="c1"># related to one of the non-equivalent facets in</span>
+                            <span class="c1"># the chain</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">chain_facet</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span>\
+                                    <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> \
+                                    <span class="p">(</span><span class="n">facet_dict</span><span class="p">[</span><span class="n">facet</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                                     <span class="ow">not</span> <span class="ow">in</span> <span class="n">chain_list_noneq_facets</span><span class="p">):</span>
+
+                                <span class="n">chain_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
+                                <span class="n">chain_list_noneq_facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">facet_dict</span><span class="p">[</span><span class="n">facet</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                                <span class="p">)</span>
+                                <span class="n">new_chain_facet</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">chain_facets</span> <span class="o">=</span> <span class="n">facets</span>
+            <span class="n">chain_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">facets</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chain_facets</span><span class="p">))</span> <span class="o">+</span>
@@ -590,15 +650,15 @@
                         <span class="n">other_facets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">option</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="k">break</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">facet_chain</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">):</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: Could not connect all nonequivalent facets.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">facet_chain</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">chain_length</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;WARNING: Could not connect all facets.&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">facet_chain</span></div>
 
 <div class="viewcode-block" id="Cage.find_facet_links"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_facet_links">[docs]</a>    <span class="k">def</span> <span class="nf">find_facet_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">share_edge</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the non-equivalent links between facets of the cage</span>
-<span class="sd">        molecule. The facets can be connected by sharing an edge, or a vertex.</span>
+<span class="sd">        molecule. The facets can be connected by sharing an edge, or a site.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            share_edge (bool): Only return links between facets that</span>
@@ -612,9 +672,9 @@
         <span class="c1"># Find all links, i.e. possible combinations of surface facets</span>
         <span class="n">links</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 
-        <span class="c1"># Find the links that share a vertex (this automatically finds</span>
+        <span class="c1"># Find the links that share a site (this automatically finds</span>
         <span class="c1"># those that share an edge as well).</span>
-        <span class="n">vertex_sharing_links</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">site_sharing_links</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
             <span class="n">cross_section</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">cross_section</span><span class="p">:</span>
@@ -622,14 +682,14 @@
                 <span class="c1"># In case the user only wants edge-sharing paths, check that</span>
                 <span class="k">if</span> <span class="n">share_edge</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cross_section</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">vertex_sharing_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                        <span class="n">site_sharing_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
                 <span class="c1"># Else just add the path to the list</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">vertex_sharing_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                    <span class="n">site_sharing_links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
 
-        <span class="c1"># Find the vertex sharing paths that are non equivalent</span>
+        <span class="c1"># Find the site sharing paths that are non equivalent</span>
         <span class="n">noneq_links</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">vertex_sharing_links</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">site_sharing_links</span><span class="p">:</span>
 
             <span class="c1"># Check to see if the path is equivalent with a path in the List of</span>
             <span class="c1"># non-equivalent paths</span>
@@ -638,7 +698,7 @@
                 <span class="k">for</span> <span class="n">symm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">symmops</span><span class="p">:</span>
                     <span class="n">link_center</span> <span class="o">=</span> <span class="p">(</span><span class="n">link</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span> <span class="n">link</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
                     <span class="n">noneq_link_center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">((</span><span class="n">noneq_link</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
-                                                <span class="n">noneq_link</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+                                             <span class="n">noneq_link</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
                     <span class="n">symm_link_center</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">operate</span><span class="p">(</span><span class="n">link_center</span><span class="p">)</span>
                     <span class="n">connection_vector</span> <span class="o">=</span> <span class="n">symm_link_center</span> <span class="o">-</span> <span class="n">noneq_link_center</span>
                     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">connection_vector</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-2</span><span class="p">:</span>
@@ -734,7 +794,8 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">spin_multiplicity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">validate_proximity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">site_properties</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize an OccupiedCage instance.</span>
+<span class="sd">        Initialize an OccupiedCage instance. The geometric center of the anion</span>
+<span class="sd">        is automatically centered on the origin.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            species (List of pymatgen.Specie): List of atomic species. Possible</span>
@@ -778,6 +839,9 @@
 <span class="sd">        anion** is moved to the point provided. In case no point is provided,</span>
 <span class="sd">        the anion is centered around the origin.</span>
 
+<span class="sd">        Note: Running this method will reset the facets and symmetry</span>
+<span class="sd">        information to None.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            point ((3,) numpy.ndarray): Point around which to center the</span>
 <span class="sd">                molecule.</span>
@@ -788,13 +852,38 @@
 
         <span class="n">anion_center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anion_coords</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">anion_coords</span><span class="p">)</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">OccupiedCage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">center</span><span class="p">(</span><span class="n">anion_center</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">anion_center</span> <span class="o">-=</span> <span class="n">point</span>
 
-<div class="viewcode-block" id="OccupiedCage.add_dock"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.add_dock">[docs]</a>    <span class="k">def</span> <span class="nf">add_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dock</span><span class="p">,</span> <span class="n">cation</span><span class="o">=</span><span class="s1">&#39;Li&#39;</span><span class="p">,</span> <span class="n">docking_point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># Find the new coordinates</span>
+        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">anion_center</span>
+
+        <span class="c1"># Update the sites</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                  <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pointgroup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_facet_dict</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="OccupiedCage.add_dock"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.add_dock">[docs]</a>    <span class="k">def</span> <span class="nf">add_dock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dock</span><span class="p">,</span> <span class="n">cation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">docking_point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a docking site to the OccupiedCage. If the chemical symbol of the</span>
 <span class="sd">        cation is provided, the cation is appended to the OccupiedCage. In case</span>
 <span class="sd">        the cation is equal to *None*, the cation is assumed to be present and</span>
+<span class="sd">        the facet is simply designated as a dock.</span>
+
+<span class="sd">        Note: If a cation is appended to the molecule. running this method will</span>
+<span class="sd">        reset the facets and symmetry information to None.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            dock (cage.Facet): The Facet on which the cation is docked.</span>
@@ -821,9 +910,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">),</span> <span class="n">cation_coord</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span>
                                          <span class="bp">self</span><span class="o">.</span><span class="n">spin_multiplicity</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_docks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dock</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="kc">None</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_docks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dock</span><span class="p">)</span></div>
 
         <span class="c1"># TODO Add some more checks</span>
 
@@ -831,11 +918,21 @@
     <span class="k">def</span> <span class="nf">from_cage_and_facets</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cage</span><span class="p">,</span> <span class="n">facets</span><span class="p">,</span> <span class="n">docking_points</span><span class="o">=</span><span class="p">(),</span>
                              <span class="n">cation</span><span class="o">=</span><span class="s1">&#39;Li&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize an OccupiedCage from a Cage object and a tuple of facets.</span>
 
-<span class="sd">        :param cage:</span>
-<span class="sd">        :param facets:</span>
-<span class="sd">        :param docking_points:</span>
-<span class="sd">        :param cation:</span>
+<span class="sd">        Args:</span>
+<span class="sd">            cage (cage.Cage): The anion on which the cations are docked.</span>
+<span class="sd">            facets (tuple): Tuple of cage.Facets on which the cations are</span>
+<span class="sd">                docked.</span>
+<span class="sd">            docking_points (tuple): Tuple of (3,) numpy.ndarray coordinates</span>
+<span class="sd">                that define the docking coordinates of the corresponding</span>
+<span class="sd">                docking Facets.</span>
+<span class="sd">            cation(str): Chemical symbol of the cation. In case *None* is</span>
+<span class="sd">                given, the docking sites are considered to already have a</span>
+<span class="sd">                cation present.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*cage.OccupiedCage*)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">occ_cage</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="n">cage</span><span class="o">.</span><span class="n">species</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="n">cage</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">,</span>
                        <span class="n">charge</span><span class="o">=</span><span class="n">cage</span><span class="o">.</span><span class="n">charge</span><span class="p">,</span>
@@ -865,7 +962,7 @@
 <span class="sd">        Returns:</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span> <span class="c1">#TODO</span></div>
+        <span class="k">pass</span>  <span class="c1">#TODO</span></div>
 
 <div class="viewcode-block" id="OccupiedCage.from_file"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.from_file">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
@@ -878,14 +975,18 @@
 <span class="sd">        Returns:</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span> <span class="c1">#TODO</span></div>
+        <span class="k">pass</span>  <span class="c1">#TODO</span></div>
 
 <div class="viewcode-block" id="OccupiedCage.remove_surface_facet"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.remove_surface_facet">[docs]</a>    <span class="k">def</span> <span class="nf">remove_surface_facet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facet</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a surface facet from the list of facets of an OccupiedCage.</span>
 
-<span class="sd">        :return:</span>
+<span class="sd">        Args:</span>
+<span class="sd">            facet (cage.Facet): The facet which is to be removed from the</span>
+<span class="sd">                molecule.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">surface_facets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span>
+
         <span class="k">if</span> <span class="n">surface_facets</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_facets</span> <span class="o">=</span> <span class="n">surface_facets</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">facet</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -893,9 +994,12 @@
 
 <div class="viewcode-block" id="OccupiedCage.find_surface_facets"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.find_surface_facets">[docs]</a>    <span class="k">def</span> <span class="nf">find_surface_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find the surface facets of the OccupiedCage.</span>
-<span class="sd">        :param ignore:</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Find the surface facets of the OccupiedCage, minus the facets which</span>
+<span class="sd">        have a docked cation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ignore (Tuple of Elements/Species): The elements to ignore for the</span>
+<span class="sd">                surface facet determination.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">anion</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">sites</span>
@@ -918,14 +1022,14 @@
 <span class="sd">    Facet of a Molecule object, defined by a list of Sites.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1">#TODO Allow the facet to contain more than three sites</span>
-    <span class="c1">#TODO Write those docstrings you lazy bastard!</span>
-
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sites</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize a Facet with the provided sites.</span>
-<span class="sd">        :param sites:</span>
-<span class="sd">        :param normal:</span>
+<span class="sd">        Initialize a Facet from a list of sites.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sites (list): List of pymatgen.Sites that define the facet.</span>
+<span class="sd">            normal (numpy.ndarray): (3,) Numpy array that defines the normal</span>
+<span class="sd">                vector of the facet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">site_center</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span>
@@ -936,10 +1040,22 @@
 
     <span class="k">def</span> <span class="nf">_find_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Finds the normal vector of the surface, pointing away from the origin</span>
+<span class="sd">        Finds the normal vector of the facet.</span>
+
+<span class="sd">        By convention, the normal of the facet is a vector perpendicular to</span>
+<span class="sd">        the surface with length equal to one and pointing away from the origin.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*numpy.ndarray*) -- Normal of the facet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
-                          <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">#TODO Make an average of possible normals</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span>
+                              <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
 
         <span class="c1"># Make length of the normal equal to 1</span>
         <span class="n">normal</span> <span class="o">=</span> <span class="n">normal</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
@@ -947,6 +1063,10 @@
         <span class="k">return</span> <span class="n">normal</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (*str*) -- String representation of the facet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Facet with sites:&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
             <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
@@ -955,11 +1075,18 @@
 
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check if two Facets are the same.</span>
-<span class="sd">        :param other:</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Check if the Facet is equal to another. Two facets are only equal if</span>
+<span class="sd">        they have the same sites and normal.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (cage.Facet): Facet for comparison.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*bool*) - Whether or not the facets are equal.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> \
+        <span class="c1">#TODO Check method for facets with more than 3 vertices</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span> <span class="ow">and</span> \
                 <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
@@ -967,194 +1094,13 @@
 
     <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make Facet hashable.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Make Facet hashable. This is valuable in order to e.g. make it a key</span>
+<span class="sd">        in dictionaries.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*int*) -- Hash of the Facet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
-
-<div class="viewcode-block" id="Facet.from_str"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.from_str">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">input_string</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param input_string:</span>
-<span class="sd">        :param fmt:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Only json formats have been &#39;</span>
-                                      <span class="s1">&#39;implemented.&#39;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Facet.from_file"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.from_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param filename:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-            <span class="n">contents</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Facet.from_dict"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param d:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;sites&#39;</span><span class="p">]:</span>
-            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">site</span><span class="p">))</span>
-
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]))</span></div>
-
-<div class="viewcode-block" id="Facet.as_dict"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
-             <span class="s2">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-             <span class="s2">&quot;sites&quot;</span><span class="p">:</span> <span class="p">[]}</span>
-        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="n">site_dict</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
-            <span class="k">del</span> <span class="n">site_dict</span><span class="p">[</span><span class="s2">&quot;@module&quot;</span><span class="p">]</span>
-            <span class="k">del</span> <span class="n">site_dict</span><span class="p">[</span><span class="s2">&quot;@class&quot;</span><span class="p">]</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site_dict</span><span class="p">)</span>
-        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">d</span></div>
-
-<div class="viewcode-block" id="Facet.to"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param fmt:</span>
-<span class="sd">        :param filename:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">file</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Currently only json format is &quot;</span>
-                                      <span class="s2">&quot;supported.&quot;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Facet.copy"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Facet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Facet.get_normal_intersection"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.get_normal_intersection">[docs]</a>    <span class="k">def</span> <span class="nf">get_normal_intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;gonio&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find the intersection of the normal lines of the Facet and another one.</span>
-
-<span class="sd">        Currently only works on an edge sharing Facet whose normal intersects</span>
-<span class="sd">        with the normal of the facet.</span>
-
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;gonio&#39;</span><span class="p">:</span>
-
-            <span class="n">edge</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Provided facet does not share an edge. &#39;</span>
-                                 <span class="s1">&#39;Goniometric method will not work.&#39;</span><span class="p">)</span>
-
-            <span class="n">edge_middle</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
-
-            <span class="n">y1</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">edge_middle</span><span class="p">)</span>
-            <span class="n">y2</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">edge_middle</span><span class="p">)</span>
-            <span class="n">beta</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">angle_between</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
-            <span class="n">psi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="p">(</span><span class="n">y1</span> <span class="o">/</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">)))</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">-</span> <span class="n">psi</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-            <span class="n">r1</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-            <span class="n">r2</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
-
-            <span class="n">intersection1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">-</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">utils</span><span class="o">.</span><span class="n">unit_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
-            <span class="n">intersection2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">center</span> <span class="o">-</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">utils</span><span class="o">.</span><span class="n">unit_vector</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">intersection1</span><span class="p">,</span> <span class="n">intersection2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">intersection1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find perfect intersection. Returned closest &#39;</span>
-                      <span class="s1">&#39;result.&#39;</span><span class="p">)</span>
-                <span class="k">return</span> <span class="p">(</span><span class="n">intersection1</span> <span class="o">+</span> <span class="n">intersection2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
-
-        <span class="c1"># Brute method. Currently abandoned</span>
-        <span class="c1">#</span>
-        <span class="c1"># elif method == &#39;brute&#39;:</span>
-        <span class="c1">#     lines = []</span>
-        <span class="c1">#     for facet in facets:</span>
-        <span class="c1">#         line = Landscape.from_vertices([facet.center,</span>
-        <span class="c1">#                                         facet.center - 5 *</span>
-        <span class="c1">#                                         facet.normal],</span>
-        <span class="c1">#                                        density=int(1e2))</span>
-        <span class="c1">#         lines.append(line)</span>
-        <span class="c1">#</span>
-        <span class="c1">#     intersection = None</span>
-        <span class="c1">#     distance = 1e3</span>
-        <span class="c1">#     for point1 in lines[0].points:</span>
-        <span class="c1">#         for point2 in lines[1].points:</span>
-        <span class="c1">#             if utils.distance(point1, point2) &lt; distance:</span>
-        <span class="c1">#                 distance = utils.distance(point1, point2)</span>
-        <span class="c1">#                 intersection = point1</span>
-        <span class="c1">#     if distance &lt; 1e-2:</span>
-        <span class="c1">#         return intersection</span>
-        <span class="c1">#     else:</span>
-        <span class="c1">#         print(&#39;Brute force method failed.&#39;)</span>
-        <span class="c1">#         return None</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Unknown method.&quot;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Facet.redefine_origin"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.redefine_origin">[docs]</a>    <span class="k">def</span> <span class="nf">redefine_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Change the coordinates of the Facet, in order to change the origin.</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># Find the new coordinates</span>
-        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin</span>
-
-        <span class="c1"># Update the sites</span>
-        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
-            <span class="n">prop</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
-                <span class="n">prop</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                                  <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span></div>
-
-<div class="viewcode-block" id="Facet.get_distance"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.get_distance">[docs]</a>    <span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param i:</span>
-<span class="sd">        :param j:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>  <span class="c1">#TODO</span></div>
-
-<div class="viewcode-block" id="Facet.is_equivalent"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.is_equivalent">[docs]</a>    <span class="k">def</span> <span class="nf">is_equivalent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">symmops</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Check if a Facet is equivalent to another Facet based on a list of</span>
-<span class="sd">        symmetry operations,</span>
-<span class="sd">        :param other:</span>
-<span class="sd">        :param symmops:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">is_equivalent</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">symm</span> <span class="ow">in</span> <span class="n">symmops</span><span class="p">:</span>
-            <span class="n">symm_center</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">operate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">symm_center</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">center</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-2</span><span class="p">:</span>
-                <span class="n">is_equivalent</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="n">is_equivalent</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sites</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1180,21 +1126,258 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span>
 
+<div class="viewcode-block" id="Facet.from_str"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.from_str">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_str</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">input_string</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Facet from a string.</span>
+
+<span class="sd">        Currently only supports &#39;json&#39; formats.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_string (str): String from which the Facet is initialized.</span>
+<span class="sd">            fmt (str): Format of the string representation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*cage.Facet*)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Only json formats have been &#39;</span>
+                                      <span class="s1">&#39;implemented.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Facet.from_file"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.from_file">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Facet from a file.</span>
+
+<span class="sd">        Currently only supports &#39;json&#39; formats.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): File in which the Facet is stored.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*cage.Facet*)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_str</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Facet.from_dict"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Facet from a dictionary.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            d (dict): Dictionary of the Facet properties, i.e. &#39;sites&#39; and</span>
+<span class="sd">                &#39;normal&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*cage.Facet*)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;sites&#39;</span><span class="p">]:</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">site</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">sites</span><span class="p">,</span> <span class="n">normal</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="Facet.as_dict"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary representation of the Facet.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*dict*)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+             <span class="s2">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+             <span class="s2">&quot;sites&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">site_dict</span> <span class="o">=</span> <span class="n">site</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">site_dict</span><span class="p">[</span><span class="s2">&quot;@module&quot;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">site_dict</span><span class="p">[</span><span class="s2">&quot;@class&quot;</span><span class="p">]</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;sites&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site_dict</span><span class="p">)</span>
+        <span class="n">d</span><span class="p">[</span><span class="s1">&#39;normal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">d</span></div>
+
+<div class="viewcode-block" id="Facet.to"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the Facet to a file.</span>
+
+<span class="sd">        Currently support only the &#39;json&#39; format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fmt (str): Format of the file.</span>
+<span class="sd">            filename (str): Name of the file to which the facet should be</span>
+<span class="sd">                written.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">&quot;json&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;wt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">file</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Currently only json format is &quot;</span>
+                                      <span class="s2">&quot;supported.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Facet.copy"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make a copy of the Facet.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*cage.Facet*)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Facet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Facet.add_site"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.add_site">[docs]</a>    <span class="k">def</span> <span class="nf">add_site</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">site</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a site to the facet. Will only work in case the site is in the</span>
+<span class="sd">        surface defined by the facet.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            site (pymatgen.core.sites.Site): The site that will be added to</span>
+<span class="sd">                the facet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if the site is in the surface defined by the facet</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">angle_to_normal</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">angle</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ANGLE_TOLERANCE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Angle to facet normal deviates too much from &quot;</span>
+                             <span class="s2">&quot;pi/2. A site cannot be added to the facet if &quot;</span>
+                             <span class="s2">&quot;it is not in the same plane.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add the site to the list of sites of the facet</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">site_center</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">))</span></div>
+
+        <span class="c1">#TODO Find the new normal, but make sure it doesn&#39;t flip direction</span>
+
+<div class="viewcode-block" id="Facet.get_normal_intersection"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.get_normal_intersection">[docs]</a>    <span class="k">def</span> <span class="nf">get_normal_intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the intersection of the normal lines of the Facet and another one.</span>
+
+<span class="sd">        Currently only works on an edge sharing Facet whose normal intersects</span>
+<span class="sd">        with the normal of the facet. In case the normals do not intersect,</span>
+<span class="sd">        an approximation is given.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (cage.Facet): Facet which shares an edge with this one.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*numpy.ndarray*) -- (3,) Numpy array of the intersection</span>
+<span class="sd">                coordinates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">#TODO This method needs improvement, i.e. to be made more general</span>
+
+        <span class="n">edge</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sites</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Provided facet does not share an edge.&#39;</span><span class="p">)</span>
+
+        <span class="n">edge_middle</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">edge</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">edge_middle</span><span class="p">)</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">edge_middle</span><span class="p">)</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">angle_between</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+        <span class="n">psi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="p">(</span><span class="n">y1</span> <span class="o">/</span> <span class="n">y2</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">beta</span><span class="p">)))</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">-</span> <span class="n">psi</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">psi</span><span class="p">)</span>
+
+        <span class="n">intersection1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">-</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">utils</span><span class="o">.</span><span class="n">unit_vector</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+        <span class="n">intersection2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">center</span> <span class="o">-</span> <span class="n">r2</span> <span class="o">*</span> <span class="n">utils</span><span class="o">.</span><span class="n">unit_vector</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">intersection1</span><span class="p">,</span> <span class="n">intersection2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">intersection1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find perfect intersection. Returned average &#39;</span>
+                  <span class="s1">&#39;between two best results on the respective normal lines.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">intersection1</span> <span class="o">+</span> <span class="n">intersection2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span></div>
+
+<div class="viewcode-block" id="Facet.redefine_origin"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.redefine_origin">[docs]</a>    <span class="k">def</span> <span class="nf">redefine_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adjust the coordinates of the Facet, in order to redefine the origin.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            origin (numpy.ndarray): (3,) Numpy array of the new origin&#39;s</span>
+<span class="sd">                coordinates.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Find the new coordinates</span>
+        <span class="n">new_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin</span>
+
+        <span class="c1"># Update the sites</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">)):</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="p">:</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">site_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">species</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_coords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                  <span class="n">properties</span><span class="o">=</span><span class="n">prop</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sites</span> <span class="o">=</span> <span class="n">sites</span></div>
+
+<div class="viewcode-block" id="Facet.get_distance"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.get_distance">[docs]</a>    <span class="k">def</span> <span class="nf">get_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate the distance between two sites.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            i:</span>
+<span class="sd">            j:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>  <span class="c1">#TODO</span></div>
+
+<div class="viewcode-block" id="Facet.is_equivalent"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.is_equivalent">[docs]</a>    <span class="k">def</span> <span class="nf">is_equivalent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">symmops</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a Facet is equivalent to another Facet based on a list of</span>
+<span class="sd">        symmetry operations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (cage.Facet): Facet with which to compare the Facet.</span>
+<span class="sd">            symmops (list): List of pymatgen.Symmop instances which are used</span>
+<span class="sd">                to determine equivalency.</span>
+<span class="sd">            tol (float): Tolerance for the equivalence condition, i.e. how much</span>
+<span class="sd">                the distance between the centers is allowed to be after</span>
+<span class="sd">                a symmetry operation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*bool*) - Whether or not the facet is equivalent to the other</span>
+<span class="sd">                facet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">is_equivalent</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">symm</span> <span class="ow">in</span> <span class="n">symmops</span><span class="p">:</span>
+            <span class="n">symm_center</span> <span class="o">=</span> <span class="n">symm</span><span class="o">.</span><span class="n">operate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">symm_center</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">center</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
+                <span class="n">is_equivalent</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">is_equivalent</span></div>
+
 <div class="viewcode-block" id="Facet.flip_normal"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.flip_normal">[docs]</a>    <span class="k">def</span> <span class="nf">flip_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Flip the direction of the surface normal of the Facet.</span>
-<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_normal</span></div>
 
-<div class="viewcode-block" id="Facet.angle_to_normal"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.angle_to_normal">[docs]</a>    <span class="k">def</span> <span class="nf">angle_to_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
+<div class="viewcode-block" id="Facet.angle_to_normal"><a class="viewcode-back" href="../../cage.html#cage.core.Facet.angle_to_normal">[docs]</a>    <span class="k">def</span> <span class="nf">angle_to_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the angle between the vector that connects the center and the</span>
-<span class="sd">        coordinate and the normal.</span>
-<span class="sd">        :param coordinate:</span>
-<span class="sd">        :return: angle value (in radians)</span>
+<span class="sd">        point and the normal.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point (numpy.ndarray): Coordinates of the point.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (*float*): Angle to the normal of the facet.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">angle_between</span><span class="p">(</span><span class="n">coordinate</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">angle_between</span><span class="p">(</span><span class="n">point</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normal</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

@@ -45,12 +45,13 @@
 
 <span class="kn">from</span> <span class="nn">monty.json</span> <span class="k">import</span> <span class="n">MSONable</span>
 <span class="kn">from</span> <span class="nn">cage.core</span> <span class="k">import</span> <span class="n">Cage</span>
+<span class="kn">from</span> <span class="nn">matplotlib.pyplot</span> <span class="k">import</span> <span class="n">subplots</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="k">import</span> <span class="n">Axes3D</span>
-<span class="kn">from</span> <span class="nn">pylab</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">pymatgen</span> <span class="k">as</span> <span class="nn">pmg</span>
 <span class="kn">import</span> <span class="nn">pymatgen.io.nwchem</span> <span class="k">as</span> <span class="nn">nw</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -67,6 +68,7 @@
 <span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;marnik.bercx@uantwerpen.be&quot;</span>
 <span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;alpha&quot;</span>
 <span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;16 JUN 2017&quot;</span>
+
 
 <div class="viewcode-block" id="Landscape"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape">[docs]</a><span class="k">class</span> <span class="nc">Landscape</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -129,7 +131,7 @@
                 <span class="n">vector</span> <span class="o">=</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vector</span><span class="p">)</span>
                 <span class="n">unitvector</span> <span class="o">=</span> <span class="n">vector</span> <span class="o">/</span> <span class="n">length</span>
-                <span class="n">npoints</span> <span class="o">=</span> <span class="n">num</span> <span class="c1"># int(length * num + 1)</span>
+                <span class="n">npoints</span> <span class="o">=</span> <span class="n">num</span>  <span class="c1"># int(length * num + 1)</span>
                 <span class="n">mesh_distance</span> <span class="o">=</span> <span class="n">length</span> <span class="o">/</span> <span class="n">npoints</span>
                 <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
@@ -144,8 +146,9 @@
 <span class="sd">        Extends the landscape using a axis vector and turning all the vertices</span>
 <span class="sd">        in the landscape around the origin by a value and direction determined</span>
 <span class="sd">        by the axis vector.</span>
-<span class="sd">        :param vector:</span>
-<span class="sd">        :return:</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (numpy.ndarray):</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># TODO Extend this method so it also allows rotations around other points than origin</span>
 
@@ -213,7 +216,7 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An analyzer class for interpreting data from calculations on a landscape.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">datapoints</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">software</span><span class="o">=</span><span class="s2">&quot;nwchem&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">datapoints</span><span class="o">=</span><span class="p">(),</span> <span class="n">software</span><span class="o">=</span><span class="s2">&quot;nwchem&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize an instance of LandscapeAnalyzer. This method will rarely</span>
 <span class="sd">        be used directly. Usually a LandscapeAnalyzer is initialized from a</span>
@@ -366,7 +369,7 @@
 <span class="sd">        :param coord_name:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No processed data present.&#39;</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span>
@@ -379,8 +382,8 @@
 <span class="sd">        Plot the energy landscape from the datapoints.</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapoints</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">analyze_energies</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analyze_cation_energies</span><span class="p">()</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapoints</span>
 

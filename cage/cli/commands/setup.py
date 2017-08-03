@@ -58,6 +58,7 @@ def optimize(filename):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     # Set the charge for the molecule
@@ -86,18 +87,34 @@ def optimize(filename):
     nw_input.write_file(os.path.join('optimize', 'input'))
 
 
-def docksetup(filename, cation, distance):
+def docksetup(filename, cation, distance, verbose):
+
+    if verbose:
+        print("Loading structure file " + filename + "...")
 
     try:
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
+
+    if verbose:
+        print("Setting up surface facets...")
 
     anion.find_surface_facets(ignore=IGNORE)
 
+    if verbose:
+        print("Found " + str(len(anion.facets)) + " facets.")
+
+    if verbose:
+        print("Studying symmetry...")
+
     # Find the non-equivalent facets
     facets = anion.find_noneq_facets()
+
+    if verbose:
+        print("Found " + str(len(facets)) + " non-equivalent facets.")
 
     docking_dir = 'docking'
     try:
@@ -105,15 +122,28 @@ def docksetup(filename, cation, distance):
     except FileExistsError:
         pass
 
+    if verbose:
+        print("Setting up docking calculations...")
+
     # For each docking point, set up the calculation input file
     dock_number = 1
     for neq_facet in facets:
 
+        if verbose:
+            print("")
+            print("DOCK " + str(dock_number))
+            print("------")
+            print("")
+            print("Setting up cation site...")
+
         # Set up the initial cation site
         mol = anion.copy()
-        mol.find_surface_facets()
         mol.append(pmg.Specie(cation, 1), neq_facet.center +
-                   distance*neq_facet.normal)
+                   distance * neq_facet.normal)
+        mol.find_surface_facets(ignore=IGNORE)
+
+        if verbose:
+            print("Finding constraints for the calculation...")
 
         # Constrain the opposite facet
         far_facet = mol.find_farthest_facet(neq_facet.center)
@@ -127,6 +157,9 @@ def docksetup(filename, cation, distance):
             mol.set_charge_and_spin(charge=0)
         else:
             mol.set_charge_and_spin(charge=-1)
+
+        if verbose:
+            print("Setting up the task...")
 
         # Set up the task for the calculations
         tasks = [nwchem.NwTask(mol.charge, None, BASIS,
@@ -142,8 +175,15 @@ def docksetup(filename, cation, distance):
         except FileExistsError:
             pass
 
+        if verbose:
+            print("Setting up the input file...")
+
         # Set up input
         nw_input = nwchem.NwInput(mol, tasks, geometry_options=GEO_SETUP)
+
+        if verbose:
+            print("Writing input file for dock " + str(dock_number) + "...")
+
         nw_input.write_file(os.path.join(dock_dir, 'input'))
 
         # Write out a facet json file
@@ -152,18 +192,27 @@ def docksetup(filename, cation, distance):
         dock_number += 1
 
 
-def chainsetup(filename, cation, operation, endradii, nradii, adensity):
+def chainsetup(filename, cation, facets, operation, endradii, nradii,
+               adensity):
 
     # Load the Cage from the file
     try:
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
+    anion.center()
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
-    edges = anion.find_noneq_chain_links()
+    anion.find_surface_facets(ignore=IGNORE)
+
+    if not facets == tuple:
+        chosen_facets = [anion.facets[index] for index in facets]
+        edges = anion.find_noneq_chain_links(chosen_facets)
+    else:
+        edges = anion.find_noneq_chain_links()
 
     total_mol = anion.copy()
 
@@ -197,11 +246,17 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
         facet1 = edge[0].copy()
         facet2 = edge[1].copy()
 
+        if edge == edges[-1]:
+            remove_endline = False
+        else:
+            remove_endline = True
+
         # Set up the landscape
         landscape = set_up_edge_landscape(facet1, facet2,
                                           endpoint_radii=endradii,
                                           number_of_radii=nradii,
-                                          angle_density=adensity)
+                                          angle_density=adensity,
+                                          remove_endline=remove_endline)
 
         # Get the molecule for each landscape point
         molecules = set_up_molecules(edge_mol, landscape, cation)
@@ -242,7 +297,7 @@ def chainsetup(filename, cation, operation, endradii, nradii, adensity):
         edge_number += 1
 
     # Set up an xyz file with all the paths
-    total_mol.to(fmt="xyz", filename="total_mol.xyz")
+    total_mol.to(fmt="xyz", filename=os.path.join(chain_dir, "total_mol.xyz"))
 
 
 def pathsetup(filename, cation, distance, edges):
@@ -252,6 +307,7 @@ def pathsetup(filename, cation, distance, edges):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     # TODO Find charge automatically
@@ -414,6 +470,13 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
     dock_number = 1
 
+    chain_dir = 'twocat_chain'
+    try:
+        os.mkdir(chain_dir)
+    except FileExistsError:
+        pass
+
+
     for directory in dir_list:
 
         # Extract the occupied cage
@@ -446,6 +509,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
         # Set up the occupied anion
         occmol = cage.core.OccupiedCage.from_molecule(mol)
+        occmol.center()
         occmol.find_surface_facets(ignore=IGNORE)
         dock = occmol.find_closest_facet(cat_coords)
 
@@ -458,7 +522,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
         paths = occmol.find_noneq_chain_links(symm_tol=tolerance,
                                                     verbose=verbose)
 
-        dock_dir = 'dock' + str(dock_number)
+        dock_dir = os.path.join(chain_dir, 'dock' + str(dock_number))
 
         try:
             os.mkdir(dock_dir)
@@ -546,7 +610,8 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
 
 def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
-                          number_of_radii=None, angle_density=50):
+                          number_of_radii=None, angle_density=50,
+                          remove_endline=True):
     """
     Set up the Landscape to study the energy landscape between two facets.
 
@@ -563,16 +628,19 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     :param angle_density:
     :return:
     """
-    line_vector = facet1.center/np.linalg.norm(facet1.center)
+    line_vector1 = facet1.center/np.linalg.norm(facet1.center)
+    line_vector2 = facet2.center / np.linalg.norm(facet2.center)
     lands = cage.landscape.Landscape.from_vertices(
-        [line_vector * endpoint_radii[0], line_vector * endpoint_radii[1]],
+        [line_vector1 * endpoint_radii[0], line_vector1 * endpoint_radii[1]],
         num=number_of_radii
     )
-    axis = np.cross(facet1.normal, facet2.normal)
+
+    axis = np.cross(line_vector1, line_vector2)
     angle = math.asin(np.linalg.norm(axis))
     axis = axis * angle / np.linalg.norm(axis)
 
-    lands.extend_by_rotation(axis, angle_density, remove_endline=True)
+    lands.extend_by_rotation(axis, angle_density,
+                             remove_endline=remove_endline)
 
     return lands
 

@@ -34,6 +34,13 @@ SYMMETRY_TOLERANCE = 1e-2
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
 # not found, it might be worth to try tweaking this value.
 
+ANGLE_TOLERANCE = math.pi/20
+# This value is important when determining whether or not a new site is a part
+# of the facet. In principle, the site should be in the plane of the facet,
+# i.e. the angle between the line connecting the center of the facet and the
+# site and the normal of the Facet should be pi/2. This parameters allows a
+# deviation of the angle up to ANGLE_TOLERANCE
+
 
 class Cage(Molecule):
     """
@@ -149,7 +156,7 @@ class Cage(Molecule):
         Returns:
             (*cage.Cage*)
         """
-        assert type(mol) is Molecule
+        assert type(mol) is Molecule or type(mol) is Cage
         return cls(species=mol.species, coords=mol.cart_coords,
                    charge=mol.charge, spin_multiplicity=mol.spin_multiplicity,
                    site_properties=mol.site_properties)
@@ -166,6 +173,9 @@ class Cage(Molecule):
         coordinates for the sites so that the geometric center is on the point
         provided. In case no point is provided, the molecule is centered around
         the origin.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
 
         Args:
             point ((3,) numpy.ndarray): Point around which to center the
@@ -192,6 +202,87 @@ class Cage(Molecule):
                                   properties=prop))
 
         self._sites = sites
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def redefine_origin(self, origin):
+        """
+        Change the coordinates of the Cage, in order to redefine the origin.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
+        Args:
+            origin ((3,) numpy.ndarray): Origin coordinates.
+        """
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - origin
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def insert(self, index, species, coords, validate_proximity=True,
+               properties=None):
+        """
+        Overwrite the insert method of the Molecule class, in order to
+        reset the facets, symmetry operations and point group after the site
+        has been inserted.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
+        Args:
+            index (int): Index to insert site.
+            species (pymatgen.Specie): Species of inserted site.
+            coords ((3,) numpy.ndarray): Coordinates of inserted site.
+            validate_proximity (bool): Whether to check if inserted site is
+                too close to an existing site. Defaults to True.
+            properties (dict): A dictionary of properties for the Site.
+        """
+        super(Cage, self).insert(index, species, coords, validate_proximity,
+                                 properties)
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def append(self, species, coords, validate_proximity=True,
+               properties=None):
+        """
+        Overwrite the append method of the Molecule class, in order to
+        reset the facets, symmetry operations and point group after the site
+        has been appended.
+
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
+        Args:
+            species (pymatgen.Specie): Species of inserted site.
+            coords ((3,) numpy.ndarray): Coordinates of inserted site.
+            validate_proximity (bool): Whether to check if inserted site is
+                too close to an existing site. Defaults to True.
+            properties (dict): A dictionary of properties for the Site.
+        """
+        super(Cage, self).append(species, coords, validate_proximity,
+                                 properties)
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
 
     def find_surface_facets(self, ignore=()):
         """
@@ -206,8 +297,6 @@ class Cage(Molecule):
             ignore (Tuple of Elements/Species): The elements to ignore for the
                 surface facet determination.
         """
-
-        #TODO Expand the algorithm to more sites
 
         # Find all the sites which should not be ignored
         valid_sites = []
@@ -230,81 +319,39 @@ class Cage(Molecule):
         facets_surf = []
         for facet in all_facets:
 
-            # Calculate the angles between all valid sites and surface normal
-            site_angles = [facet.angle_to_normal(site.coords)
-                           for site in valid_sites]
-
             # If all the angles are larger than pi/2, it's a surface site
             all_angles_smaller = True
-            for angle in site_angles:
-                if angle + 0.01 < math.pi/2:
+
+            # Check the other sites in the molecule
+            other_sites = valid_sites.copy()
+            for site in facet.sites:
+                other_sites.remove(site)
+
+            for site in other_sites:
+
+                angle = abs(facet.angle_to_normal(site.coords))
+
+                # For angles sufficiently close to pi/2, add the site to the
+                # facet
+                if abs(angle - math.pi/2) < ANGLE_TOLERANCE:
+                    facet.add_site(site)
+
+                elif angle - math.pi/2 < -ANGLE_TOLERANCE:
                     all_angles_smaller = False
 
+            # Now check if the facet isn't already part of the surface facets
+            facet_in_list = False
+
+            for surf_facet in facets_surf:
+                if len(set(facet.sites) & set(surf_facet.sites)) \
+                        == len(facet.sites):
+                    facet_in_list = True
+
             # In that case, add it to the surface sites
-            if all_angles_smaller:
+            if all_angles_smaller and not facet_in_list:
                 facets_surf.append(facet)
 
         self._facets = facets_surf
-
-    def redefine_origin(self, origin):
-        """
-        Change the coordinates of the Cage, in order to redefine the origin.
-
-        Args:
-            origin ((3,) numpy.ndarray): Origin coordinates.
-        """
-        # Find the new coordinates
-        new_coords = np.array(self.cart_coords) - origin
-
-        # Update the sites
-        sites = []
-        for i in range(len(self.species)):
-            prop = None
-            if self.site_properties:
-                prop = {k: v[i] for k, v in self.site_properties.items()}
-            sites.append(pmg.Site(self.species[i], new_coords[i],
-                                  properties=prop))
-
-        self._sites = sites
-
-    def insert(self, index, species, coords, validate_proximity=True,
-               properties=None):
-        """
-        Overwrite the insert method of the Molecule class, in order to
-        reset the symmetry operations and point group after the site has been
-        inserted.
-
-        Args:
-            index (int): Index to insert site.
-            species (pymatgen.Specie): Species of inserted site.
-            coords ((3,) numpy.ndarray): Coordinates of inserted site.
-            validate_proximity (bool): Whether to check if inserted site is
-                too close to an existing site. Defaults to True.
-            properties (dict): A dictionary of properties for the Site.
-        """
-        super(Cage, self).insert(index, species, coords, validate_proximity,
-                                 properties)
-        self._symmops = None
-        self._pointgroup = None
-
-    def append(self, species, coords, validate_proximity=True,
-               properties=None):
-        """
-        Overwrite the append method of the Molecule class, in order to
-        reset the symmetry operations and point group after the site has been
-        appended.
-
-        Args:
-            species (pymatgen.Specie): Species of inserted site.
-            coords ((3,) numpy.ndarray): Coordinates of inserted site.
-            validate_proximity (bool): Whether to check if inserted site is
-                too close to an existing site. Defaults to True.
-            properties (dict): A dictionary of properties for the Site.
-        """
-        super(Cage, self).append(species, coords, validate_proximity,
-                                 properties)
-        self._symmops = None
-        #self._pointgroup = None
 
     def find_noneq_facets(self, tol=SYMMETRY_TOLERANCE):
         """
@@ -367,7 +414,7 @@ class Cage(Molecule):
                 See the *fmt* argument.
         """
         if not self.facets:
-            print("Please set up surface facets first")
+            print("Please set up surface facets first.")
             return []
 
         facet_list = []
@@ -401,15 +448,15 @@ class Cage(Molecule):
                 facet_dict[facet_list[i][0]] = (facet_list[i][1],
                                                 facet_list[i][2])
 
-            if sum([len(facet_list) for facet_list in facet_dict.values()])\
-                    == len(self.facets):
+            if len(facet_dict.keys()) == len(self.facets):
                 return facet_dict
             else:
                 raise ValueError("Obtained number of facets in dict is not "
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
-    def find_noneq_facet_chain(self, start=0, symm_tol=SYMMETRY_TOLERANCE,
+    def find_noneq_facet_chain(self, start=0, facets=tuple,
+                               symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
         Find a chain of non equivalent facets, i.e. a collection of facets that
@@ -420,6 +467,9 @@ class Cage(Molecule):
             start (int): Determines from which termination facet the chain is
                 constructed. This might be useful if the chain is not
                 constructed as the user would like.
+            facets (tuple): Tuple of Facets which are to be used for the
+                chain. In case no facets are provided, the full list of
+                non-equivalent facets will be used.
             symm_tol (float): Tolerance for the equivalence condition, i.e.
                 how much the distance between the centers is allowed to be
                 after a symmetry operation.
@@ -443,42 +493,52 @@ class Cage(Molecule):
             print("Looking for non-equivalent facets...")
 
         facet_dict = self.set_up_facet_list('dict', tol=symm_tol)
-        noneq_facets = self.find_noneq_facets(tol=symm_tol)
 
-        if verbose:
-            print("Found " + str(len(noneq_facets)) +
-                  " non-equivalent facets.")
-            print("")
+        # If no facets are provided, set up the connected non-equivalent facets
+        if facets == tuple:
+            noneq_facets = self.find_noneq_facets(tol=symm_tol)
+            chain_length = len(noneq_facets)
 
-        # Find the facets in the chain
-        chain_facets = [noneq_facets[0]]
-        chain_list_noneq_facets = [noneq_facets[0]]
+            if verbose:
+                print("Found " + str(len(noneq_facets)) +
+                      " non-equivalent facets.")
+                print("")
 
-        while len(chain_facets) < len(noneq_facets):
+            # Find the facets in the chain, i.e. connect the non-equivalent
+            # facets
+            chain_facets = [noneq_facets[0]]
+            chain_list_noneq_facets = [noneq_facets[0]]
 
-            new_chain_facet = False
+            while len(chain_facets) < len(noneq_facets):
 
-            # Loop over the facets in the chain
-            for chain_facet in chain_facets:
+                new_chain_facet = False
 
-                # If a new facet has been appended, restart the loop
-                if not new_chain_facet:
+                # Loop over the facets in the chain
+                for chain_facet in chain_facets:
 
-                    # Find a facet that shares an edge
-                    for facet in self.facets:
+                    # If a new facet has been appended, restart the loop
+                    if not new_chain_facet:
 
-                        # Check if the facet shares an edge and is not related
-                        # to one of the non-equivalent facets in the chain
-                        if len(set(facet.sites) & set(chain_facet.sites)) == 2\
-                                and (facet_dict[facet][0] not in
-                                     chain_list_noneq_facets):
+                        # Find a facet that shares an edge
+                        for facet in self.facets:
 
-                            chain_facets.append(facet)
-                            chain_list_noneq_facets.append(
-                                facet_dict[facet][0]
-                            )
-                            new_chain_facet = True
-                            break
+                            # Check if the facet shares an edge and is not
+                            # related to one of the non-equivalent facets in
+                            # the chain
+                            if len(set(facet.sites) & set(chain_facet.sites))\
+                                    == 2 and \
+                                    (facet_dict[facet][0]
+                                     not in chain_list_noneq_facets):
+
+                                chain_facets.append(facet)
+                                chain_list_noneq_facets.append(
+                                    facet_dict[facet][0]
+                                )
+                                new_chain_facet = True
+                                break
+        else:
+            chain_facets = list(facets)
+            chain_length = len(facets)
 
         if verbose:
             print("Found " + str(len(chain_facets)) +
@@ -504,8 +564,11 @@ class Cage(Molecule):
             print("")
 
         if len(end_facets) == 0:
-            raise ValueError("No termination facets found! Setting up chain "
-                             "aborted.")
+            end_facets = chain_facets
+            print('Could not find a termination facet. Starting chain buildup '
+                  'from the first facet in the list.')
+            # raise ValueError("No termination facets found! Setting up chain "
+            #                  "aborted.")
 
         # Sort the chain:
         try:
@@ -548,15 +611,15 @@ class Cage(Molecule):
                         other_facets.remove(option[0])
                         break
 
-        if len(facet_chain) < len(noneq_facets):
-            print('WARNING: Could not connect all nonequivalent facets.')
+        if len(facet_chain) < chain_length:
+            print('WARNING: Could not connect all facets.')
 
         return facet_chain
 
     def find_facet_links(self, share_edge=False):
         """
         Find the non-equivalent links between facets of the cage
-        molecule. The facets can be connected by sharing an edge, or a vertex.
+        molecule. The facets can be connected by sharing an edge, or a site.
 
         Args:
             share_edge (bool): Only return links between facets that
@@ -570,9 +633,9 @@ class Cage(Molecule):
         # Find all links, i.e. possible combinations of surface facets
         links = list(combinations(self.facets, 2))
 
-        # Find the links that share a vertex (this automatically finds
+        # Find the links that share a site (this automatically finds
         # those that share an edge as well).
-        vertex_sharing_links = []
+        site_sharing_links = []
         for link in links:
             cross_section = set(link[0].sites) & set(link[1].sites)
             if cross_section:
@@ -580,14 +643,14 @@ class Cage(Molecule):
                 # In case the user only wants edge-sharing paths, check that
                 if share_edge:
                     if len(cross_section) == 2:
-                        vertex_sharing_links.append(link)
+                        site_sharing_links.append(link)
                 # Else just add the path to the list
                 else:
-                    vertex_sharing_links.append(link)
+                    site_sharing_links.append(link)
 
-        # Find the vertex sharing paths that are non equivalent
+        # Find the site sharing paths that are non equivalent
         noneq_links = []
-        for link in vertex_sharing_links:
+        for link in site_sharing_links:
 
             # Check to see if the path is equivalent with a path in the List of
             # non-equivalent paths
@@ -596,7 +659,7 @@ class Cage(Molecule):
                 for symm in self.symmops:
                     link_center = (link[0].center + link[1].center)/2
                     noneq_link_center = sum((noneq_link[0].center,
-                                                noneq_link[1].center))/2
+                                             noneq_link[1].center))/2
                     symm_link_center = symm.operate(link_center)
                     connection_vector = symm_link_center - noneq_link_center
                     if np.linalg.norm(connection_vector) < 1e-2:
@@ -607,13 +670,16 @@ class Cage(Molecule):
 
         return noneq_links
 
-    def find_noneq_chain_links(self, symm_tol=SYMMETRY_TOLERANCE,
+    def find_noneq_chain_links(self, facets=tuple, symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
         Find the links between the facets of the chain that connects a
         set of non equivalent facets.
 
         Args:
+            facets (tuple): Tuple of Facets which are to be used for the
+                chain. In case no facets are provided, the full list of
+                non-equivalent facets will be used.
             symm_tol (float): Tolerance for the equivalence condition, i.e.
                 how much the distance between the centers is allowed to be
                 after a symmetry operation.
@@ -624,10 +690,9 @@ class Cage(Molecule):
             (*List of (cage.Facet, cage.Facet) Tuples*) --
                 The links between the Facets in the chain of non-equivalent
                 Facets.
-
         """
-
-        facet_chain = self.find_noneq_facet_chain(symm_tol=symm_tol,
+        facet_chain = self.find_noneq_facet_chain(facets=facets,
+                                                  symm_tol=symm_tol,
                                                   verbose=verbose)
 
         chain_links = []
@@ -692,7 +757,8 @@ class OccupiedCage(Cage):
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
                  validate_proximity=False, site_properties=None):
         """
-        Initialize an OccupiedCage instance.
+        Initialize an OccupiedCage instance. The geometric center of the anion
+        is automatically centered on the origin.
 
         Args:
             species (List of pymatgen.Specie): List of atomic species. Possible
@@ -736,6 +802,9 @@ class OccupiedCage(Cage):
         anion** is moved to the point provided. In case no point is provided,
         the anion is centered around the origin.
 
+        Note: Running this method will reset the facets and symmetry
+        information to None.
+
         Args:
             point ((3,) numpy.ndarray): Point around which to center the
                 molecule.
@@ -746,13 +815,38 @@ class OccupiedCage(Cage):
 
         anion_center = sum(anion_coords)/len(anion_coords)
 
-        super(OccupiedCage, self).center(anion_center)
+        if point is not None:
+            anion_center -= point
 
-    def add_dock(self, dock, cation='Li', docking_point=None):
+        # Find the new coordinates
+        new_coords = np.array(self.cart_coords) - anion_center
+
+        # Update the sites
+        sites = []
+        for i in range(len(self.species)):
+            prop = None
+
+            if self.site_properties:
+                prop = {k: v[i] for k, v in self.site_properties.items()}
+
+            sites.append(pmg.Site(self.species[i], new_coords[i],
+                                  properties=prop))
+
+        self._sites = sites
+        self._facets = None
+        self._symmops = None
+        self._pointgroup = None
+        self._facet_dict = None
+
+    def add_dock(self, dock, cation=None, docking_point=None):
         """
         Add a docking site to the OccupiedCage. If the chemical symbol of the
         cation is provided, the cation is appended to the OccupiedCage. In case
         the cation is equal to *None*, the cation is assumed to be present and
+        the facet is simply designated as a dock.
+
+        Note: If a cation is appended to the molecule. running this method will
+        reset the facets and symmetry information to None.
 
         Args:
             dock (cage.Facet): The Facet on which the cation is docked.
@@ -780,8 +874,6 @@ class OccupiedCage(Cage):
                 self.set_charge_and_spin(self.charge,
                                          self.spin_multiplicity - 1)
                 self._docks.append(dock)
-
-        self._facets = None
 
         # TODO Add some more checks
 
@@ -833,7 +925,7 @@ class OccupiedCage(Cage):
         Returns:
 
         """
-        pass #TODO
+        pass  #TODO
 
     @classmethod
     def from_file(cls, filename):
@@ -846,7 +938,7 @@ class OccupiedCage(Cage):
         Returns:
 
         """
-        pass #TODO
+        pass  #TODO
 
     def remove_surface_facet(self, facet):
         """
@@ -893,9 +985,6 @@ class Facet(SiteCollection, MSONable):
     Facet of a Molecule object, defined by a list of Sites.
     """
 
-    #TODO Allow the facet to contain more than three sites
-    #TODO Write those docstrings you lazy bastard!
-
     def __init__(self, sites, normal=None):
         """
         Initialize a Facet from a list of sites.
@@ -923,8 +1012,13 @@ class Facet(SiteCollection, MSONable):
             (*numpy.ndarray*) -- Normal of the facet.
         """
 
-        normal = np.cross(self._sites[0].coords - self._sites[1].coords,
-                          self._sites[0].coords - self._sites[2].coords)
+        if len(self.sites) == 3:
+            normal = np.cross(self._sites[0].coords - self._sites[1].coords,
+                              self._sites[0].coords - self._sites[2].coords)
+        else:
+            #TODO Make an average of possible normals
+            normal = np.cross(self._sites[0].coords - self._sites[1].coords,
+                              self._sites[0].coords - self._sites[2].coords)
 
         # Make length of the normal equal to 1
         normal = normal/np.linalg.norm(normal)
@@ -953,6 +1047,8 @@ class Facet(SiteCollection, MSONable):
         Returns:
             (*bool*) - Whether or not the facets are equal.
         """
+        #TODO Check method for facets with more than 3 vertices
+
         if (len(set(self.sites) & set(other.sites)) == len(self.sites)) and \
                 np.allclose(self.normal, other.normal, atol=1e-3):
             return True
@@ -968,6 +1064,30 @@ class Facet(SiteCollection, MSONable):
             (*int*) -- Hash of the Facet.
         """
         return hash(str(self))
+
+    @property
+    def sites(self):
+        """
+        The sites that define the Facet.
+        :return: List of Sites
+        """
+        return self._sites
+
+    @property
+    def center(self):
+        """
+        The center of the Facet.
+        :return: Array of the center coordinates
+        """
+        return self._center
+
+    @property
+    def normal(self):
+        """
+        Surface normal of the Facet
+        :return: Array of the normal vector
+        """
+        return self._normal
 
     @classmethod
     def from_str(cls, input_string, fmt="json"):
@@ -1076,6 +1196,30 @@ class Facet(SiteCollection, MSONable):
         """
         return Facet(self._sites, self._normal)
 
+    def add_site(self, site):
+        """
+        Add a site to the facet. Will only work in case the site is in the
+        surface defined by the facet.
+
+        Args:
+            site (pymatgen.core.sites.Site): The site that will be added to
+                the facet.
+        """
+
+        # Check if the site is in the surface defined by the facet
+        angle = self.angle_to_normal(site.coords)
+        if abs(angle - math.pi/2) > ANGLE_TOLERANCE:
+            raise ValueError("Angle to facet normal deviates too much from "
+                             "pi/2. A site cannot be added to the facet if "
+                             "it is not in the same plane.")
+
+        # Add the site to the list of sites of the facet
+        self._sites.append(site)
+
+        self._center = utils.site_center(tuple(self.sites))
+
+        #TODO Find the new normal, but make sure it doesn't flip direction
+
     def get_normal_intersection(self, other):
         """
         Find the intersection of the normal lines of the Facet and another one.
@@ -1092,7 +1236,7 @@ class Facet(SiteCollection, MSONable):
                 coordinates.
         """
 
-        #TODO This method needs improvement.
+        #TODO This method needs improvement, i.e. to be made more general
 
         edge = set(self.sites) & set(other.sites)
         if len(edge) != 2:
@@ -1179,42 +1323,21 @@ class Facet(SiteCollection, MSONable):
                 is_equivalent = True
         return is_equivalent
 
-    @property
-    def sites(self):
-        """
-        The sites that define the Facet.
-        :return: List of Sites
-        """
-        return self._sites
-
-    @property
-    def center(self):
-        """
-        The center of the Facet.
-        :return: Array of the center coordinates
-        """
-        return self._center
-
-    @property
-    def normal(self):
-        """
-        Surface normal of the Facet
-        :return: Array of the normal vector
-        """
-        return self._normal
-
     def flip_normal(self):
         """
         Flip the direction of the surface normal of the Facet.
-        :return:
         """
         self._normal = -self._normal
 
-    def angle_to_normal(self, coordinate):
+    def angle_to_normal(self, point):
         """
         Find the angle between the vector that connects the center and the
-        coordinate and the normal.
-        :param coordinate:
-        :return: angle value (in radians)
+        point and the normal.
+
+        Args:
+            point (numpy.ndarray): Coordinates of the point.
+
+        Returns:
+            (*float*): Angle to the normal of the facet.
         """
-        return utils.angle_between(coordinate - self._center, self._normal)
+        return utils.angle_between(point - self._center, self._normal)

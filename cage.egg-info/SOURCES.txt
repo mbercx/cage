@@ -1,7 +1,7 @@
 MANIFEST.in
 README.rst
 cage/__init__.py
-cage/facetsym.py
+cage/core.py
 cage/landscape.py
 cage/path.py
 cage/study.py
@@ -15,7 +15,9 @@ cage.egg-info/top_level.txt
 cage/cli/__init__.py
 cage/cli/cage.py
 cage/cli/commands/__init__.py
+cage/cli/commands/analyze.py
 cage/cli/commands/setup.py
+cage/cli/commands/util.py
 cage/scripts/__init__.py
 cage/scripts/chainsetup.py
 cage/scripts/checkCalc.py

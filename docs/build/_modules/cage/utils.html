@@ -46,19 +46,8 @@
 <span class="kn">import</span> <span class="nn">pymatgen.io.nwchem</span> <span class="k">as</span> <span class="nn">nw</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">A random collection of utility methods for other modules.</span>
+<span class="sd">A collection of utility methods for other modules.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-
-<div class="viewcode-block" id="write_init_final"><a class="viewcode-back" href="../../cage.html#cage.utils.write_init_final">[docs]</a><span class="k">def</span> <span class="nf">write_init_final</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Quickly write out the initial and the final configuration of a nwchem</span>
-<span class="sd">    optimization.</span>
-<span class="sd">    :param filename:</span>
-<span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">nw</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;initial_mol.xyz&#39;</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;final_mol.xyz&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="distance"><a class="viewcode-back" href="../../cage.html#cage.utils.distance">[docs]</a><span class="k">def</span> <span class="nf">distance</span><span class="p">(</span><span class="n">coord1</span><span class="p">,</span> <span class="n">coord2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

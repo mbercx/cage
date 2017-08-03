@@ -1,18 +1,11 @@
-"""
-cage
 
-Usage:
-    cage -h | --help
-    cage dock
-    cage chain
-
-Options:
-    -h --help
-
-"""
-
-from cage import __version__ as VERSION
 import click
+
+"""
+Command Line Interface for the cage package.
+
+"""
+
 
 @click.group()
 def main():
@@ -21,6 +14,7 @@ def main():
     batteries.
     """
     pass
+
 
 @main.group()
 def setup():
@@ -32,6 +26,21 @@ def setup():
     """
     pass
 
+
+
+
+
+@main.group()
+def util():
+    """
+    A set of utility scripts for the cage package.
+    """
+    pass
+
+
+# SETUP COMMANDS
+
+
 @setup.command()
 @click.argument('filename')
 def optimize(filename):
@@ -40,31 +49,46 @@ def optimize(filename):
 
     optimize(filename)
 
+
 @setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2.0)
-def dock(filename, cation, distance):
+@click.option('--verbose', '-v', is_flag=True)
+def dock(filename, cation, distance, verbose):
     """
-    Set up the docking sites. It is recommended to use an anion which has
-    first been optimize using 'cage setup optimize'.
+    Set up the docking sites.
+
+    It is recommended to use an anion which has first been optimize using
+    'cage setup optimize'.
     """
     from cage.cli.commands.setup import docksetup
 
-    docksetup(filename, cation, distance)
+    docksetup(filename, cation, distance, verbose)
+
 
 @setup.command()
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
+@click.option('--facets', '-f', type=str ,  default='tuple')
 @click.option('--operation', '-O', default='energy')
 @click.option('--endradii', '-e', default=(3, 6))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
-def chain(filename, cation, operation, endradii, nradii, adensity):
+def chain(filename, cation, facets, operation, endradii, nradii, adensity):
     """ Set up a 2D landscape along the chain of non-equivalent facets. """
     from cage.cli.commands.setup import chainsetup
 
-    chainsetup(filename, cation, operation, endradii, nradii, adensity)
+    facets = [int(number) for number in facets.split()]
+
+    chainsetup(filename=filename,
+               facets=facets,
+               cation=cation,
+               operation=operation,
+               endradii=endradii,
+               nradii=nradii,
+               adensity=adensity)
+
 
 @setup.command()
 @click.argument('filename')
@@ -77,14 +101,19 @@ def path(filename, cation, distance, edges):
 
     pathsetup(filename, cation, distance, edges)
 
+
 @setup.command()
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
 def neb(paths_dir, nimages):
-    """ Set up the paths between facets that share a vertex. """
+    """
+    Set up the nudged elastic band calculation.
+
+    """
     from cage.cli.commands.setup import nebsetup
 
     nebsetup(paths_dir, nimages)
+
 
 @setup.group()
 def twocat():
@@ -95,6 +124,7 @@ def twocat():
     the anion.
     """
     pass
+
 
 @twocat.command()
 @click.argument('dock_dir')
@@ -116,6 +146,7 @@ def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
     twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose)
 
+
 @main.group()
 def analyze():
     """
@@ -126,18 +157,28 @@ def analyze():
     """
     pass
 
-@analyze.command()
-def landscape():
-    """
-    Analyze the landscape
-    """
 
-@main.group()
-def util():
+@analyze.command()
+@click.argument('lands_dir')
+@click.option('--cation', '-C', default='Li')
+@click.option('--energy_range', '-E', default=(0.0, 0.0))
+@click.option('--interp_mesh', '-I', default=(0.003, 0.01))
+@click.option('--contour_levels', '-l', default=0.1)
+@click.option('--verbose', '-v', is_flag=True)
+def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
+              verbose):
     """
-    A set of utility scripts for the cage package.
+    Analyze the landscape data.
     """
-    pass
+    from cage.cli.commands.analyze import landscape_analysis
+
+    landscape_analysis(lands_dir=lands_dir,
+                       cation=cation,
+                       energy_range=energy_range,
+                       interp_mesh=interp_mesh,
+                       contour_levels=contour_levels,
+                       verbose=verbose)
+
 
 @util.command()
 @click.argument('output_file')
@@ -146,4 +187,3 @@ def geo(output_file):
     from cage.cli.commands.util import geo
 
     geo(output_file=output_file)
-
