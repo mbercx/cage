@@ -72,7 +72,7 @@ def dock(filename, cation, distance, verbose):
 @click.option('--cation', '-C', default='Li')
 @click.option('--facets', '-f', type=str ,  default='tuple')
 @click.option('--operation', '-O', default='energy')
-@click.option('--endradii', '-e', default=(3, 6))
+@click.option('--endradii', '-e', default=(3.0, 6.0))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
 def chain(filename, cation, facets, operation, endradii, nradii, adensity):
