@@ -203,10 +203,16 @@ def chainsetup(filename, cation, facets, operation, endradii, nradii,
         # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
+    anion.center()
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
     anion.find_surface_facets(ignore=IGNORE)
-    edges = anion.find_noneq_chain_links()
+
+    if not facets == tuple:
+        chosen_facets = [anion.facets[index] for index in facets]
+        edges = anion.find_noneq_chain_links(chosen_facets)
+    else:
+        edges = anion.find_noneq_chain_links()
 
     total_mol = anion.copy()
 
@@ -240,11 +246,17 @@ def chainsetup(filename, cation, facets, operation, endradii, nradii,
         facet1 = edge[0].copy()
         facet2 = edge[1].copy()
 
+        if edge == edges[-1]:
+            remove_endline = False
+        else:
+            remove_endline = True
+
         # Set up the landscape
         landscape = set_up_edge_landscape(facet1, facet2,
                                           endpoint_radii=endradii,
                                           number_of_radii=nradii,
-                                          angle_density=adensity)
+                                          angle_density=adensity,
+                                          remove_endline=remove_endline)
 
         # Get the molecule for each landscape point
         molecules = set_up_molecules(edge_mol, landscape, cation)
@@ -598,7 +610,8 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
 
 def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
-                          number_of_radii=None, angle_density=50):
+                          number_of_radii=None, angle_density=50,
+                          remove_endline=True):
     """
     Set up the Landscape to study the energy landscape between two facets.
 
@@ -615,16 +628,19 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     :param angle_density:
     :return:
     """
-    line_vector = facet1.center/np.linalg.norm(facet1.center)
+    line_vector1 = facet1.center/np.linalg.norm(facet1.center)
+    line_vector2 = facet2.center / np.linalg.norm(facet2.center)
     lands = cage.landscape.Landscape.from_vertices(
-        [line_vector * endpoint_radii[0], line_vector * endpoint_radii[1]],
+        [line_vector1 * endpoint_radii[0], line_vector1 * endpoint_radii[1]],
         num=number_of_radii
     )
-    axis = np.cross(facet1.normal, facet2.normal)
+
+    axis = np.cross(line_vector1, line_vector2)
     angle = math.asin(np.linalg.norm(axis))
     axis = axis * angle / np.linalg.norm(axis)
 
-    lands.extend_by_rotation(axis, angle_density, remove_endline=True)
+    lands.extend_by_rotation(axis, angle_density,
+                             remove_endline=remove_endline)
 
     return lands
 
