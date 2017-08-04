@@ -455,7 +455,7 @@ class Cage(Molecule):
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
-    def visualize_noneq_facets(self, filename, ignore=()):
+    def visualize_noneq_facets(self, filename, ignore=(), max_bond_length=1.9):
         """
         Visualize the non-equivalent facets by setting up a VESTA file with
         the various facets in different colours and with the corresponding
@@ -519,19 +519,22 @@ class Cage(Molecule):
         file.write("\n\n")
         file.write("SBOND\n")
 
-        bonds = combinations([element for element in self.composition])
+        bonds = list(combinations([element for element in self.composition],
+                                  2))
+        for element in self.composition:
+            bonds.append((element, element))
 
         bond_number = 1
         for bond in bonds:
             file.write(str(bond_number) + "\t" + str(bond[0]) + "\t"
-                       + str(bond[1]) + "\t0.00000\t2.0\t0\t1\t0\t0\t1"
-                                        "\t0.250\t2.000\t127\t127\t127\n")
+                       + str(bond[1]) + "\t0.00000\t" + str(max_bond_length) +
+                       "\t0\t1\t0\t0\t1\t0.250\t2.000\t127\t127\t127\n")
             bond_number += 1
 
         for element in self.composition:
             if element not in ignore:
                 file.write(str(bond_number) + "\tFa" + "\t"+ str(element) +
-                           "\t0.00000\t1.8\t0\t1\t1\t0\t1\t0.250\t2.000"
+                           "\t0.00000\t1.85\t0\t1\t1\t0\t1\t0.250\t2.000"
                            "\t210\t50\t20\n")
             bond_number += 1
 
