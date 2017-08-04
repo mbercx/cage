@@ -27,9 +27,9 @@ want to use it for anything else, they might need some adjustments.
 ##############
 
 # Facet recognition parameters
-IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
-          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
-          pmg.Element('F'))
+IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
+          pmg.Element('H'), pmg.Element('I'), pmg.Element('Br'),
+          pmg.Element('Cl'), pmg.Element('F'))
 
 OUTPUT_FILE = 'result.out'
 
@@ -194,6 +194,22 @@ def docksetup(filename, cation, distance, verbose):
 
 def chainsetup(filename, cation, facets, operation, endradii, nradii,
                adensity):
+    """
+    Set up calculations to study the 2D edge landscapes between a chain of
+    non-equivalent facets.
+
+    Args:
+        filename:
+        cation:
+        facets:
+        operation:
+        endradii:
+        nradii:
+        adensity:
+
+    Returns:
+
+    """
 
     # Load the Cage from the file
     try:
@@ -209,7 +225,8 @@ def chainsetup(filename, cation, facets, operation, endradii, nradii,
     anion.find_surface_facets(ignore=IGNORE)
 
     if not facets == tuple:
-        chosen_facets = [anion.facets[index] for index in facets]
+        noneq_facets = anion.find_noneq_facets()
+        chosen_facets = [noneq_facets[index] for index in facets]
         edges = anion.find_noneq_chain_links(chosen_facets)
     else:
         edges = anion.find_noneq_chain_links()

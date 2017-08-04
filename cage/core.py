@@ -455,6 +455,129 @@ class Cage(Molecule):
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
+    def visualize_noneq_facets(self, filename, ignore=(), max_bond_length=1.9):
+        """
+        Visualize the non-equivalent facets by setting up a VESTA file with
+        the various facets in different colours and with the corresponding
+        index given to the atom, labeled 'Fa' placed at the center of the
+        facet.
+
+        Args:
+            filename (str): Name of the VESTA file to be written.
+
+        """
+        # TODO This method is very specific. We probably should find a more general way to do this.
+
+        file = open(filename, "w")
+
+        file.write("#VESTA_FORMAT_VERSION 3.3.0\n\n")
+        file.write("MOLECULE\n")
+
+        # Write structure data
+        file.write("\n")
+        file.write("STRUC")
+        file.write("\n")
+        site_number = 1
+        specie_number = 1
+        for site in self.sites:
+
+            file.write(str(site_number) + "\t" + str(site.specie) + "\t" +
+                       str(site.specie) + str(specie_number) + "\t1.000" )
+
+            for coord in site.coords:
+                file.write("\t" + str(coord))
+
+            file.write("\t1\t-\n\t\t\t\t0.0000\t0.0000\t0.0000\t0.00\n")
+
+            try:
+                if self.sites[self.sites.index(site) + 1].specie == site.specie:
+                    specie_number += 1
+                else:
+                    specie_number = 1
+            except IndexError:
+                pass
+
+            site_number += 1
+
+        # Add the centers of the non-equivalent facets
+        noneq_facets = self.find_noneq_facets()
+        for index in range(len(noneq_facets)):
+            file.write(str(site_number) + "\tFa" + "\tFa" + str(index) + "\t"
+                       + "1.000")
+
+            for coord in noneq_facets[index].center:
+                file.write("\t" + str(coord))
+
+            file.write("\t1\t-\n\t\t\t\t0.0000\t0.0000\t0.0000\t0.00\n")
+
+            site_number += 1
+
+        file.write(" 0")
+
+        # Write the bond data
+
+        file.write("\n\n")
+        file.write("SBOND\n")
+
+        bonds = list(combinations([element for element in self.composition],
+                                  2))
+        for element in self.composition:
+            bonds.append((element, element))
+
+        bond_number = 1
+        for bond in bonds:
+            file.write(str(bond_number) + "\t" + str(bond[0]) + "\t"
+                       + str(bond[1]) + "\t0.00000\t" + str(max_bond_length) +
+                       "\t0\t1\t0\t0\t1\t0.250\t2.000\t127\t127\t127\n")
+            bond_number += 1
+
+        for element in self.composition:
+            if element not in ignore:
+                file.write(str(bond_number) + "\tFa" + "\t"+ str(element) +
+                           "\t0.00000\t1.85\t0\t1\t1\t0\t1\t0.250\t2.000"
+                           "\t210\t50\t20\n")
+            bond_number += 1
+
+        file.write(" 0")
+
+        # Write the atom data
+        file.write("\n\n")
+        file.write("ATOMT\n")
+        file.write("\n")
+        atom_number = 1
+        for element in self.composition:
+            file.write(str(atom_number) + "\t" + str(element) + "\t"
+                       + str(float(element.atomic_radius)) + "\t")
+            if element == pmg.Element('B'):
+                file.write("31\t162\t15\t31\t162\t15\t204\n")
+            elif element == pmg.Element('C'):
+                file.write("128\t73\t41\t128\t73\t41\t204\n")
+            elif element == pmg.Element('H'):
+                file.write("255\t204\t204\t255\t204\t204\t204\n")
+            elif element == pmg.Element('Br'):
+                file.write("255\t24\t204\t255\t204\t204\t204\n")
+            elif element == pmg.Element('Cl'):
+                file.write("255\t204\t24\t255\t204\t204\t204\n")
+            elif element == pmg.Element('F'):
+                file.write("255\t204\t204\t255\t204\t204\t204\n")
+            elif element == pmg.Element('I'):
+                file.write("25\t204\t204\t255\t204\t204\t204\n")
+            else:
+                file.write("255\t204\t204\t255\t204\t204\t204\n")
+
+            atom_number += 1
+
+        file.write(str(atom_number) + "\tFa\t0.4\t140\t40\t40"
+                                      "\t215\t50\t20\t220\n")
+        atom_number += 1
+
+        file.write(" 0")
+
+        file.write("\n\n")
+        file.write("STYLE\n")
+        file.write("MODEL 2 1 0\n")
+        file.write("POLYS 2\n")
+
     def find_noneq_facet_chain(self, start=0, facets=tuple,
                                symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
