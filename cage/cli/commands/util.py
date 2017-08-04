@@ -113,8 +113,8 @@ def process_landscape(directory, cation):
     """
 
     lands_analyzer = LandscapeAnalyzer.from_data(directory=directory)
-    facet = Facet.from_file(os.path.join(directory, "init_facet.json"))
-    lands_analyzer.analyze_cation_energies(cation=cation, facet=facet)
+    # facet = Facet.from_file(os.path.join(directory, "init_facet.json"))
+    # lands_analyzer.analyze_cation_energies(cation=cation, facet=facet)
     lands_analyzer.to(os.path.join(directory, "landscape.json"))
 
 def process_output(location):
