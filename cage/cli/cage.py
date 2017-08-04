@@ -27,20 +27,6 @@ def setup():
     pass
 
 
-
-
-
-@main.group()
-def util():
-    """
-    A set of utility scripts for the cage package.
-    """
-    pass
-
-
-# SETUP COMMANDS
-
-
 @setup.command()
 @click.argument('filename')
 def optimize(filename):
@@ -180,6 +166,14 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
                        verbose=verbose)
 
 
+@main.group()
+def util():
+    """
+    A set of utility scripts for the cage package.
+    """
+    pass
+
+
 @util.command()
 @click.argument('output_file')
 def geo(output_file):
@@ -187,3 +181,22 @@ def geo(output_file):
     from cage.cli.commands.util import geo
 
     geo(output_file=output_file)
+
+
+@util.command()
+@click.argument('output_file')
+def check(output_file):
+    """  """
+    from cage.cli.commands.util import check_calculation
+
+    check_calculation(output_file=output_file)
+
+
+@util.command()
+@click.argument('output_file')
+def process(output_file):
+    """  """
+    from cage.cli.commands.util import process_output
+
+    process_output(output_file=output_file)
+
