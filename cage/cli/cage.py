@@ -148,7 +148,8 @@ def analyze():
 @click.argument('lands_dir')
 @click.option('--cation', '-C', default='Li')
 @click.option('--energy_range', '-E', default=(0.0, 0.0))
-@click.option('--interp_mesh', '-I', default=(0.003, 0.01))
+@click.option('--interp_mesh', '-I', default=(0.03, 0.01))
+@click.option('--radii', '-R', default=(0.0, 0.0))
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option('--verbose', '-v', is_flag=True)
 def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
@@ -162,6 +163,7 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
                        cation=cation,
                        energy_range=energy_range,
                        interp_mesh=interp_mesh,
+                       radii=radii,
                        contour_levels=contour_levels,
                        verbose=verbose)
 

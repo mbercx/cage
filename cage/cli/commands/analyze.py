@@ -19,7 +19,7 @@ START_FACET = 0  # 0 or 1 -> determines facet to start chain from
 #TODO This code needs serious improvement. It's damn near illegible
 
 
-def landscape_analysis(lands_dir, cation, energy_range, interp_mesh,
+def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
                        contour_levels, verbose):
 
     lands_dir = os.path.abspath(lands_dir)
@@ -151,16 +151,23 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh,
     if verbose:
         print('-----------')
         print("Finding proper radii and angles...")
-    # Find the proper radii
-    min_max_radius = 1e6
-    max_min_radius = 0
-    for lands in landscape_chain:
-        rmax = lands.datapoints['Distance'].max()
-        if rmax < min_max_radius:
-            min_max_radius = rmax
-        rmin = lands.datapoints['Distance'].min()
-        if rmin > max_min_radius:
-            max_min_radius = rmin
+
+
+    if radii == (0.0, 0.0):
+        # Find the proper radii
+        min_max_radius = 1e6
+        max_min_radius = 0
+        for lands in landscape_chain:
+            rmax = lands.datapoints['Distance'].max()
+            if rmax < min_max_radius:
+                min_max_radius = rmax
+            rmin = lands.datapoints['Distance'].min()
+            if rmin > max_min_radius:
+                max_min_radius = rmin
+    else:
+        # User the user provided radii
+        max_min_radius = radii[0]
+        min_max_radius = radii[1]
 
     if verbose:
         print("")
