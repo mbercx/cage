@@ -30,6 +30,7 @@ def check_calculation(output_file):
     ouput file.
     """
     # TODO Add method of extracting data more quickly
+    #TODO Make method independent of the name of the output file.
 
     if os.path.isdir(output_file):
 
@@ -47,6 +48,8 @@ def check_calculation(output_file):
                     out = nwchem.NwOutput(file)
                 except:
                     raise IOError('File not found.')
+            except FileNotFoundError:
+                print("No output file found in " + directory)
 
             try:
                 error = False

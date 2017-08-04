@@ -186,7 +186,7 @@ def geo(output_file):
 @util.command()
 @click.argument('output_file')
 def check(output_file):
-    """  """
+    """ Check the output of calculations. """
     from cage.cli.commands.util import check_calculation
 
     check_calculation(output_file=output_file)
@@ -195,7 +195,7 @@ def check(output_file):
 @util.command()
 @click.argument('output_file')
 def process(output_file):
-    """  """
+    """ Process the output of calculations. """
     from cage.cli.commands.util import process_output
 
     process_output(output_file=output_file)
