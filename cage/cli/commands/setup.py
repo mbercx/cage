@@ -27,9 +27,9 @@ want to use it for anything else, they might need some adjustments.
 ##############
 
 # Facet recognition parameters
-IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('H'),
-          pmg.Element('I'), pmg.Element('Br'), pmg.Element('Cl'),
-          pmg.Element('F'))
+IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
+          pmg.Element('H'), pmg.Element('I'), pmg.Element('Br'),
+          pmg.Element('Cl'), pmg.Element('F'))
 
 OUTPUT_FILE = 'result.out'
 
