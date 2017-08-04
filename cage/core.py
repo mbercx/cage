@@ -537,7 +537,7 @@ class Cage(Molecule):
                                 new_chain_facet = True
                                 break
         else:
-            chain_facets = facets
+            chain_facets = list(facets)
             chain_length = len(facets)
 
         if verbose:
