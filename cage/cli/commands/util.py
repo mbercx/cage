@@ -3,6 +3,8 @@ import os
 
 import pymatgen.io.nwchem as nwchem
 
+from cage.landscape import LandscapeAnalyzer
+from cage import Facet
 from json import JSONDecodeError
 
 """
@@ -100,19 +102,34 @@ def check_calculation(output_file):
             print("No data found in file!")
 
 
-def process_output(output_file):
+def process_landscape(directory, cation):
     """
-    Process the results in an output file or all subdirectories in a directory.
 
     Args:
-        output_file:
+        landscape:
 
     Returns:
 
     """
-    if os.path.isdir(output_file):
 
-        dir_list = [directory for directory in os.listdir(output_file)
+    lands_analyzer = LandscapeAnalyzer.from_data(directory=directory)
+    facet = Facet.from_file(os.path.join(directory, "init_facet.json"))
+    lands_analyzer.analyze_cation_energies(cation=cation, facet=facet)
+    lands_analyzer.to(os.path.join(directory, "landscape.json"))
+
+def process_output(location):
+    """
+    Process the results in an output file or all subdirectories in a directory.
+
+    Args:
+        location:
+
+    Returns:
+
+    """
+    if os.path.isdir(location):
+
+        dir_list = [directory for directory in os.listdir(location)
                     if os.path.isdir(directory)]
 
         for directory in dir_list:
@@ -124,8 +141,8 @@ def process_output(output_file):
 
             try:
                 error = False
-                for data in output.data:
-                    if data['has_error']:
+                for location in output.data:
+                    if location['has_error']:
                         error = True
 
                 if error:
@@ -149,28 +166,28 @@ def process_output(output_file):
 
     else:
 
-        output_file = os.path.abspath(output_file)
-        print('Processing output in ' + output_file)
+        location = os.path.abspath(location)
+        print('Processing output in ' + location)
 
         try:
-            output = nwchem.NwOutput(output_file)
+            output = nwchem.NwOutput(location)
         except:
             raise IOError('Could not find proper nwchem output file.')
 
         try:
             error = False
-            for data in output.data:
-                if data['has_error']:
+            for location in output.data:
+                if location['has_error']:
                     error = True
 
             if error:
-                print("File: " + output_file + " contains errors!")
+                print("File: " + location + " contains errors!")
 
             elif output.data[-1]['task_time'] == 0:
-                print('No timing information found in ' + output_file + ".")
+                print('No timing information found in ' + location + ".")
 
             else:
-                output.to_file(os.path.join(os.path.dirname(output_file),
+                output.to_file(os.path.join(os.path.dirname(location),
                                             'data.json'))
 
         except NameError:
@@ -181,7 +198,7 @@ def process_output(output_file):
 
             print("Data is empty!")
 
-        output.to_file(os.path.join(os.path.dirname(output_file), 'data.json'))
+        output.to_file(os.path.join(os.path.dirname(location), 'data.json'))
 
 
 def search_and_reboot(dir_name):

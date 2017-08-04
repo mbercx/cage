@@ -237,7 +237,7 @@ class LandscapeAnalyzer(MSONable):
                     output.append(out)
                     print('Grabbed output in directory ' + dir)
 
-            # TODO This currently only considers the final task. Not a very general approach
+            # TODO This currently only considers the final task. Not a very general approach, but maybe the most sensible?
             data = [out.data[-1] for out in output]
 
         else:

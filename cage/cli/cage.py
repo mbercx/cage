@@ -198,5 +198,18 @@ def process(output_file):
     """ Process the output of calculations. """
     from cage.cli.commands.util import process_output
 
-    process_output(output_file=output_file)
+    process_output(location=output_file)
+
+@util.command()
+@click.argument('directory')
+@click.option('--cation', '-C', default='Li')
+def gather(directory, cation):
+    """
+
+
+    """
+    from cage.cli.commands.util import process_landscape
+
+    process_landscape(directory=directory,
+                      cation=cation)
 
