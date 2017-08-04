@@ -31,32 +31,70 @@ def check_calculation(output_file):
     """
     # TODO Add method of extracting data more quickly
 
-    try:
-        out = nwchem.NwOutput(output_file, fmt='json')
-    except JSONDecodeError:
+    if os.path.isdir(output_file):
+
+        dir_list = [directory for directory in os.listdir(output_file)
+                    if os.path.isdir(directory)]
+
+        for directory in dir_list:
+
+            file = os.path.join(directory, 'result.out')
+
+            try:
+                out = nwchem.NwOutput(file, fmt='json')
+            except JSONDecodeError:
+                try:
+                    out = nwchem.NwOutput(file)
+                except:
+                    raise IOError('File not found.')
+
+            try:
+                error = False
+                for data in out.data:
+                    if data['has_error']:
+                        error = True
+
+                print('File: ' + os.path.abspath(file))
+                if out.data[-1]['task_time'] != 0:
+                    print('Calculation completed in ' + str(
+                        out.data[-1]['task_time']) + 's')
+                else:
+                    print(
+                        'No timing information found. Calculation might not '
+                        'have completed successfully.')
+
+                print('Calculation has error: ' + str(error))
+
+            except NameError:
+                print("No data found in file!")
+
+    else:
         try:
-            out = nwchem.NwOutput(output_file)
-        except:
-            raise IOError('File not found.')
+            out = nwchem.NwOutput(output_file, fmt='json')
+        except JSONDecodeError:
+            try:
+                out = nwchem.NwOutput(output_file)
+            except:
+                raise IOError('File not found.')
 
-    try:
-        error = False
-        for data in out.data:
-            if data['has_error']:
-                error = True
+        try:
+            error = False
+            for data in out.data:
+                if data['has_error']:
+                    error = True
 
-        print('File: ' + os.path.abspath(output_file))
-        if out.data[-1]['task_time'] != 0:
-            print('Calculation completed in ' + str(
-                out.data[-1]['task_time']) + 's')
-        else:
-            print('No timing information found. Calculation might not have '
-                  'completed successfully.')
+            print('File: ' + os.path.abspath(output_file))
+            if out.data[-1]['task_time'] != 0:
+                print('Calculation completed in ' + str(
+                    out.data[-1]['task_time']) + 's')
+            else:
+                print('No timing information found. Calculation might not '
+                      'have completed successfully.')
 
-        print('Calculation has error: ' + str(error))
+            print('Calculation has error: ' + str(error))
 
-    except NameError:
-        print("No data found in file!")
+        except NameError:
+            print("No data found in file!")
 
 
 def process_output(output_file):
