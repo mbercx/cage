@@ -152,8 +152,8 @@ def analyze():
 @click.option('--radii', '-R', default=(0.0, 0.0))
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option('--verbose', '-v', is_flag=True)
-def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
-              verbose):
+def landscape(lands_dir, cation, energy_range, interp_mesh, radii,
+              contour_levels, verbose):
     """
     Analyze the landscape data.
     """

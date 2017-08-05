@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 from cage.landscape import LandscapeAnalyzer
 from cage.core import Facet
+from cage import utils
 
 """
 Analysis tools for the data produced by calculation set up using the cage setup
@@ -175,15 +176,26 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
         print('Smallest maximal radius = ' + str(min_max_radius))
 
     # Adjust the angles to make one angle coordinate for all edges
-    facet_angles = [0, landscape_chain[0].datapoints['Angle'].max()]
 
-    for lands in landscape_chain[1:]:
+    facet_angles = [0, ]
 
-        if verbose:
-            print('Maximum angle = ' + str(facet_angles[-1]))
+    for index in range(1,len(facet_chain)):
 
-        lands.datapoints['Angle'] += facet_angles[-1]
-        facet_angles.append(lands.datapoints['Angle'].max())
+        landscape_chain[index-1].datapoints['Angle'] += facet_angles[-1]
+
+        facet_angles.append(facet_angles[-1] +
+                            utils.angle_between(facet_chain[index - 1].center,
+                                                facet_chain[index].center))
+
+    # facet_angles = [0, landscape_chain[0].datapoints['Angle'].max()]
+    #
+    # for lands in landscape_chain[1:]:
+    #
+    #     if verbose:
+    #         print('Maximum angle = ' + str(facet_angles[-1]))
+    #
+    #     lands.datapoints['Angle'] += facet_angles[-1]
+    #     facet_angles.append(lands.datapoints['Angle'].max())
 
     all_radii = []
     all_angles = []
@@ -230,7 +242,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
             print('Shape new_angles: ' + str(new_angles.shape))
             print('Shape new_radii: ' + str(new_radii.shape))
 
-        tck = interpolate.bisplrep(angles, radii, energy, s=0.01)
+        tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
 
         new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
                                          tck)
