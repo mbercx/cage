@@ -54,6 +54,13 @@ DRIVER_SETUP = {'loose': '', 'maxiter': '100'}
 
 
 def optimize(filename):
+    """
+    Set up a NwChem calculation to optimize a molecule structure.
+
+    Args:
+        filename (str): Structure file of the molecule.
+
+    """
 
     try:
         # Load the POSCAR into a Cage
