@@ -95,10 +95,7 @@ def path(filename, cation, distance, edges):
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
 def neb(paths_dir, nimages):
-    """
-    Set up the nudged elastic band calculation.
-
-    """
+    """ Set up the nudged elastic band calculation. """
     from cage.cli.commands.setup import nebsetup
 
     nebsetup(paths_dir, nimages)
@@ -157,9 +154,7 @@ def analyze():
 @click.option('--verbose', '-v', is_flag=True)
 def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
               contour_levels, verbose):
-    """
-    Analyze the landscape data.
-    """
+    """ Analyze the landscape data. """
     from cage.cli.commands.analyze import landscape_analysis
 
     landscape_analysis(lands_dir=lands_dir,
@@ -183,6 +178,7 @@ def util():
 @click.argument('output_file')
 def geo(output_file):
     """ Write the initial and final geometry of a nwchem optimization. """
+
     from cage.cli.commands.util import geo
 
     geo(output_file=output_file)
@@ -192,6 +188,7 @@ def geo(output_file):
 @click.argument('output_file')
 def check(output_file):
     """ Check the output of calculations. """
+
     from cage.cli.commands.util import check_calculation
 
     check_calculation(output=output_file)
@@ -201,6 +198,7 @@ def check(output_file):
 @click.argument('output_file')
 def process(output_file):
     """ Process the output of calculations. """
+
     from cage.cli.commands.util import process_output
 
     process_output(location=output_file)
@@ -209,12 +207,17 @@ def process(output_file):
 @click.argument('directory')
 @click.option('--cation', '-C', default='Li')
 def gather(directory, cation):
-    """
+    """ Gather the results of a landscape calculation. """
 
-
-    """
     from cage.cli.commands.util import process_landscape
 
     process_landscape(directory=directory,
                       cation=cation)
+@util.command()
+@click.argument('filename')
+def facets(filename):
+    """ Visualize the facets of a molecule. """
 
+    from cage.cli.commands.util import visualize_facets
+
+    visualize_facets(filename=filename)
