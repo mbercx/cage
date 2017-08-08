@@ -58,20 +58,23 @@ def dock(filename, cation, distance, verbose):
 @click.option('--cation', '-C', default='Li')
 @click.option('--facets', '-f', type=str ,  default='tuple')
 @click.option('--operation', '-O', default='energy')
-@click.option('--endradii', '-e', default=(3.0, 6.0))
+@click.option('--end_radii', '-r', default=(3.0, 6.0))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
-def chain(filename, cation, facets, operation, endradii, nradii, adensity):
+def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
     """ Set up a 2D landscape along the chain of non-equivalent facets. """
     from cage.cli.commands.setup import chainsetup
 
-    facets = [int(number) for number in facets.split()]
+    if facets == 'tuple':
+        facets = tuple
+    else:
+        facets = [int(number) for number in facets.split()]
 
     chainsetup(filename=filename,
                facets=facets,
                cation=cation,
                operation=operation,
-               endradii=endradii,
+               end_radii=end_radii,
                nradii=nradii,
                adensity=adensity)
 
@@ -148,11 +151,12 @@ def analyze():
 @click.argument('lands_dir')
 @click.option('--cation', '-C', default='Li')
 @click.option('--energy_range', '-E', default=(0.0, 0.0))
-@click.option('--interp_mesh', '-I', default=(0.003, 0.01))
+@click.option('--interp_mesh', '-I', default=(0.03, 0.01))
+@click.option('--end_radii', '-R', default=(0.0, 0.0))
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option('--verbose', '-v', is_flag=True)
-def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
-              verbose):
+def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
+              contour_levels, verbose):
     """
     Analyze the landscape data.
     """
@@ -162,6 +166,7 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
                        cation=cation,
                        energy_range=energy_range,
                        interp_mesh=interp_mesh,
+                       end_radii=end_radii,
                        contour_levels=contour_levels,
                        verbose=verbose)
 
@@ -189,7 +194,7 @@ def check(output_file):
     """ Check the output of calculations. """
     from cage.cli.commands.util import check_calculation
 
-    check_calculation(output_file=output_file)
+    check_calculation(output=output_file)
 
 
 @util.command()
