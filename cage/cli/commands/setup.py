@@ -26,11 +26,12 @@ want to use it for anything else, they might need some adjustments.
 # PARAMETERS #
 ##############
 
-# Facet recognition parameters
+# Elements to ignore for the surface facet determination
 IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
           pmg.Element('H'), pmg.Element('I'), pmg.Element('Br'),
           pmg.Element('Cl'), pmg.Element('F'))
 
+# Name of the output file
 OUTPUT_FILE = 'result.out'
 
 # Calculation parameters
@@ -192,7 +193,7 @@ def docksetup(filename, cation, distance, verbose):
         dock_number += 1
 
 
-def chainsetup(filename, cation, facets, operation, endradii, nradii,
+def chainsetup(filename, cation, facets, operation, end_radii, nradii,
                adensity):
     """
     Set up calculations to study the 2D edge landscapes between a chain of
@@ -203,7 +204,7 @@ def chainsetup(filename, cation, facets, operation, endradii, nradii,
         cation:
         facets:
         operation:
-        endradii:
+        end_radii:
         nradii:
         adensity:
 
@@ -270,7 +271,7 @@ def chainsetup(filename, cation, facets, operation, endradii, nradii,
 
         # Set up the landscape
         landscape = set_up_edge_landscape(facet1, facet2,
-                                          endpoint_radii=endradii,
+                                          endpoint_radii=end_radii,
                                           number_of_radii=nradii,
                                           angle_density=adensity,
                                           remove_endline=remove_endline)
