@@ -30,7 +30,7 @@ __date__ = "16 JUN 2017"
 
 class Landscape(MSONable):
     """
-    A discrete mesh representing a line, area or volume.
+    A selection of points representing a line, area or volume.
     """
     def __init__(self, points):
         """
