@@ -20,7 +20,7 @@ START_FACET = 0  # 0 or 1 -> determines facet to start chain from
 #TODO This code needs serious improvement. It's damn near illegible
 
 
-def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
+def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels, verbose):
 
     lands_dir = os.path.abspath(lands_dir)
@@ -153,8 +153,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
         print('-----------')
         print("Finding proper radii and angles...")
 
-
-    if radii == (0.0, 0.0):
+    if end_radii == (0.0, 0.0):
         # Find the proper radii
         min_max_radius = 1e6
         max_min_radius = 0
@@ -167,15 +166,15 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
                 max_min_radius = rmin
     else:
         # User the user provided radii
-        max_min_radius = radii[0]
-        min_max_radius = radii[1]
+        max_min_radius = end_radii[0]
+        min_max_radius = end_radii[1]
 
     if verbose:
         print("")
         print('Largest minimal radius = ' + str(max_min_radius))
         print('Smallest maximal radius = ' + str(min_max_radius))
 
-    # Adjust the angles to make one angle coordinate for all edges
+    # Adjust the angles to set up one angle coordinate for all edges
 
     facet_angles = [0, ]
 
@@ -186,6 +185,11 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
         facet_angles.append(facet_angles[-1] +
                             utils.angle_between(facet_chain[index - 1].center,
                                                 facet_chain[index].center))
+
+    if verbose:
+        print("")
+        print("Facet Angles:")
+        print(facet_angles)
 
     # facet_angles = [0, landscape_chain[0].datapoints['Angle'].max()]
     #
@@ -223,8 +227,8 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
             print('Number of Radii = ' + str(nradii))
 
         # Get the right format for the data
-        radii = data['Distance'].reshape(nradii, nangles)  # [::nradii]
-        angles = data['Angle'].reshape(nradii, nangles)  # [:nangles]
+        radii = data['Distance'].reshape(nradii, nangles)
+        angles = data['Angle'].reshape(nradii, nangles)
         energy = data['Energy'].reshape(nradii, nangles)
 
         if verbose:
@@ -232,20 +236,33 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
             print('Shape radii: ' + str(radii.shape))
             print('Shape energy: ' + str(energy.shape))
 
-        new_angles, new_radii = np.mgrid[
-                                angles.min():angles.max():interp_mesh[0],
-                                max_min_radius:min_max_radius:interp_mesh[1]
-                                ]
+            print("Minimum Angle = " + str(angles.min()))
+            print("Maximum Angle = " + str(angles.max()))
 
-        if verbose:
-            print('-------------')
-            print('Shape new_angles: ' + str(new_angles.shape))
-            print('Shape new_radii: ' + str(new_radii.shape))
+        if interp_mesh == (0.0, 0.0):
+            new_radii = np.transpose(radii)
+            new_angles = np.transpose(angles)
+            new_energy = np.transpose(energy)
+        else:
+            new_angles, new_radii = np.mgrid[
+                                    angles.min():angles.max() + interp_mesh[0]
+                                    :interp_mesh[0],
+                                    max_min_radius:min_max_radius
+                                                   + interp_mesh[1]
+                                    :interp_mesh[1]
+                                    ]
 
-        tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
+            if verbose:
+                print('-------------')
+                print('Shape new_angles: ' + str(new_angles.shape))
+                print('Shape new_radii: ' + str(new_radii.shape))
+                print("New Minimum Angle = " + str(new_angles.min()))
+                print("New Maximum Angle = " + str(new_angles.max()))
 
-        new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
-                                         tck)
+            tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
+
+            new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
+                                             tck)
 
         all_radii.append(new_radii)
         all_angles.append(new_angles)
@@ -270,12 +287,14 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, radii,
     cbar.set_label('Energy (eV)', size='x-large')
     cs = plt.contour(total_angles, total_radii, total_energy, colors='black',
                      levels=contour_levels, linewidths=0.6)
+
     for angle in facet_angles:
         plt.plot([angle, angle], [total_radii.min(), total_radii.max()],
                  color='k', linestyle='-', linewidth=1)
     xlabel = []
     for i in range(len(facet_angles)):
         xlabel.append('$\Omega_' + str(i+1) + '$')
+
     plt.xlabel('Angle', size='large')
     plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
     plt.xticks(facet_angles, xlabel, size='x-large')
