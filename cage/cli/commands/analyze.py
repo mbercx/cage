@@ -31,124 +31,68 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
     if verbose:
         print("Extracting Landscape data from " + lands_dir + "...")
-        for directory in dir_list:
-            print(directory)
 
-    # TODO Make this part ignore directories that do not have the right files
-    edges = [[LandscapeAnalyzer.from_file(os.path.join(directory,
-                                                       'landscape.json')),
-              [Facet.from_file(os.path.join(directory, 'init_facet.json')),
-              Facet.from_file(os.path.join(directory, 'final_facet.json'))]]
-             for directory in dir_list]
+    # Extract the data from the subdirectories of the landscape directory
+    chain = {}
 
-    if verbose:
-        print("Found " + str(len(edges)) + " directories with landscape data.")
+    for directory in dir_list:
 
-    for edge in edges:
-        edge[0].analyze_cation_energies(facet=edge[1][0], cation=cation)
+        if os.path.isfile(os.path.join(directory, 'landscape.json')):
+            if os.path.isfile(os.path.join(directory, 'init_facet.json')) \
+                and os.path.isfile(os.path.join(directory,
+                                                'final_facet.json')):
+                if verbose:
+                    print("Found data in " + directory + ".")
 
-    # TODO Make landscapes and paths connected via dictionary
-
-    if verbose:
-        print("Analyzing facets...")
-
-    # Find all the facets in the paths
-    facets = []
-    for edge in edges:
-        for facet in edge[1]:
-            if facet not in facets:
-                facets.append(facet)
-
-    if verbose:
-        print("Found " + str(len(facets)) + " facets.")
-
-    if verbose:
-        print("Looking for end facets...")
-
-    # Find end_facets
-    end_facets = []
-    for edge in edges:
-        for facet in edge[1]:
-            if facet not in end_facets:
-                end_facets.append(facet)
+                chain[directory] = {
+                    'landscape': LandscapeAnalyzer.from_file(
+                        os.path.join(directory, 'landscape.json')),
+                    "link": [Facet.from_file(os.path.join(directory,
+                                                          'init_facet.json')),
+                             Facet.from_file(
+                                 os.path.join(directory, 'final_facet.json'))]
+                }
             else:
-                end_facets.remove(facet)
-
-    # Check if the chain is connected
-    if len(end_facets) != 2:
-        raise ValueError('Edges are not connected in a chain. Aborting...')
-    # TODO Handle case of circular connection of paths
-
-    # Find the starting path
-    facet_chain = [end_facets[START_FACET], ]
-    path_chain = []
-    landscape_chain = []
-
-    if verbose:
-        print("Constructing chain...")
-        print('')
-
-    while len(facet_chain) < len(facets):
-
-        last_facet = facet_chain[-1]
-
-        if verbose:
-            print('Last Facet:')
-            print(str(last_facet))
-
-        # Find the path that connects to the last facet and is not already in
-        # the path chain
-        for edge in edges:
-            if edge[1] not in path_chain and last_facet in edge[1]:
-                other_facet = edge[1].copy()
-                other_facet.remove(last_facet)
-                other_facet = other_facet[0]
 
                 if verbose:
-                    print('Other Facet:')
-                    print(str(other_facet))
-
-                facet_chain.append(other_facet)
-
-                # Make sure that the landscape edge is set up in the right
-                # direction.
-                if edge[1][0] != last_facet:
-
-                    if verbose:
-                        print('Flipped path (before):')
-                        print(str(edge[1][0]))
-                        print(str(edge[1][1]))
-
-                    edge[1].reverse()
-
-                    if verbose:
-                        print('Flipped path (after):')
-                        print(str(edge[1][0]))
-                        print(str(edge[1][1]))
-
-                    edge[0].flip_coordinates('Angle')
-
-                landscape_chain.append(edge[0])
-                path_chain.append(edge[1])
-
-        if verbose:
-            print('')
+                    print("No facet information found in " + directory + ".")
+        else:
+            print("No landscape data found in " + directory + ".")
 
     if verbose:
-        print('----------------')
-        print('Facet Chain:')
-        for facet in facet_chain:
-            print(str(facet))
-        print('----------------')
-        print('Path Chain:')
-        for edge in path_chain:
-            print('From')
-            print(str(edge[0]))
-            print('To')
-            print(str(edge[1]))
+        print("Found " + str(len(chain.keys())) +
+              " directories with landscape data.")
+        print("")
+        print("Analyzing landscape data...")
+
+    for data in chain.keys():
+
+        # Extract the total energies from the calculations, and assign their
+        # coordinates.
+
+        chain[data]['landscape'].analyze_cation_energies(
+            facet=chain[data]['link'][0],
+            cation=cation
+        )
+
+    # Check if the chain is properly constructed
+    broken_chain = False
+    test_chain = [chain[data]['link'] for data in chain.keys()]
+    for index in range(len(test_chain)-1):
+        if test_chain[index][1] != test_chain[index + 1][0]:
+            broken_chain = True
+
+    if broken_chain:
+        chain_landscapes, facet_chain = reconstruct_chain(chain,
+                                                          verbose=verbose)
+    else:
+        chain_links = [chain[data]['link'] for data in chain.keys()]
+        facet_chain = [chain_links[0][0]]
+        for link in chain_links:
+            facet_chain.append(link[1])
+        chain_landscapes = [chain[data]['landscape'] for data in chain.keys()]
 
     # Interpolate the landscapes to a uniform mesh
-
     if verbose:
         print('-----------')
         print("Finding proper radii and angles...")
@@ -157,11 +101,11 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         # Find the proper radii
         min_max_radius = 1e6
         max_min_radius = 0
-        for lands in landscape_chain:
-            rmax = lands.datapoints['Distance'].max()
+        for landscape in chain_landscapes:
+            rmax = landscape.datapoints['Distance'].max()
             if rmax < min_max_radius:
                 min_max_radius = rmax
-            rmin = lands.datapoints['Distance'].min()
+            rmin = landscape.datapoints['Distance'].min()
             if rmin > max_min_radius:
                 max_min_radius = rmin
     else:
@@ -180,7 +124,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
     for index in range(1,len(facet_chain)):
 
-        landscape_chain[index-1].datapoints['Angle'] += facet_angles[-1]
+        chain_landscapes[index-1].datapoints['Angle'] += facet_angles[-1]
 
         facet_angles.append(facet_angles[-1] +
                             utils.angle_between(facet_chain[index - 1].center,
@@ -206,9 +150,9 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     all_energy = []
 
     # Interpolate the landscapes
-    for lands in landscape_chain:
+    for landscape in chain_landscapes:
 
-        data = lands.datapoints
+        data = landscape.datapoints
 
         data['Distance'] = np.round(data['Distance'], 5)
         data = np.sort(data, order=['Distance', 'Angle'])
@@ -300,3 +244,110 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     plt.xticks(facet_angles, xlabel, size='x-large')
     plt.clabel(cs, fontsize=10, inline_spacing=15, fmt='%1.1f', manual=True)
     plt.show()
+
+
+###########
+# METHODS #
+###########
+
+def reconstruct_chain(chain, verbose=False):
+
+    if verbose:
+        print("Analyzing facets in chain...")
+
+    # Find all the facets in the links
+
+    chain_facets = []
+    end_facets = []
+
+    for data in chain.keys():
+        for facet in chain[data]['link']:
+
+            if facet not in chain_facets:
+                chain_facets.append(facet)
+
+            if facet not in end_facets:
+                end_facets.append(facet)
+            else:
+                end_facets.remove(facet)
+
+    if verbose:
+        print("Found " + str(len(chain_facets)) + " facets, of which "
+              + str(len(end_facets)) + " are termination facets.")
+
+    # Check if the chain has two termination facets.
+    if len(end_facets) != 2:
+        raise ValueError('Edges are not connected in a chain. Aborting...')
+    # TODO Handle case of circular connection of paths
+
+    # Choose the starting facet from the termination facets
+    facet_chain = [end_facets[START_FACET], ]
+
+    chain_links = []
+    chain_landscapes = []
+
+    if verbose:
+        print("Constructing chain...")
+        print('')
+
+    while len(facet_chain) < len(chain_facets):
+
+        last_facet = facet_chain[-1]
+
+        if verbose:
+            print('Last Facet:')
+            print(str(last_facet))
+
+        # Find the link to the last facet and is not already in the path chain
+        for data in chain.keys():
+            if data['link'] not in chain_links and last_facet in data['link']:
+
+                # Get the other facet in the link
+                other_facet = data['link'].copy()
+                other_facet.remove(last_facet)
+                other_facet = other_facet[0]
+
+                if verbose:
+                    print('Other Facet:')
+                    print(str(other_facet))
+
+                facet_chain.append(other_facet)
+
+                # Make sure that the landscape edge is set up in the right
+                # direction.
+                if data['link'][0] != last_facet:
+
+                    if verbose:
+                        print('Flipped path (before):')
+                        print(str(data['link'][0]))
+                        print(str(data['link'][1]))
+
+                    data['link'].reverse()
+
+                    if verbose:
+                        print('Flipped path (after):')
+                        print(str(data['link'][0]))
+                        print(str(data['link'][1]))
+
+                    data['landscape'].flip_coordinates('Angle')
+
+                chain_landscapes.append(data['landscape'])
+                chain_links.append(data['link'])
+
+        if verbose:
+            print('')
+
+    if verbose:
+        print('----------------')
+        print('Facet Chain:')
+        for facet in facet_chain:
+            print(str(facet))
+        print('----------------')
+        print('Path Chain:')
+        for link in chain_links:
+            print('From')
+            print(str(link[0]))
+            print('To')
+            print(str(link[1]))
+
+    return (chain_landscapes, facet_chain)
