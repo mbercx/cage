@@ -12,6 +12,8 @@ Small utility scripts that support the use of the cage package.
 
 """
 
+OUTPUT_FILE = "result.out"
+JOB_SCRIPT = "job_nwchem.sh"
 
 def geo(output_file):
     """
@@ -26,22 +28,28 @@ def geo(output_file):
     data['molecules'][-1].to(fmt='xyz', filename='final_mol.xyz')
 
 
-def check_calculation(output_file):
+def check_calculation(output):
     """
     Script that checks if a calculation has completed successfully from the
-    ouput file.
+    output file(s).
+
+    Args:
+        output (str): Output file or directory
+
     """
-    # TODO Add method of extracting data more quickly
-    #TODO Make method independent of the name of the output file.
 
-    if os.path.isdir(output_file):
+    # TODO Make this method recursively check subdirectories
 
-        dir_list = [directory for directory in os.listdir(output_file)
+
+
+    if os.path.isdir(output):
+
+        dir_list = [directory for directory in os.listdir(output)
                     if os.path.isdir(directory)]
 
         for directory in dir_list:
 
-            file = os.path.join(directory, 'result.out')
+            file = os.path.join(directory, OUTPUT_FILE)
 
             try:
                 out = nwchem.NwOutput(file, fmt='json')
@@ -75,10 +83,10 @@ def check_calculation(output_file):
 
     else:
         try:
-            out = nwchem.NwOutput(output_file, fmt='json')
+            out = nwchem.NwOutput(output, fmt='json')
         except JSONDecodeError:
             try:
-                out = nwchem.NwOutput(output_file)
+                out = nwchem.NwOutput(output)
             except:
                 raise IOError('File not found.')
 
@@ -88,7 +96,7 @@ def check_calculation(output_file):
                 if data['has_error']:
                     error = True
 
-            print('File: ' + os.path.abspath(output_file))
+            print('File: ' + os.path.abspath(output))
             if out.data[-1]['task_time'] != 0:
                 print('Calculation completed in ' + str(
                     out.data[-1]['task_time']) + 's')
@@ -106,15 +114,13 @@ def process_landscape(directory, cation):
     """
 
     Args:
-        landscape:
+        directory:
 
     Returns:
 
     """
 
     lands_analyzer = LandscapeAnalyzer.from_data(directory=directory)
-    # facet = Facet.from_file(os.path.join(directory, "init_facet.json"))
-    # lands_analyzer.analyze_cation_energies(cation=cation, facet=facet)
     lands_analyzer.to(os.path.join(directory, "landscape.json"))
 
 def process_output(location):
@@ -135,9 +141,9 @@ def process_output(location):
         for directory in dir_list:
 
             print("Processing output in " +
-                  os.path.join(directory, 'result.out') +
+                  os.path.join(directory, OUTPUT_FILE) +
                   "...")
-            output = nwchem.NwOutput(os.path.join(directory, 'result.out'))
+            output = nwchem.NwOutput(os.path.join(directory, OUTPUT_FILE))
 
             try:
                 error = False
@@ -146,12 +152,12 @@ def process_output(location):
                         error = True
 
                 if error:
-                    print("File: " + os.path.join(directory, 'result.out') +
+                    print("File: " + os.path.join(directory, OUTPUT_FILE) +
                           " contains errors!")
 
                 elif output.data[-1]['task_time'] == 0:
                     print('No timing information found in ' +
-                          os.path.join(directory, 'result.out') + ".")
+                          os.path.join(directory, OUTPUT_FILE) + ".")
 
                 else:
                     output.to_file(os.path.join(directory, 'data.json'))
@@ -215,9 +221,9 @@ def search_and_reboot(dir_name):
 
     for dir_name in dir_list:
 
-        print("Checking output in " + os.path.join(dir_name, 'result.out') +
+        print("Checking output in " + os.path.join(dir_name, OUTPUT_FILE) +
               "...")
-        output = nwchem.NwOutput(os.path.join(dir_name, 'result.out'))
+        output = nwchem.NwOutput(os.path.join(dir_name, OUTPUT_FILE))
 
         try:
             error = False
@@ -226,23 +232,25 @@ def search_and_reboot(dir_name):
                     error = True
 
             if error:
-                print("File: " + os.path.join(dir_name, 'result.out') +
+                print("File: " + os.path.join(dir_name, OUTPUT_FILE) +
                       " contains errors! Simply rebooting is probably not "
                       "sufficient.")
 
             if output.data[-1]['task_time'] == 0:
                 print('No timing information found in ' +
-                      os.path.join(dir_name, 'result.out') +
+                      os.path.join(dir_name, OUTPUT_FILE) +
                       '. Rebooting calculation...')
                 os.system(
-                    "sh -c 'cd " + dir_name + " && msub job_nwchem.sh '")
+                    "sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT + " '")
 
         except NameError:
 
             print("No data found in file. Rebooting calculation...")
-            os.system("sh -c 'cd " + dir_name + " && msub job_nwchem.sh '")
+            os.system("sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT
+                      + " '")
 
         except IndexError:
 
             print("Data is empty! Rebooting Calculation...")
-            os.system("sh -c 'cd " + dir_name + " && msub job_nwchem.sh '")
+            os.system("sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT
+                      + " '")
