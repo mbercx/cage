@@ -1,16 +1,22 @@
 
 import os
 
+import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 from cage.landscape import LandscapeAnalyzer
-from cage import Facet
+from cage import Facet, Cage
 from json import JSONDecodeError
 
 """
 Small utility scripts that support the use of the cage package.
 
 """
+
+# Elements to ignore for the surface facet determination
+IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
+          pmg.Element('H'), pmg.Element('I'), pmg.Element('Br'),
+          pmg.Element('Cl'), pmg.Element('F'))
 
 OUTPUT_FILE = "result.out"
 JOB_SCRIPT = "job_nwchem.sh"
@@ -39,8 +45,6 @@ def check_calculation(output):
     """
 
     # TODO Make this method recursively check subdirectories
-
-
 
     if os.path.isdir(output):
 
@@ -115,6 +119,7 @@ def process_landscape(directory, cation):
 
     Args:
         directory:
+        cation
 
     Returns:
 
@@ -122,6 +127,7 @@ def process_landscape(directory, cation):
 
     lands_analyzer = LandscapeAnalyzer.from_data(directory=directory)
     lands_analyzer.to(os.path.join(directory, "landscape.json"))
+
 
 def process_output(location):
     """
@@ -254,3 +260,25 @@ def search_and_reboot(dir_name):
             print("Data is empty! Rebooting Calculation...")
             os.system("sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT
                       + " '")
+
+
+def visualize_facets(filename):
+    """
+    Visualize the facets of a molecule based on a structure file.
+
+    Args:
+        filename (str): Structure file of the molecule.
+    """
+
+    try:
+        # Load the POSCAR into a Cage
+        anion = Cage.from_poscar(filename)
+    except ValueError:
+        # If that fails, try other file formats supported by pymatgen
+        anion = Cage.from_file(filename)
+
+    anion.find_surface_facets(ignore=IGNORE)
+
+    facet_filename = "".join(filename.split(".")[0:-1]) + ".vesta"
+
+    anion.visualize_facets(facet_filename)

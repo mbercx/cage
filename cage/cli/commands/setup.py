@@ -204,7 +204,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
                adensity):
     """
     Set up calculations to study the 2D edge landscapes between a chain of
-    non-equivalent facets.
+    facets.
 
     Args:
         filename:
@@ -233,8 +233,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
     anion.find_surface_facets(ignore=IGNORE)
 
     if not facets == tuple:
-        noneq_facets = anion.find_noneq_facets()
-        chosen_facets = [noneq_facets[index] for index in facets]
+        chosen_facets = [anion.facets[index] for index in facets]
         edges = anion.find_noneq_chain_links(chosen_facets)
     else:
         edges = anion.find_noneq_chain_links()

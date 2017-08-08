@@ -455,9 +455,9 @@ class Cage(Molecule):
                                  "equal to number of surface facets. "
                                  "Something must have gone wrong.")
 
-    def visualize_noneq_facets(self, filename, ignore=(), max_bond_length=1.9):
+    def visualize_facets(self, filename, ignore=(), max_bond_length=1.9):
         """
-        Visualize the non-equivalent facets by setting up a VESTA file with
+        Visualize the facets of the Cage by setting up a VESTA file with
         the various facets in different colours and with the corresponding
         index given to the atom, labeled 'Fa' placed at the center of the
         facet.
@@ -490,7 +490,8 @@ class Cage(Molecule):
             file.write("\t1\t-\n\t\t\t\t0.0000\t0.0000\t0.0000\t0.00\n")
 
             try:
-                if self.sites[self.sites.index(site) + 1].specie == site.specie:
+                if self.sites[self.sites.index(site) + 1].specie \
+                        == site.specie:
                     specie_number += 1
                 else:
                     specie_number = 1
@@ -499,13 +500,12 @@ class Cage(Molecule):
 
             site_number += 1
 
-        # Add the centers of the non-equivalent facets
-        noneq_facets = self.find_noneq_facets()
-        for index in range(len(noneq_facets)):
+        # Add the centers of the facets
+        for index in range(len(self.facets)):
             file.write(str(site_number) + "\tFa" + "\tFa" + str(index) + "\t"
                        + "1.000")
 
-            for coord in noneq_facets[index].center:
+            for coord in self.facets[index].center:
                 file.write("\t" + str(coord))
 
             file.write("\t1\t-\n\t\t\t\t0.0000\t0.0000\t0.0000\t0.00\n")
@@ -548,6 +548,8 @@ class Cage(Molecule):
         for element in self.composition:
             file.write(str(atom_number) + "\t" + str(element) + "\t"
                        + str(float(element.atomic_radius)) + "\t")
+
+            # Add the RGB colour of the atom
             if element == pmg.Element('B'):
                 file.write("31\t162\t15\t31\t162\t15\t204\n")
             elif element == pmg.Element('C'):
@@ -582,7 +584,7 @@ class Cage(Molecule):
                                symm_tol=SYMMETRY_TOLERANCE,
                                verbose=False):
         """
-        Find a chain of non equivalent facets, i.e. a collection of facets that
+        Construct a chain of facets, i.e. a collection of facets that
         are connected by edges. Automatically sorts the facets so they
         are connected by their neighbours in the list.
 
@@ -591,7 +593,7 @@ class Cage(Molecule):
                 constructed. This might be useful if the chain is not
                 constructed as the user would like.
             facets (tuple): Tuple of Facets which are to be used for the
-                chain. In case no facets are provided, the full list of
+                chain. In case no facets are provided, the list of
                 non-equivalent facets will be used.
             symm_tol (float): Tolerance for the equivalence condition, i.e.
                 how much the distance between the centers is allowed to be
@@ -619,6 +621,7 @@ class Cage(Molecule):
 
         # If no facets are provided, set up the connected non-equivalent facets
         if facets == tuple:
+
             noneq_facets = self.find_noneq_facets(tol=symm_tol)
             chain_length = len(noneq_facets)
 
@@ -665,8 +668,11 @@ class Cage(Molecule):
 
         if verbose:
             print("Found " + str(len(chain_facets)) +
-                  " non-equivalent facets in chain.")
+                  " facets in chain.")
             print("")
+
+        if chain_length == 0 or chain_length == 1:
+            raise ValueError("Number of facets is too small to form a chain.")
 
         # Find the termination facets. These are defined as facets which only
         # have one edge with other chain facets.
@@ -690,8 +696,6 @@ class Cage(Molecule):
             end_facets = chain_facets
             print('Could not find a termination facet. Starting chain buildup '
                   'from the first facet in the list.')
-            # raise ValueError("No termination facets found! Setting up chain "
-            #                  "aborted.")
 
         # Sort the chain:
         try:
