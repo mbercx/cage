@@ -21,6 +21,7 @@ IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
 OUTPUT_FILE = "result.out"
 JOB_SCRIPT = "job_nwchem.sh"
 
+
 def geo(output_file):
     """
     Quickly write out the initial and the final configuration of a nwchem
@@ -114,34 +115,31 @@ def check_calculation(output):
             print("No data found in file!")
 
 
-def process_landscape(directory, cation):
+def gather_landscape(directory):
     """
+    Gather the results from a landscape calculation.
 
     Args:
-        directory:
-        cation
-
-    Returns:
-
+        directory (str): Directory which contains all the geometry directories
+            that describe the landscape.
     """
 
     lands_analyzer = LandscapeAnalyzer.from_data(directory=directory)
     lands_analyzer.to(os.path.join(directory, "landscape.json"))
 
 
-def process_output(location):
+def process_output(output):
     """
     Process the results in an output file or all subdirectories in a directory.
 
     Args:
-        location:
-
-    Returns:
-
+        output (str): File or directory that contains the output. If a
+            directory is provided, the output has to be in the subdirectories
+            of that directory.
     """
-    if os.path.isdir(location):
+    if os.path.isdir(output):
 
-        dir_list = [directory for directory in os.listdir(location)
+        dir_list = [directory for directory in os.listdir(output)
                     if os.path.isdir(directory)]
 
         for directory in dir_list:
@@ -149,24 +147,24 @@ def process_output(location):
             print("Processing output in " +
                   os.path.join(directory, OUTPUT_FILE) +
                   "...")
-            output = nwchem.NwOutput(os.path.join(directory, OUTPUT_FILE))
+            out = nwchem.NwOutput(os.path.join(directory, OUTPUT_FILE))
 
             try:
                 error = False
-                for location in output.data:
-                    if location['has_error']:
+                for output in out.data:
+                    if output['has_error']:
                         error = True
 
                 if error:
                     print("File: " + os.path.join(directory, OUTPUT_FILE) +
                           " contains errors!")
 
-                elif output.data[-1]['task_time'] == 0:
+                elif out.data[-1]['task_time'] == 0:
                     print('No timing information found in ' +
                           os.path.join(directory, OUTPUT_FILE) + ".")
 
                 else:
-                    output.to_file(os.path.join(directory, 'data.json'))
+                    out.to_file(os.path.join(directory, 'data.json'))
 
             except NameError:
 
@@ -178,29 +176,29 @@ def process_output(location):
 
     else:
 
-        location = os.path.abspath(location)
-        print('Processing output in ' + location)
+        output = os.path.abspath(output)
+        print('Processing output in ' + output)
 
         try:
-            output = nwchem.NwOutput(location)
+            out = nwchem.NwOutput(output)
         except:
             raise IOError('Could not find proper nwchem output file.')
 
         try:
             error = False
-            for location in output.data:
-                if location['has_error']:
+            for output in out.data:
+                if output['has_error']:
                     error = True
 
             if error:
-                print("File: " + location + " contains errors!")
+                print("File: " + output + " contains errors!")
 
-            elif output.data[-1]['task_time'] == 0:
-                print('No timing information found in ' + location + ".")
+            elif out.data[-1]['task_time'] == 0:
+                print('No timing information found in ' + output + ".")
 
             else:
-                output.to_file(os.path.join(os.path.dirname(location),
-                                            'data.json'))
+                out.to_file(os.path.join(os.path.dirname(output),
+                                         'data.json'))
 
         except NameError:
 
@@ -210,26 +208,25 @@ def process_output(location):
 
             print("Data is empty!")
 
-        output.to_file(os.path.join(os.path.dirname(location), 'data.json'))
+        out.to_file(os.path.join(os.path.dirname(output), 'data.json'))
 
 
-def search_and_reboot(dir_name):
+def search_and_reboot(directory):
     """
+    Look to a directory for calculations in its subdirectories, and reboot them
+    if they did not complete successfully.
 
     Args:
-        dir_name:
-
-    Returns:
-
+        directory (str):
     """
-    dir_list = [directory for directory in os.listdir(dir_name)
-                if os.path.isdir(directory)]
+    dir_list = [subdir for subdir in os.listdir(directory)
+                if os.path.isdir(subdir)]
 
-    for dir_name in dir_list:
+    for directory in dir_list:
 
-        print("Checking output in " + os.path.join(dir_name, OUTPUT_FILE) +
+        print("Checking output in " + os.path.join(directory, OUTPUT_FILE) +
               "...")
-        output = nwchem.NwOutput(os.path.join(dir_name, OUTPUT_FILE))
+        output = nwchem.NwOutput(os.path.join(directory, OUTPUT_FILE))
 
         try:
             error = False
@@ -238,27 +235,27 @@ def search_and_reboot(dir_name):
                     error = True
 
             if error:
-                print("File: " + os.path.join(dir_name, OUTPUT_FILE) +
+                print("File: " + os.path.join(directory, OUTPUT_FILE) +
                       " contains errors! Simply rebooting is probably not "
                       "sufficient.")
 
             if output.data[-1]['task_time'] == 0:
                 print('No timing information found in ' +
-                      os.path.join(dir_name, OUTPUT_FILE) +
+                      os.path.join(directory, OUTPUT_FILE) +
                       '. Rebooting calculation...')
                 os.system(
-                    "sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT + " '")
+                    "sh -c 'cd " + directory + " && msub " + JOB_SCRIPT + " '")
 
         except NameError:
 
             print("No data found in file. Rebooting calculation...")
-            os.system("sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT
+            os.system("sh -c 'cd " + directory + " && msub " + JOB_SCRIPT
                       + " '")
 
         except IndexError:
 
             print("Data is empty! Rebooting Calculation...")
-            os.system("sh -c 'cd " + dir_name + " && msub " + JOB_SCRIPT
+            os.system("sh -c 'cd " + directory + " && msub " + JOB_SCRIPT
                       + " '")
 
 
