@@ -201,18 +201,16 @@ def process(output_file):
 
     from cage.cli.commands.util import process_output
 
-    process_output(location=output_file)
+    process_output(output=output_file)
 
 @util.command()
 @click.argument('directory')
-@click.option('--cation', '-C', default='Li')
-def gather(directory, cation):
+def gather(directory):
     """ Gather the results of a landscape calculation. """
 
-    from cage.cli.commands.util import process_landscape
+    from cage.cli.commands.util import gather_landscape
 
-    process_landscape(directory=directory,
-                      cation=cation)
+    gather_landscape(directory=directory)
 @util.command()
 @click.argument('filename')
 def facets(filename):
