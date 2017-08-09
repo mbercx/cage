@@ -300,10 +300,11 @@ def reconstruct_chain(chain, verbose=False):
 
         # Find the link to the last facet and is not already in the path chain
         for data in chain.keys():
-            if data['link'] not in chain_links and last_facet in data['link']:
+            if chain[data]['link'] not in chain_links \
+                and last_facet in chain[data]['link']:
 
                 # Get the other facet in the link
-                other_facet = data['link'].copy()
+                other_facet = chain[data]['link'].copy()
                 other_facet.remove(last_facet)
                 other_facet = other_facet[0]
 
@@ -315,24 +316,24 @@ def reconstruct_chain(chain, verbose=False):
 
                 # Make sure that the landscape edge is set up in the right
                 # direction.
-                if data['link'][0] != last_facet:
+                if chain[data]['link'][0] != last_facet:
 
                     if verbose:
                         print('Flipped path (before):')
-                        print(str(data['link'][0]))
-                        print(str(data['link'][1]))
+                        print(str(chain[data]['link'][0]))
+                        print(str(chain[data]['link'][1]))
 
-                    data['link'].reverse()
+                    chain[data]['link'].reverse()
 
                     if verbose:
                         print('Flipped path (after):')
-                        print(str(data['link'][0]))
-                        print(str(data['link'][1]))
+                        print(str(chain[data]['link'][0]))
+                        print(str(chain[data]['link'][1]))
 
-                    data['landscape'].flip_coordinates('Angle')
+                    chain[data]['landscape'].flip_coordinates('Angle')
 
-                chain_landscapes.append(data['landscape'])
-                chain_links.append(data['link'])
+                chain_landscapes.append(chain[data]['landscape'])
+                chain_links.append(chain[data]['link'])
 
         if verbose:
             print('')
