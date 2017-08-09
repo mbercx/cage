@@ -302,7 +302,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
         if operation == "optimize":
             far_facet = anion.find_farthest_facet(landscape.center)
             constraints = find_constraints(anion, far_facet.sites)
-            constraints.join(' ' + str(len(anion.sites)))  # cation
+            constraints['fix atom'] += ' ' + str(len(anion.sites) + 1)  #cation
             ALT_SETUP['constraints'] = constraints
             ALT_SETUP["driver"] = DRIVER_SETUP
 
