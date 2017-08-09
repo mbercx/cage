@@ -95,7 +95,7 @@ def optimize(filename):
     nw_input.write_file(os.path.join('optimize', 'input'))
 
 
-def docksetup(filename, cation, distance, verbose):
+def docksetup(filename, cation, distance, facets, verbose):
 
     if verbose:
         print("Loading structure file " + filename + "...")
@@ -118,8 +118,11 @@ def docksetup(filename, cation, distance, verbose):
     if verbose:
         print("Studying symmetry...")
 
-    # Find the non-equivalent facets
-    facets = anion.find_noneq_facets()
+    if facets == tuple:
+        # Find the non-equivalent facets, and use them for the docking sites
+        facets = anion.find_noneq_facets()
+    else:
+        facets = [anion.facets[index] for index in facets]
 
     if verbose:
         print("Found " + str(len(facets)) + " non-equivalent facets.")

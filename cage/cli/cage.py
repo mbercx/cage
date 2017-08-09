@@ -40,17 +40,23 @@ def optimize(filename):
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2.0)
+@click.option('--facets', '-f', type=str ,  default='tuple')
 @click.option('--verbose', '-v', is_flag=True)
-def dock(filename, cation, distance, verbose):
+def dock(filename, cation, distance, facets, verbose):
     """
     Set up the docking sites.
 
-    It is recommended to use an anion which has first been optimize using
+    It is recommended to use an anion which has first been optimized using
     'cage setup optimize'.
     """
     from cage.cli.commands.setup import docksetup
 
-    docksetup(filename, cation, distance, verbose)
+    if facets == 'tuple':
+        facets = tuple
+    else:
+        facets = [int(number) for number in facets.split()]
+
+    docksetup(filename, cation, distance, facets, verbose)
 
 
 @setup.command()
