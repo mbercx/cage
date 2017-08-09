@@ -6,8 +6,10 @@ Command Line Interface for the cage package.
 
 """
 
+# This is only used to make '-h' a shorter way to access the CLI help
+CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 
-@click.group()
+@click.group(context_settings=CONTEXT_SETTINGS)
 def main():
     """
     Python tools for studying cage-like anions for solid electrolytes in
@@ -16,18 +18,18 @@ def main():
     pass
 
 
-@main.group()
+@main.group(context_settings=CONTEXT_SETTINGS,
+            short_help="Set up Nwchem calculations for the anion.")
 def setup():
     """
-    Set up Nwchem calculations for the anion.
-
-    Tools for investigating the local cation-anion interaction around cage-like
-    molecules.
+    Tools for setting up calculations for investigating the local cation-anion
+    interaction around cage-like molecules.
     """
     pass
 
 
-@setup.command()
+@setup.command(context_settings=CONTEXT_SETTINGS,
+               short_help="Initial anion geometric optimization.")
 @click.argument('filename')
 def optimize(filename):
     """ Set up the initial anion optimization. """
@@ -36,15 +38,19 @@ def optimize(filename):
     optimize(filename)
 
 
-@setup.command()
+@setup.command(context_settings=CONTEXT_SETTINGS,
+               short_help="Set up docking sites.")
 @click.argument('filename')
-@click.option('--cation', '-C', default='Li')
+@click.option('--cation', '-C', default='Li',
+              help="The cation to be placed on the dock, provided as a string "
+                   "of the chemical symbol, e.g. 'Li' or 'Na'.")
 @click.option('--distance', '-d', default=2.0)
 @click.option('--facets', '-f', type=str ,  default='tuple')
 @click.option('--verbose', '-v', is_flag=True)
 def dock(filename, cation, distance, facets, verbose):
     """
-    Set up the docking sites.
+    Set up optimization calculation in NwChem for either all non-equivalent
+    facets of the anion, or a list of chosen facets.
 
     It is recommended to use an anion which has first been optimized using
     'cage setup optimize'.
@@ -59,16 +65,16 @@ def dock(filename, cation, distance, facets, verbose):
     docksetup(filename, cation, distance, facets, verbose)
 
 
-@setup.command()
+@setup.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--facets', '-f', type=str ,  default='tuple')
 @click.option('--operation', '-O', default='energy')
-@click.option('--end_radii', '-r', default=(3.0, 6.0))
+@click.option('--end_radii', '-R', default=(3.0, 6.0))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
 def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
-    """ Set up a 2D landscape along the chain of non-equivalent facets. """
+    """ Set up a 2D landscape along a chain facets. """
     from cage.cli.commands.setup import chainsetup
 
     if facets == 'tuple':
@@ -85,7 +91,7 @@ def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
                adensity=adensity)
 
 
-@setup.command()
+@setup.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
@@ -97,7 +103,7 @@ def path(filename, cation, distance, edges):
     pathsetup(filename, cation, distance, edges)
 
 
-@setup.command()
+@setup.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('paths_dir')
 @click.option('--nimages', '-n', default=10)
 def neb(paths_dir, nimages):
@@ -107,7 +113,7 @@ def neb(paths_dir, nimages):
     nebsetup(paths_dir, nimages)
 
 
-@setup.group()
+@setup.group(context_settings=CONTEXT_SETTINGS)
 def twocat():
     """
     Set up calculations for anions with two cations.
@@ -118,11 +124,11 @@ def twocat():
     pass
 
 
-@twocat.command()
+@twocat.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('dock_dir')
 @click.option('--cation', '-C', default='Li')
 @click.option('--operation', '-O', default='energy')
-@click.option('--endradii', '-e', default=(3, 6))
+@click.option('--endradii', '-R', default=(3, 6))
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
 @click.option('--tolerance', default=1e-2)
@@ -139,18 +145,17 @@ def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
                       tolerance, verbose)
 
 
-@main.group()
+@main.group(context_settings=CONTEXT_SETTINGS,
+            short_help="Analyze the results from NwChem calculations.")
 def analyze():
     """
-    Analyze the results from NwChem calculations.
-
-    Allows a quick analysis of the output of several calculations to quickly
+    Scripts to help analyze the output of several calculations to quickly
     visualize results.
     """
     pass
 
 
-@analyze.command()
+@analyze.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('lands_dir')
 @click.option('--cation', '-C', default='Li')
 @click.option('--energy_range', '-E', default=(0.0, 0.0))
@@ -172,7 +177,7 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        verbose=verbose)
 
 
-@main.group()
+@main.group(context_settings=CONTEXT_SETTINGS)
 def util():
     """
     A set of utility scripts for the cage package.
@@ -180,7 +185,7 @@ def util():
     pass
 
 
-@util.command()
+@util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('output_file')
 def geo(output_file):
     """ Write the initial and final geometry of a nwchem optimization. """
@@ -190,7 +195,7 @@ def geo(output_file):
     geo(output_file=output_file)
 
 
-@util.command()
+@util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('output_file')
 def check(output_file):
     """ Check the output of calculations. """
@@ -200,7 +205,7 @@ def check(output_file):
     check_calculation(output=output_file)
 
 
-@util.command()
+@util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('output_file')
 def process(output_file):
     """ Process the output of calculations. """
@@ -209,7 +214,7 @@ def process(output_file):
 
     process_output(output=output_file)
 
-@util.command()
+@util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('directory')
 def gather(directory):
     """ Gather the results of a landscape calculation. """
@@ -217,7 +222,7 @@ def gather(directory):
     from cage.cli.commands.util import gather_landscape
 
     gather_landscape(directory=directory)
-@util.command()
+@util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('filename')
 def facets(filename):
     """ Visualize the facets of a molecule. """

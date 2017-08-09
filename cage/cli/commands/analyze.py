@@ -17,9 +17,6 @@ tools. Requires expansion.
 
 START_FACET = 0  # 0 or 1 -> determines facet to start chain from
 
-#TODO This code needs serious improvement. It's damn near illegible
-
-
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels, verbose):
 
