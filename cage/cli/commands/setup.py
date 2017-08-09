@@ -300,7 +300,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
         # In case the molecules must be optimized, add the constraints and
         # optimization setup (DRIVER)
         if operation == "optimize":
-            far_facet = anion.find_furthest_facet(landscape.center)
+            far_facet = anion.find_farthest_facet(landscape.center)
             ALT_SETUP["constraints"] = find_constraints(anion, far_facet.sites)
 
             ALT_SETUP['constraints'].join(' ' + str(len(anion.sites)))  # cation
@@ -729,7 +729,7 @@ def set_up_lattice(mol):
     :param mol:
     :return:
     """
-    # Find the distance between the origin and the furthest atom in the
+    # Find the distance between the origin and the farthest atom in the
     # molecule
 
     max_distance = 0
