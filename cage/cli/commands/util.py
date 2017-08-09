@@ -276,6 +276,7 @@ def visualize_facets(filename):
 
     anion.find_surface_facets(ignore=IGNORE)
 
-    facet_filename = "".join(filename.split(".")[0:-1]) + ".vesta"
+    facet_filename = "".join(filename.split("/")[-1].split(".")[0:-1])\
+                     + ".vesta"
 
-    anion.visualize_facets(facet_filename)
+    anion.visualize_facets(facet_filename, ignore=IGNORE)

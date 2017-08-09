@@ -95,7 +95,7 @@ def optimize(filename):
     nw_input.write_file(os.path.join('optimize', 'input'))
 
 
-def docksetup(filename, cation, distance, verbose):
+def docksetup(filename, cation, distance, facets, verbose):
 
     if verbose:
         print("Loading structure file " + filename + "...")
@@ -118,8 +118,11 @@ def docksetup(filename, cation, distance, verbose):
     if verbose:
         print("Studying symmetry...")
 
-    # Find the non-equivalent facets
-    facets = anion.find_noneq_facets()
+    if facets == tuple:
+        # Find the non-equivalent facets, and use them for the docking sites
+        facets = anion.find_noneq_facets()
+    else:
+        facets = [anion.facets[index] for index in facets]
 
     if verbose:
         print("Found " + str(len(facets)) + " non-equivalent facets.")
@@ -178,10 +181,13 @@ def docksetup(filename, cation, distance, verbose):
 
         dock_dir = os.path.join(docking_dir, 'dock' + str(dock_number))
 
-        try:
-            os.mkdir(dock_dir)
-        except FileExistsError:
-            pass
+        while True:
+            try:
+                os.mkdir(dock_dir)
+                break
+            except FileExistsError:
+                dock_number += 1
+                dock_dir = os.path.join(docking_dir, 'dock' + str(dock_number))
 
         if verbose:
             print("Setting up the input file...")
@@ -196,6 +202,9 @@ def docksetup(filename, cation, distance, verbose):
 
         # Write out a facet json file
         neq_facet.to(fmt='json', filename=os.path.join(dock_dir, 'facet.json'))
+
+        # Write a xyz file of the molecule with the docked cation
+        mol.to(fmt='xyz', filename=os.path.join(dock_dir,'dock.xyz'))
 
         dock_number += 1
 
@@ -302,7 +311,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
         if operation == "optimize":
             far_facet = anion.find_farthest_facet(landscape.center)
             constraints = find_constraints(anion, far_facet.sites)
-            constraints.join(' ' + str(len(anion.sites)))  # cation
+            constraints['fix atom'] += ' ' + str(len(anion.sites) + 1)  #cation
             ALT_SETUP['constraints'] = constraints
             ALT_SETUP["driver"] = DRIVER_SETUP
 
