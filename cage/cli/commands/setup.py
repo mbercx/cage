@@ -181,10 +181,13 @@ def docksetup(filename, cation, distance, facets, verbose):
 
         dock_dir = os.path.join(docking_dir, 'dock' + str(dock_number))
 
-        try:
-            os.mkdir(dock_dir)
-        except FileExistsError:
-            pass
+        while True:
+            try:
+                os.mkdir(dock_dir)
+                break
+            except FileExistsError:
+                dock_number += 1
+                dock_dir = os.path.join(docking_dir, 'dock' + str(dock_number))
 
         if verbose:
             print("Setting up the input file...")
@@ -199,6 +202,9 @@ def docksetup(filename, cation, distance, facets, verbose):
 
         # Write out a facet json file
         neq_facet.to(fmt='json', filename=os.path.join(dock_dir, 'facet.json'))
+
+        # Write a xyz file of the molecule with the docked cation
+        mol.to(fmt='xyz', filename=os.path.join(dock_dir,'dock.xyz'))
 
         dock_number += 1
 
