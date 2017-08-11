@@ -74,7 +74,7 @@ def dock(filename, cation, distance, facets, verbose):
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
 def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
-    """ Set up a 2D landscape along a chain facets. """
+    """ Set up a 2D landscape along a chain of facets. """
     from cage.cli.commands.setup import chainsetup
 
     if facets == 'tuple':
