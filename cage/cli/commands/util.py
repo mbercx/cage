@@ -5,7 +5,7 @@ import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
 from cage.landscape import LandscapeAnalyzer
-from cage import Facet, Cage
+from cage import Cage
 from json import JSONDecodeError
 
 """
@@ -266,6 +266,8 @@ def visualize_facets(filename):
     Args:
         filename (str): Structure file of the molecule.
     """
+
+    filename = str(os.path.abspath(filename))
 
     try:
         # Load the POSCAR into a Cage

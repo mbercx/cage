@@ -467,7 +467,7 @@ class Cage(Molecule):
 
         """
         # TODO This method is very specific. We probably should find a more general way to do this.
-
+        # TODO Fix bug for facets with more than three sites
         file = open(filename, "w")
 
         file.write("#VESTA_FORMAT_VERSION 3.3.0\n\n")
