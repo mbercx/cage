@@ -13,7 +13,7 @@ cage.egg-info/entry_points.txt
 cage.egg-info/requires.txt
 cage.egg-info/top_level.txt
 cage/cli/__init__.py
-cage/cli/cage.py
+cage/cli/cli.py
 cage/cli/commands/__init__.py
 cage/cli/commands/analyze.py
 cage/cli/commands/setup.py
