@@ -45,7 +45,7 @@ def optimize(filename):
               help="The cation to be placed on the dock, provided as a string "
                    "of the chemical symbol, e.g. 'Li' or 'Na'.")
 @click.option('--distance', '-d', default=2.0)
-@click.option('--facets', '-f', type=str ,  default='tuple')
+@click.option('--facets', '-f', type=str,  default='tuple')
 @click.option('--verbose', '-v', is_flag=True)
 def dock(filename, cation, distance, facets, verbose):
     """
@@ -68,7 +68,7 @@ def dock(filename, cation, distance, facets, verbose):
 @setup.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
-@click.option('--facets', '-f', type=str ,  default='tuple')
+@click.option('--facets', '-f', type=str,  default='tuple')
 @click.option('--operation', '-O', default='energy')
 @click.option('--end_radii', '-R', default=(3.0, 6.0))
 @click.option('--nradii', default=30)

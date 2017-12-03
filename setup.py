@@ -13,6 +13,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        cage=cage.cli.cage:main
+        cage=cage.cli.cli:main
     ''',
 )
