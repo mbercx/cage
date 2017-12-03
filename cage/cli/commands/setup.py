@@ -106,7 +106,7 @@ def docksetup(filename, cation, distance, facets, verbose):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        # If that fails, try other file formats supported by pymatgen
+        # If that fails, try other file formats supported by pymatgen TODO Why?
         anion = cage.core.Cage.from_file(filename)
 
     if verbose:
@@ -495,10 +495,79 @@ def nebsetup(paths_dir, nimages):
         plot_images(molecules, filename=os.path.join(directory, 'path.neb'))
 
 
-def ref(filename, cation, distance):
+def ref(facet_index, filename, cation, distance, verbose):
 
-    anion = Structure.from_file(filename)
+    if verbose:
+        print("Loading structure file " + filename + "...")
 
+    try:
+        # Load the POSCAR into a Cage
+        anion = cage.core.Cage.from_poscar(filename)
+    except ValueError:
+        # If that fails, try other file formats supported by pymatgen TODO Why?
+        anion = cage.core.Cage.from_file(filename)
+
+    if verbose:
+        print("Setting up surface facets...")
+
+    anion.find_surface_facets(ignore=IGNORE)
+
+    if verbose:
+        print("Found " + str(len(anion.facets)) + " facets.")
+
+    reference_dir = 'reference'
+    try:
+        os.mkdir(reference_dir)
+    except FileExistsError:
+        pass
+
+    if verbose:
+        print("Setting up reference calculation...")
+
+
+    reference_facet = anion.facets[facet_index]
+
+    if verbose:
+        print("Adding cation to reference facet at distance = " + str(distance)
+              + " Angstroms.")
+
+    # Set up the cation site
+    mol = anion.copy()
+    mol.append(pmg.Specie(cation, 1), reference_facet.center +
+               distance * reference_facet.normal)
+
+    # Set the charge for the molecule TODO: Automate
+    if pmg.Element('C') in [site.specie for site in mol.sites]:
+        mol.set_charge_and_spin(charge=0)
+    else:
+        mol.set_charge_and_spin(charge=-1)
+
+    if verbose:
+        print("Setting up the task...")
+
+    # Set up the task for the calculation
+    tasks = [nwchem.NwTask(mol.charge, None, BASIS,
+                           theory='dft',
+                           operation="energy",
+                           theory_directives=THEORY_SETUP,
+                           alternate_directives=ALT_SETUP)]
+
+    mol.find_surface_facets(ignore=IGNORE)
+
+    if verbose:
+        print("Setting up the input file...")
+
+    # Set up input
+    nw_input = nwchem.NwInput(mol, tasks, geometry_options=GEO_SETUP)
+
+    nw_input.write_file(os.path.join(reference_dir, 'input'))
+
+    # Write out a facet json file
+    reference_facet.to(fmt='json', filename=os.path.join(reference_dir,
+                                                         'facet.json'))
+
+    # Write a xyz file of the molecule with the docked cation
+    mol.to(fmt='xyz', filename=os.path.join(reference_dir,'dock.xyz'))
 
 
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,

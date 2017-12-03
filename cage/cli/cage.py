@@ -114,16 +114,27 @@ def neb(paths_dir, nimages):
 
 
 @setup.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("facet_index",
+                help="Choice of facet for the reference energy point.")
 @click.argument("filename",
                 help="Structure file of the anion.")
 @click.option("--cation", "-C", default="Li",
               help="Cation for which to calculate the reference energy.")
+
 @click.option("--distance", "-d", default=6.5,
               help="Distance to place the cation for the reference energy "
                    "point.")
-def ref(filename, cation, distance):
+@click.option('--verbose', '-v', is_flag=True)
+def ref(facet_index, filename, cation, distance, verbose):
     """Set up a calculation to determine a reference energy."""
-    pass
+
+    from cage.cli.commands.setup import ref
+
+    ref(facet_index=facet_index,
+        filename=filename,
+        cation=cation,
+        distance=distance,
+        verbose=verbose)
 
 
 @setup.group(context_settings=CONTEXT_SETTINGS)
