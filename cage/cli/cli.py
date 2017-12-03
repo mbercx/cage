@@ -115,8 +115,7 @@ def neb(paths_dir, nimages):
 
 @setup.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("facet_index")
-@click.argument("filename",
-                help="Structure file of the anion.")
+@click.argument("filename")
 @click.option("--cation", "-C", default="Li",
               help="Cation for which to calculate the reference energy.")
 @click.option("--distance", "-d", default=6.5,
