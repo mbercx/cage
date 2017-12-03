@@ -127,6 +127,9 @@ def ref(facet_index, filename, cation, distance, verbose):
 
     from cage.cli.commands.setup import ref
 
+    # Convert string input to integer
+    facet_index = int(facet_index)
+
     ref(facet_index=facet_index,
         filename=filename,
         cation=cation,
