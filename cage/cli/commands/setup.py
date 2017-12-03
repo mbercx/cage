@@ -106,7 +106,7 @@ def docksetup(filename, cation, distance, facets, verbose):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        # If that fails, try other file formats supported by pymatgen TODO Why?
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     if verbose:
@@ -504,7 +504,7 @@ def ref(facet_index, filename, cation, distance, verbose):
         # Load the POSCAR into a Cage
         anion = cage.core.Cage.from_poscar(filename)
     except ValueError:
-        # If that fails, try other file formats supported by pymatgen TODO Why?
+        # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
 
     if verbose:

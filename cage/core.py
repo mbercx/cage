@@ -32,7 +32,7 @@ SYMMETRY_TOLERANCE = 1e-2
 # This is a tolerance value to determine the symmetry operations of the Cage.
 # It is also used to determine which facets are equivalent. The standard value
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
-# not found, it might be worth to try tweaking this value.
+# not found, it might be worth tryin to tweaking this value.
 
 ANGLE_TOLERANCE = math.pi/20
 # This value is important when determining whether or not a new site is a part

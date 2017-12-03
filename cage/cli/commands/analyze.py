@@ -94,8 +94,9 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         print('-----------')
         print("Finding proper radii and angles...")
 
+    # If no radii were provided
     if end_radii == (0.0, 0.0):
-        # Find the proper radii
+        # Find the proper endradii automatically
         min_max_radius = 1e6
         max_min_radius = 0
         for landscape in chain_landscapes:
@@ -106,7 +107,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
             if rmin > max_min_radius:
                 max_min_radius = rmin
     else:
-        # User the user provided radii
+        # Use the radii provided by the user
         max_min_radius = end_radii[0]
         min_max_radius = end_radii[1]
 
@@ -146,6 +147,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     all_angles = []
     all_energy = []
 
+    # TODO There needs to be a better way of interpolating this...
     # Interpolate the landscapes
     for landscape in chain_landscapes:
 

@@ -101,7 +101,7 @@ class Landscape(MSONable):
 
     def extend_by_rotation(self, axis, density=10, remove_endline=False):
         """
-        Extends the landscape using a axis vector and turning all the vertices
+        Extends the landscape using an axis vector and turning all the vertices
         in the landscape around the origin by a value and direction determined
         by the axis vector.
 
@@ -141,15 +141,19 @@ class Landscape(MSONable):
         """
         pass
 
+
     def extend_from_point(self, point, extension, density=10):
         """
-        Extends the Landscape by scaling the points from a specific point.
+        Extends the Landscape by scaling the points from a specific point or
+        origin, i.e. by homothetic transformations.
+
         :param point:
         :param extension:
         :param density:
         :return:
         """
         pass
+
 
     def as_dict(self):
         """
@@ -176,8 +180,8 @@ class LandscapeAnalyzer(MSONable):
     """
     def __init__(self, data, datapoints=(), software="nwchem"):
         """
-        Initialize an instance of LandscapeAnalyzer. This method will rarely
-        be used directly. Usually a LandscapeAnalyzer is initialized from a
+        Initialize an instance of LandscapeAnalyzer. This method is rarely
+        used directly. Usually a LandscapeAnalyzer is initialized from a
         directory or file.
         """
         self._data = data
@@ -465,6 +469,10 @@ class LandscapeAnalyzer(MSONable):
 
                 data.append(data_dict)
 
+        else:
+            raise NotImplementedError("Only json format is currently "
+                                      "supported.")
+
         return LandscapeAnalyzer(data, datapoints=file_data["datapoints"])
 
     def to(self, filename, fmt="json"):
@@ -477,7 +485,8 @@ class LandscapeAnalyzer(MSONable):
                 json.dump(self.as_dict(), f)
             return
         else:
-            raise NotImplementedError('Only json formats supported currently.')
+            raise NotImplementedError("Only json format is currently "
+                                      "supported.")
         # TODO Add support for .yaml
 
 
