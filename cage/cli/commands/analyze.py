@@ -147,8 +147,6 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     all_angles = []
     all_energy = []
 
-    # THIS IS A CHANGE!
-
     # TODO There needs to be a better way of interpolating this...
     # Interpolate the landscapes
     for landscape in chain_landscapes:
