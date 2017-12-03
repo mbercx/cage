@@ -49,8 +49,8 @@ def optimize(filename):
 @click.option('--verbose', '-v', is_flag=True)
 def dock(filename, cation, distance, facets, verbose):
     """
-    Set up optimization calculation in NwChem for either all non-equivalent
-    facets of the anion, or a list of chosen facets.
+    Set up a geometry optimization of a cation docked on a facet in NwChem for
+    all non-equivalent facets of the anion or a list of chosen facets.
 
     It is recommended to use an anion which has first been optimized using
     'cage setup optimize'.
@@ -74,7 +74,7 @@ def dock(filename, cation, distance, facets, verbose):
 @click.option('--nradii', default=30)
 @click.option('--adensity', default=50)
 def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
-    """ Set up a 2D landscape along a chain facets. """
+    """ Set up a 2D landscape along a chain of facets. """
     from cage.cli.commands.setup import chainsetup
 
     if facets == 'tuple':
@@ -111,6 +111,30 @@ def neb(paths_dir, nimages):
     from cage.cli.commands.setup import nebsetup
 
     nebsetup(paths_dir, nimages)
+
+
+@setup.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("facet_index",
+                help="Choice of facet for the reference energy point.")
+@click.argument("filename",
+                help="Structure file of the anion.")
+@click.option("--cation", "-C", default="Li",
+              help="Cation for which to calculate the reference energy.")
+
+@click.option("--distance", "-d", default=6.5,
+              help="Distance to place the cation for the reference energy "
+                   "point.")
+@click.option('--verbose', '-v', is_flag=True)
+def ref(facet_index, filename, cation, distance, verbose):
+    """Set up a calculation to determine a reference energy."""
+
+    from cage.cli.commands.setup import ref
+
+    ref(facet_index=facet_index,
+        filename=filename,
+        cation=cation,
+        distance=distance,
+        verbose=verbose)
 
 
 @setup.group(context_settings=CONTEXT_SETTINGS)
