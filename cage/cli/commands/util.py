@@ -31,8 +31,8 @@ def geo(output_file):
         output_file (str): Output file of the nwchem calculation.
     """
     data = nwchem.NwOutput(output_file).data[-1]
-    data['molecules'][0].to(fmt='xyz', filename='initial_mol.xyz')
-    data['molecules'][-1].to(fmt='xyz', filename='final_mol.xyz')
+    data['molecules'][0].to(fmt='xyz', filename='initial_geo.xyz')
+    data['molecules'][-1].to(fmt='xyz', filename='final_geo.xyz')
 
 
 def check_calculation(output):
