@@ -9,6 +9,8 @@ import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
+from pymatgen.core import Structure
+
 import cage
 
 from cage.core import Cage
@@ -491,6 +493,12 @@ def nebsetup(paths_dir, nimages):
         nw_input.write_file(os.path.join(directory, 'input'))
 
         plot_images(molecules, filename=os.path.join(directory, 'path.neb'))
+
+
+def ref(filename, cation, distance):
+
+    anion = Structure.from_file(filename)
+
 
 
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
