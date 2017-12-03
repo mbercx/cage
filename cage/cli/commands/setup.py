@@ -567,7 +567,7 @@ def ref(facet_index, filename, cation, distance, verbose):
                                                          'facet.json'))
 
     # Write a xyz file of the molecule with the docked cation
-    mol.to(fmt='xyz', filename=os.path.join(reference_dir,'dock.xyz'))
+    mol.to(fmt='xyz', filename=os.path.join(reference_dir,'reference.xyz'))
 
 
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
