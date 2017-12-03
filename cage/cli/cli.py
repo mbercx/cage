@@ -120,7 +120,6 @@ def neb(paths_dir, nimages):
                 help="Structure file of the anion.")
 @click.option("--cation", "-C", default="Li",
               help="Cation for which to calculate the reference energy.")
-
 @click.option("--distance", "-d", default=6.5,
               help="Distance to place the cation for the reference energy "
                    "point.")
