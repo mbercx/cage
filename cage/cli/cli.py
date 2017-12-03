@@ -121,7 +121,7 @@ def neb(paths_dir, nimages):
 @click.option("--distance", "-d", default=6.5,
               help="Distance to place the cation for the reference energy "
                    "point.")
-@click.option("--verbose", "-v", is_flag=True, help="")
+@click.option("--verbose", "-v", is_flag=True)
 def ref(facet_index, filename, cation, distance, verbose):
     """Set up a calculation to determine a reference energy."""
 
