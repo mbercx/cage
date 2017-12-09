@@ -62,6 +62,10 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         print("")
         print("Analyzing landscape data...")
 
+    if len(chain.keys()) == 0:
+        raise FileNotFoundError("No landscape data found in subdirectories of "
+                                + lands_dir)
+
     for data in chain.keys():
 
         # Extract the total energies from the calculations, and assign their
