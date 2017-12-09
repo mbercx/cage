@@ -133,7 +133,7 @@ def ref(facet_index, filename, cation, distance, verbose):
     ref(facet_index=facet_index,
         filename=filename,
         cation=cation,
-        distance=distance,
+        end_radius=distance,
         verbose=verbose)
 
 
