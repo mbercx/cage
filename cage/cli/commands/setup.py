@@ -309,7 +309,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
         if operation == "optimize":
             far_facet = anion.find_farthest_facet(landscape.center)
             constraints = find_constraints(anion, far_facet.sites)
-            constraints['fix atom'] += ' ' + str(len(anion.sites) + 1)  #cation
+            constraints['fix atom'] += ' ' + str(len(anion.sites) + 1)
             ALT_SETUP['constraints'] = constraints
             ALT_SETUP["driver"] = DRIVER_SETUP
 
@@ -530,8 +530,8 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
     for radius in np.linspace(start_radius, end_radius, nradii):
 
         if verbose:
-            print("Adding cation to reference facet at distance = " + str(radius)
-                  + " Angstroms.")
+            print("Adding cation to reference facet at distance = "
+                  + str(radius) + " Angstroms.")
 
         # Set up the cation site
         mol = anion.copy()
@@ -562,7 +562,13 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
         # Set up input
         nw_input = nwchem.NwInput(mol, tasks, geometry_options=GEO_SETUP)
 
-        calculation_dir = os.path.join(reference_dir, "radius=" + str(radius))
+        calculation_dir = os.path.join(reference_dir, "radius="
+                                       + '{0:.2f}'.format(radius))
+
+        try:
+            os.mkdir(os.path.join(calculation_dir))
+        except FileExistsError:
+            pass
 
         nw_input.write_file(os.path.join(calculation_dir, 'input'))
 
@@ -586,7 +592,6 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
         os.mkdir(chain_dir)
     except FileExistsError:
         pass
-
 
     for directory in dir_list:
 
@@ -631,7 +636,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
 
         # Find the chain paths
         paths = occmol.find_noneq_chain_links(symm_tol=tolerance,
-                                                    verbose=verbose)
+                                              verbose=verbose)
 
         dock_dir = os.path.join(chain_dir, 'dock' + str(dock_number))
 
@@ -810,6 +815,7 @@ def find_constraints(mol, sites):
     # Set up the constraints on the atoms
     return {'fix atom': site_numbers}
 
+
 def set_up_lattice(mol):
     """
 
@@ -832,6 +838,7 @@ def set_up_lattice(mol):
                                     [0, 0, lat_const]]))
 
     return lattice
+
 
 def plot_images(molecules, filename='path.neb'):
     """
