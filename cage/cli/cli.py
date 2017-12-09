@@ -238,6 +238,7 @@ def process(output_file):
 
     process_output(output=output_file)
 
+
 @util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('directory')
 def gather(directory):
@@ -246,9 +247,11 @@ def gather(directory):
     from cage.cli.commands.util import gather_landscape
 
     gather_landscape(directory=directory)
+
+
 @util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('filename')
-def facets(filename):
+def visualize(filename):
     """ Visualize the facets of a molecule. """
 
     from cage.cli.commands.util import visualize_facets

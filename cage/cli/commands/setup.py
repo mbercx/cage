@@ -9,11 +9,7 @@ import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
 
-from pymatgen.core import Structure
-
 import cage
-
-from cage.core import Cage
 
 """
 Scripts to set up calculations for studying the geometry and energy landscapes 
@@ -206,7 +202,7 @@ def docksetup(filename, cation, distance, facets, verbose):
         neq_facet.to(fmt='json', filename=os.path.join(dock_dir, 'facet.json'))
 
         # Write a xyz file of the molecule with the docked cation
-        mol.to(fmt='xyz', filename=os.path.join(dock_dir,'dock.xyz'))
+        mol.to(fmt='xyz', filename=os.path.join(dock_dir, 'dock.xyz'))
 
         dock_number += 1
 
