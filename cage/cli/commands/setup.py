@@ -507,6 +507,7 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
     if verbose:
         print("Setting up surface facets...")
 
+    anion.center()
     anion.find_surface_facets(ignore=IGNORE)
 
     if verbose:
