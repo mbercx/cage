@@ -9,6 +9,11 @@ from cage.landscape import LandscapeAnalyzer
 from cage.core import Facet
 from cage import utils
 
+from cage.core import Cage
+
+from pymatgen.core import Element
+from pymatgen.io.nwchem import NwOutput
+
 """
 Analysis tools for the data produced by calculation set up using the cage setup
 tools. Requires expansion.
@@ -16,6 +21,8 @@ tools. Requires expansion.
 """
 
 START_FACET = 0  # 0 or 1 -> determines facet to start chain from
+
+CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels, verbose):
@@ -248,6 +255,39 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     plt.clabel(cs, fontsize=10, inline_spacing=15, fmt='%1.1f', manual=True)
     plt.show()
 
+def reference(reference_dir, coulomb_charge=0):
+
+    reference_dir = os.path.abspath(reference_dir)
+
+    dir_list = [os.path.abspath(os.path.join(reference_dir, file))
+                for file in os.listdir(reference_dir)
+                if os.path.isdir(os.path.join(reference_dir, file))]
+
+    energies = []
+    radii = []
+
+    for directory in dir_list:
+
+        data = NwOutput(os.path.join(directory, "result.out")).data
+
+        energies.append(data[-1]["energies"][-1])
+        geometry = data[-1]["molecules"][-1]
+
+        cation_coords = [site.coords for site in geometry.sites
+                   if site.specie in CATIONS]
+
+        if len(cation_coords) != 1:
+            raise ValueError("Number of cations is more of less")
+
+        radii.append(np.linalg.norm(cation_coords[0]))
+
+    energies = np.array(energies)
+
+    minimum_energy = np.array([min(energies)]*len(energies))
+
+    plt.figure()
+    plt.plot(radii, energies - minimum_energy)
+    plt.show()
 
 ###########
 # METHODS #

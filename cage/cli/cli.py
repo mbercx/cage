@@ -200,6 +200,13 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels=contour_levels,
                        verbose=verbose)
 
+@analyze.command(context_settings=CONTEXT_SETTINGS)
+@click.argument("reference_dir")
+def reference(reference_dir):
+    from cage.cli.commands.analyze import reference
+
+    reference(reference_dir)
+
 
 @main.group(context_settings=CONTEXT_SETTINGS)
 def util():
