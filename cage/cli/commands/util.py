@@ -36,7 +36,7 @@ def geo(output_file):
 
 def energy(output_file):
     data = nwchem.NwOutput(output_file).data[-1]
-    print("Total energy = " + data["energies"][-1])
+    print("Total energy = " + str(data["energies"][-1]))
 
 def check_calculation(output):
     """
