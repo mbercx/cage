@@ -12,6 +12,7 @@ from cage import utils
 from cage.core import Cage
 
 from pymatgen.core import Element
+from pymatgen.core.units import FloatWithUnit, Unit, Energy, Length, Charge
 from pymatgen.io.nwchem import NwOutput
 
 """
@@ -395,3 +396,29 @@ def reconstruct_chain(chain, verbose=False):
             print(str(link[1]))
 
     return (chain_landscapes, facet_chain)
+
+
+def coulomb(Q, q, r):
+    """
+
+    Args:
+        Q: Charge in # of elementary charges
+        q: Charge in # of elementary charges
+        r: Distance between the two charges in Angstrom
+
+    Returns:
+        Coulomb potential energy in eV
+    """
+
+    k_e = FloatWithUnit(8.987552e9, Unit("N m^2 C-2")) # Coulomb's constant
+
+    elementary_charge = Charge(1.602e-19, Unit("C"))
+    Q *= elementary_charge
+    q *= elementary_charge
+
+    distance = Length(r, Unit("ang"))
+
+    coulomb_pot = k_e*Q*q/distance
+
+    return coulomb_pot.to("eV")
+
