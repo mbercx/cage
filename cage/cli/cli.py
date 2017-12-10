@@ -202,10 +202,11 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
 @analyze.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("reference_dir")
-def reference(reference_dir):
+@click.option("--coulomb_charge", "-c", default=0)
+def reference(reference_dir, coulomb_charge):
     from cage.cli.commands.analyze import reference
 
-    reference(reference_dir)
+    reference(reference_dir, coulomb_charge)
 
 
 @main.group(context_settings=CONTEXT_SETTINGS)
