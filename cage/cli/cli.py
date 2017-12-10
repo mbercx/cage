@@ -187,10 +187,14 @@ def analyze():
 @click.option('--end_radii', '-R', default=(0.0, 0.0))
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option('--verbose', '-v', is_flag=True)
+@click.option("--reference_energy", "-r", default=0.0)
 def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
-              contour_levels, verbose):
+              contour_levels, verbose, reference_energy):
     """ Analyze the landscape data. """
     from cage.cli.commands.analyze import landscape_analysis
+
+    if reference_energy == 0.0:
+        reference_energy = None
 
     landscape_analysis(lands_dir=lands_dir,
                        cation=cation,
@@ -198,7 +202,8 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        interp_mesh=interp_mesh,
                        end_radii=end_radii,
                        contour_levels=contour_levels,
-                       verbose=verbose)
+                       verbose=verbose,
+                       energy_reference=reference_energy)
 
 @analyze.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("reference_dir")
@@ -225,6 +230,14 @@ def geo(output_file):
     from cage.cli.commands.util import geo
 
     geo(output_file=output_file)
+
+@util.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('output_file')
+def energy(output_file):
+
+    from cage.cli.commands.util import energy
+
+    energy(output_file=output_file)
 
 
 @util.command(context_settings=CONTEXT_SETTINGS)

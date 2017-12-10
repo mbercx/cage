@@ -26,7 +26,7 @@ START_FACET = 0  # 0 or 1 -> determines facet to start chain from
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
-                       contour_levels, verbose):
+                       contour_levels, verbose, energy_reference=None):
 
     lands_dir = os.path.abspath(lands_dir)
 
@@ -226,7 +226,11 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     total_radii = np.concatenate(tuple(all_radii))
     total_angles = np.concatenate(tuple(all_angles))
     total_energy = np.concatenate(tuple(all_energy))
-    total_energy -= total_energy.min()
+
+    if energy_reference is None:
+        total_energy -= total_energy.min()
+    else:
+        total_energy -= energy_reference
 
     # If no energy range is specified by the user, take (min, max)
     if energy_range == (0.0, 0.0):
