@@ -331,7 +331,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
     total_mol.to(fmt="xyz", filename=os.path.join(chain_dir, "total_mol.xyz"))
 
 
-def pathsetup(filename, cation, distance, edges):
+def pathsetup(filename, cation, distance, facets, edges):
 
     # Load the Cage from the file
     try:
@@ -350,8 +350,12 @@ def pathsetup(filename, cation, distance, edges):
     # Find the surface facets
     anion.find_surface_facets(ignore=IGNORE)
 
-    # Find the paths, i.e. the List of facet combinations
-    paths = anion.find_facet_links(share_edge=edges)
+    if facets == tuple:
+        # Find the paths, i.e. the List of facet combinations
+        paths = anion.find_facet_links(share_edge=edges)
+    else:
+        chosen_facets = [anion.facets[index] for index in facets]
+        paths = anion.find_noneq_chain_links(chosen_facets)
 
     tasks = [nwchem.NwTask(anion.charge, None, BASIS, theory='dft',
                            operation="optimize",

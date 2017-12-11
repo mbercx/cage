@@ -95,12 +95,18 @@ def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
+@click.option("--facets", "-f", type=str,  default="tuple")
 @click.option('--edges', is_flag=True)
-def path(filename, cation, distance, edges):
+def path(filename, cation, distance, facets, edges):
     """ Set up the paths between facets that share a vertex. """
     from cage.cli.commands.setup import pathsetup
 
-    pathsetup(filename, cation, distance, edges)
+    if facets == 'tuple':
+        facets = tuple
+    else:
+        facets = [int(number) for number in facets.split()]
+
+    pathsetup(filename, cation, distance, facets, edges)
 
 
 @setup.command(context_settings=CONTEXT_SETTINGS)
