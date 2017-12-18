@@ -282,7 +282,7 @@ def reference(reference_dir, coulomb_charge=0):
                    if site.specie in CATIONS]
 
         if len(cation_coords) != 1:
-            raise ValueError("Number of cations is more of less")
+            raise ValueError("Number of cations is not equal to one.")
 
         radii.append(np.linalg.norm(cation_coords[0]))
 
