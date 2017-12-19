@@ -1,5 +1,7 @@
 # Encoding: utf-8
 
+import pdb
+
 import os
 import numpy as np
 from scipy import interpolate
@@ -26,7 +28,7 @@ START_FACET = 0  # 0 or 1 -> determines facet to start chain from
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
-                       contour_levels, verbose, energy_reference=None):
+                       contour_levels, verbose, coulomb, reference_energy=None):
 
     lands_dir = os.path.abspath(lands_dir)
 
@@ -227,10 +229,15 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     total_angles = np.concatenate(tuple(all_angles))
     total_energy = np.concatenate(tuple(all_energy))
 
-    if energy_reference is None:
+    if coulomb:
+        coulomb_energy = np.array([[coulomb_potential(-1,1, r) for r in row]
+                                   for row in total_radii])
+        total_energy -= coulomb_energy
+
+    if reference_energy is None:
         total_energy -= total_energy.min()
     else:
-        total_energy -= energy_reference
+        total_energy -= reference_energy
 
     # If no energy range is specified by the user, take (min, max)
     if energy_range == (0.0, 0.0):
@@ -403,12 +410,12 @@ def reconstruct_chain(chain, verbose=False):
     return (chain_landscapes, facet_chain)
 
 
-def coulomb(Q, q, r):
+def coulomb_potential(Q, q, r):
     """
 
     Args:
-        Q: Charge in # of elementary charges
-        q: Charge in # of elementary charges
+        Q: Charge in # of elementary charges. Include sign!
+        q: Charge in # of elementary charges. Include sign!
         r: Distance between the two charges in Angstrom
 
     Returns:

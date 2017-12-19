@@ -193,9 +193,10 @@ def analyze():
 @click.option('--end_radii', '-R', default=(0.0, 0.0))
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option('--verbose', '-v', is_flag=True)
+@click.option("--coulomb", "-c", is_flag=True)
 @click.option("--reference_energy", "-r", default=0.0)
 def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
-              contour_levels, verbose, reference_energy):
+              contour_levels, verbose, coulomb, reference_energy):
     """ Analyze the landscape data. """
     from cage.cli.commands.analyze import landscape_analysis
 
@@ -209,7 +210,8 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        end_radii=end_radii,
                        contour_levels=contour_levels,
                        verbose=verbose,
-                       energy_reference=reference_energy)
+                       coulomb=coulomb,
+                       reference_energy=reference_energy)
 
 @analyze.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("reference_dir")
@@ -219,8 +221,6 @@ def reference(reference_dir, coulomb_charge):
 
     reference(reference_dir, coulomb_charge)
 
-# Test
-# Test2
 
 @main.group(context_settings=CONTEXT_SETTINGS)
 def util():
