@@ -454,7 +454,7 @@ def nebsetup(paths_dir, nimages):
         molecules = [pmg.Molecule(struct.species, struct.cart_coords)
                      for struct in structures]
 
-        # Move the lithium positions on an ellips (kind of)
+        # Move the lithium positions on an ellipsoid (kind of)
         r1 = np.linalg.norm(start_molecule.sites[-1].coords)
         r2 = np.linalg.norm(end_molecule.sites[-1].coords)
         for m in molecules:
@@ -477,6 +477,10 @@ def nebsetup(paths_dir, nimages):
         path_mol.to(fmt='xyz', filename=os.path.join(directory, 'path.xyz'))
 
         # Set up the input file
+        ALT_SETUP["neb"] = DRIVER_SETUP
+        ALT_SETUP["neb"].update({"nbeads": nimages,
+                                 "xyz_path": "path.neb",
+                                 "print_shift": 5})
 
         # Set the charge for the molecule
         # TODO CALCULATE THE CHARGE SOMEHOW
