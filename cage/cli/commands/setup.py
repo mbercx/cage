@@ -5,6 +5,8 @@ import os
 import io
 import math
 
+from cage.utils import unit_vector
+
 import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
@@ -547,7 +549,8 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
 
         # Set up the cation site
         mol = anion.copy()
-        mol.append(pmg.Specie(cation, 1), reference_facet.center*radius)
+        mol.append(pmg.Specie(cation, 1),
+                   unit_vector(reference_facet.center)*radius)
 
         # Set the charge for the molecule TODO: Automate
         if pmg.Element('C') in [site.specie for site in mol.sites]:
@@ -564,8 +567,6 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
                                operation="energy",
                                theory_directives=THEORY_SETUP,
                                alternate_directives=ALT_SETUP)]
-
-        mol.find_surface_facets(ignore=IGNORE)
 
         if verbose:
             print("Setting up the input file...")
