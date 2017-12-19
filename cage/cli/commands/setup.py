@@ -357,6 +357,9 @@ def pathsetup(filename, cation, distance, facets, edges):
         chosen_facets = [anion.facets[index] for index in facets]
         paths = anion.find_noneq_chain_links(chosen_facets)
 
+    # Set the driver settings for the optimization
+    ALT_SETUP["driver"] = DRIVER_SETUP
+
     tasks = [nwchem.NwTask(anion.charge, None, BASIS, theory='dft',
                            operation="optimize",
                            theory_directives=THEORY_SETUP,
