@@ -23,7 +23,7 @@ tools. Requires expansion.
 
 """
 
-START_FACET = 0  # 0 or 1 -> determines facet to start chain from
+START_FACET = 1  # 0 or 1 -> determines facet to start chain from
 
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
@@ -322,6 +322,7 @@ def reconstruct_chain(chain, verbose=False):
             if facet not in chain_facets:
                 chain_facets.append(facet)
 
+            # If the facet is an end facet, it will only appear once
             if facet not in end_facets:
                 end_facets.append(facet)
             else:
@@ -339,11 +340,17 @@ def reconstruct_chain(chain, verbose=False):
     # Choose the starting facet from the termination facets
     facet_chain = [end_facets[START_FACET], ]
 
+    if verbose:
+        print('')
+        print("Starting facet of the chain:")
+        print(str(facet_chain[0]))
+        print('')
+
     chain_links = []
     chain_landscapes = []
 
     if verbose:
-        print("Constructing chain...")
+        print("Reconstructing chain...")
         print('')
 
     while len(facet_chain) < len(chain_facets):
@@ -354,7 +361,7 @@ def reconstruct_chain(chain, verbose=False):
             print('Last Facet:')
             print(str(last_facet))
 
-        # Find the link to the last facet and is not already in the path chain
+        # Find the link to the last facet that is not already in the path chain
         for data in chain.keys():
             if chain[data]['link'] not in chain_links \
                 and last_facet in chain[data]['link']:
