@@ -294,7 +294,7 @@ def reference(reference_dir, coulomb_charge=0):
         radii.append(np.linalg.norm(cation_coords[0]))
 
     energies = np.array(energies) \
-        - np.array([coulomb(coulomb_charge, 1, radius) for radius in radii])
+        - np.array([coulomb_potential(coulomb_charge, 1, radius) for radius in radii])
 
     minimum_energy = np.array([min(energies)]*len(energies))
 
