@@ -1,7 +1,5 @@
 # Encoding: utf-8
 
-import pdb
-
 import os
 import numpy as np
 from scipy import interpolate
@@ -299,6 +297,8 @@ def reference(reference_dir, coulomb_charge=0):
     minimum_energy = np.array([min(energies)]*len(energies))
 
     plt.figure()
+    plt.xlabel("Radius (Angstrom)")
+    plt.ylabel("Energy (eV)")
     plt.plot(radii, energies - minimum_energy)
     plt.show()
 
