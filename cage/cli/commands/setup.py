@@ -51,7 +51,7 @@ ALT_SETUP = {}
 DRIVER_SETUP = {'loose': '', 'maxiter': '100'}
 
 
-def optimize(filename):
+def optimize(filename, charge=0):
     """
     Set up a NwChem calculation to optimize a molecule structure.
 
@@ -547,8 +547,7 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
 
         # Set up the cation site
         mol = anion.copy()
-        mol.append(pmg.Specie(cation, 1), reference_facet.center +
-                   radius * reference_facet.normal)
+        mol.append(pmg.Specie(cation, 1), reference_facet.center*radius)
 
         # Set the charge for the molecule TODO: Automate
         if pmg.Element('C') in [site.specie for site in mol.sites]:
