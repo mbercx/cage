@@ -67,6 +67,16 @@ class Path(object):
         """
         return self._energies
 
+    @property
+    def barrier(self):
+        """
+        Size of the energy barrier along the path.
+
+        Returns:
+
+        """
+
+
     def set_energies(self, energies):
         """
 
@@ -89,7 +99,7 @@ class Path(object):
     @classmethod
     def from_file(cls, filename, fmt="xyz"):
         """
-        Read the path from a file.
+        Read the path from the file.
         :param filename:
         :return:
         """
@@ -123,7 +133,7 @@ class Path(object):
 
             return path
 
-    def plot_energies(self, interpolation='Cubic Spline'):
+    def plot_energies(self, interpolation='cubic spline'):
         """
 
         :return:
@@ -136,7 +146,7 @@ class Path(object):
 
         plt.figure()
 
-        if interpolation == 'Cubic Spline':
+        if interpolation == 'cubic spline':
             tck = inter.splrep(images, energies, s=0.01)
             images_inter = np.mgrid[images.min():images.max():0.01]
             energies_inter = inter.splev(images_inter, tck, der=0)
