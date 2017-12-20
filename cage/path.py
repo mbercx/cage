@@ -16,6 +16,10 @@ from pymatgen.core.units import Energy
 Tools for analyzing pathways on Cage molecules.
 """
 
+# Allowed distance between SiteCollection sites for checking if two paths can
+# be added.
+DISTANCE_TOL = 0.05
+
 class Path(object):
     """
     A Path is defined by a List of SiteCollections.
@@ -40,8 +44,10 @@ class Path(object):
         :param other:
         :return:
         """
+        d = [np.linalg.norm(site1.coords - site2.coords) for site1, site2 in
+         zip(self.site_collections[-1].sites, other.site_collections[0].sites)]
 
-        if self.site_collections[-1] == other.site_collections[0]:
+        if max(d) < DISTANCE_TOL:
             path = self.__class__(self.site_collections[:-1] + other.site_collections)
             if self.energies == None or other.energies == None:
                 return path
