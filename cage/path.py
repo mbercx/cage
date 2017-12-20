@@ -76,11 +76,14 @@ class Path(object):
     @property
     def barrier(self):
         """
-        Size of the energy barrier along the path.
+        Size of the energy barrier along the path. This is defined as the
+        largest energy minus the initial energy. Expressed in eV.
 
         Returns:
 
         """
+        barrier_energy = Energy(max(self.energies) - self.energies[0], "Ha")
+        return barrier_energy.to("eV")
 
 
     def set_energies(self, energies):
@@ -105,10 +108,12 @@ class Path(object):
     @classmethod
     def from_file(cls, filename, fmt="xyz"):
         """
-        Read the path from the file.
+        Read the path from the NwChem input.neb.xyz file.
+
         :param filename:
         :return:
         """
+        # TODO Change units to eV immediately
         if fmt == "xyz":
             with zopen(filename) as f:
                 data = f.read()
