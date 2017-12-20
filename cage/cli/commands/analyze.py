@@ -1,5 +1,7 @@
 # Encoding: utf-8
 
+import pdb
+
 import os
 import numpy as np
 from scipy import interpolate
@@ -263,6 +265,235 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
     plt.xticks(facet_angles, xlabel, size='x-large')
     plt.clabel(cs, fontsize=10, inline_spacing=15, fmt='%1.1f', manual=True)
+    plt.show()
+
+
+def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
+                     verbose, coulomb, reference_energy=None):
+
+    lands_dir = os.path.abspath(lands_dir)
+
+    dir_list = [os.path.abspath(os.path.join(lands_dir, file))
+                for file in os.listdir(lands_dir)
+                if os.path.isdir(os.path.join(lands_dir, file))]
+
+    if verbose:
+        print("Extracting Landscape data from " + lands_dir + "...")
+
+    # Extract the data from the subdirectories of the landscape directory
+    chain = {}
+
+    for directory in dir_list:
+
+        if os.path.isfile(os.path.join(directory, 'landscape.json')):
+            if os.path.isfile(os.path.join(directory, 'init_facet.json')) \
+                and os.path.isfile(os.path.join(directory,
+                                                'final_facet.json')):
+                if verbose:
+                    print("Found data in " + directory + ".")
+
+                chain[directory] = {
+                    'landscape': LandscapeAnalyzer.from_file(
+                        os.path.join(directory, 'landscape.json')),
+                    "link": [Facet.from_file(os.path.join(directory,
+                                                          'init_facet.json')),
+                             Facet.from_file(
+                                 os.path.join(directory, 'final_facet.json'))]
+                }
+            else:
+
+                if verbose:
+                    print("No facet information found in " + directory + ".")
+        else:
+            print("No landscape data found in " + directory + ".")
+
+    if verbose:
+        print("Found " + str(len(chain.keys())) +
+              " directories with landscape data.")
+        print("")
+        print("Analyzing landscape data...")
+
+    if len(chain.keys()) == 0:
+        raise FileNotFoundError("No landscape data found in subdirectories of "
+                                + lands_dir)
+
+    for data in chain.keys():
+
+        # Extract the total energies from the calculations, and assign their
+        # coordinates.
+
+        chain[data]['landscape'].analyze_cation_energies(
+            facet=chain[data]['link'][0],
+            cation=cation
+        )
+
+    # Check if the chain is properly constructed
+    broken_chain = False
+    test_chain = [chain[data]['link'] for data in chain.keys()]
+    for index in range(len(test_chain)-1):
+        if test_chain[index][1] != test_chain[index + 1][0]:
+            broken_chain = True
+
+    if broken_chain:
+        chain_landscapes, facet_chain = reconstruct_chain(chain,
+                                                          verbose=verbose)
+    else:
+        chain_links = [chain[data]['link'] for data in chain.keys()]
+        facet_chain = [chain_links[0][0]]
+        for link in chain_links:
+            facet_chain.append(link[1])
+        chain_landscapes = [chain[data]['landscape'] for data in chain.keys()]
+
+    # Interpolate the landscapes to a uniform mesh
+    if verbose:
+        print('-----------')
+        print("Finding proper radii and angles...")
+
+    # If no radii were provided
+    if end_radii == (0.0, 0.0):
+        # Find the proper endradii automatically
+        min_max_radius = 1e6
+        max_min_radius = 0
+        for landscape in chain_landscapes:
+            rmax = landscape.datapoints['Distance'].max()
+            if rmax < min_max_radius:
+                min_max_radius = rmax
+            rmin = landscape.datapoints['Distance'].min()
+            if rmin > max_min_radius:
+                max_min_radius = rmin
+    else:
+        # Use the radii provided by the user
+        max_min_radius = end_radii[0]
+        min_max_radius = end_radii[1]
+
+    if verbose:
+        print("")
+        print('Largest minimal radius = ' + str(max_min_radius))
+        print('Smallest maximal radius = ' + str(min_max_radius))
+
+    # Adjust the angles to set up one angle coordinate for all edges
+
+    facet_angles = [0, ]
+
+    for index in range(1,len(facet_chain)):
+
+        chain_landscapes[index-1].datapoints['Angle'] += facet_angles[-1]
+
+        facet_angles.append(facet_angles[-1] +
+                            utils.angle_between(facet_chain[index - 1].center,
+                                                facet_chain[index].center))
+
+    if verbose:
+        print("")
+        print("Facet Angles:")
+        print(facet_angles)
+
+    # facet_angles = [0, landscape_chain[0].datapoints['Angle'].max()]
+    #
+    # for lands in landscape_chain[1:]:
+    #
+    #     if verbose:
+    #         print('Maximum angle = ' + str(facet_angles[-1]))
+    #
+    #     lands.datapoints['Angle'] += facet_angles[-1]
+    #     facet_angles.append(lands.datapoints['Angle'].max())
+
+    all_radii = []
+    all_angles = []
+    all_energy = []
+
+    # TODO There needs to be a better way of interpolating this...
+    # Interpolate the landscapes
+    for landscape in chain_landscapes:
+
+        data = landscape.datapoints
+
+        data['Distance'] = np.round(data['Distance'], 5)
+        data = np.sort(data, order=['Distance', 'Angle'])
+
+        # Find the number of radii and angles
+        r_init = data['Distance'][0]
+        nangles = 1
+        while abs(data['Distance'][nangles] - r_init) < 1e-5:
+            nangles += 1
+        nradii = int(len(data) / nangles)
+
+        if verbose:
+            print('')
+            print('-----------')
+            print('Number of Angles = ' + str(nangles))
+            print('Number of Radii = ' + str(nradii))
+
+        # Get the right format for the data
+        radii = data['Distance'].reshape(nradii, nangles)
+        angles = data['Angle'].reshape(nradii, nangles)
+        energy = data['Energy'].reshape(nradii, nangles)
+
+        if verbose:
+            print('Shape angles: ' + str(angles.shape))
+            print('Shape radii: ' + str(radii.shape))
+            print('Shape energy: ' + str(energy.shape))
+
+            print("Minimum Angle = " + str(angles.min()))
+            print("Maximum Angle = " + str(angles.max()))
+
+        if interp_mesh == (0.0, 0.0):
+            new_radii = np.transpose(radii)
+            new_angles = np.transpose(angles)
+            new_energy = np.transpose(energy)
+        else:
+            new_angles, new_radii = np.mgrid[
+                                    angles.min():angles.max() + interp_mesh[0]
+                                    :interp_mesh[0],
+                                    max_min_radius:min_max_radius
+                                                   + interp_mesh[1]
+                                    :interp_mesh[1]
+                                    ]
+
+            if verbose:
+                print('-------------')
+                print('Shape new_angles: ' + str(new_angles.shape))
+                print('Shape new_radii: ' + str(new_radii.shape))
+                print("New Minimum Angle = " + str(new_angles.min()))
+                print("New Maximum Angle = " + str(new_angles.max()))
+
+            tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
+
+            new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
+                                             tck)
+
+        all_radii.append(new_radii)
+        all_angles.append(new_angles)
+        all_energy.append(new_energy)
+
+    total_radii = np.concatenate(tuple(all_radii))
+    total_angles = np.concatenate(tuple(all_angles))
+    total_energy = np.concatenate(tuple(all_energy))
+
+    if coulomb:
+        coulomb_energy = np.array([[coulomb_potential(-1,1, r) for r in row]
+                                   for row in total_radii])
+        total_energy -= coulomb_energy
+
+    if reference_energy is None:
+        total_energy -= total_energy.min()
+    else:
+        total_energy -= reference_energy
+
+    plt.figure()
+    plt.plot(total_angles[:,0], total_energy.min(1))
+
+    for angle in facet_angles:
+        plt.plot([angle, angle], [total_energy.min(), total_energy.max()],
+                 color='k', linestyle='-', linewidth=1)
+    xlabel = []
+    for i in range(len(facet_angles)):
+        xlabel.append('$\Omega_' + str(i+1) + '$')
+
+    plt.xlabel('Angle', size='large')
+    plt.xticks(facet_angles, xlabel, size='x-large')
+    plt.ylabel("Energy (eV)", size="large")
+
     plt.show()
 
 def reference(reference_dir, coulomb_charge=0):

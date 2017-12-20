@@ -76,7 +76,7 @@ class Path(object):
         if len(energies) == len(self.site_collections):
             self._energies = energies
         else:
-            raise ValueError("Number of provided energies does not correspond"
+            raise ValueError("Number of provided energies does not correspond "
                              "to the number of SiteCollections.")
 
     def set_up_neb(self):

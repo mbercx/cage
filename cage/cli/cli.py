@@ -213,6 +213,32 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        coulomb=coulomb,
                        reference_energy=reference_energy)
 
+
+@analyze.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('lands_dir')
+@click.option('--cation', '-C', default='Li')
+@click.option('--interp_mesh', '-I', default=(0.03, 0.01))
+@click.option('--end_radii', '-R', default=(0.0, 0.0))
+@click.option('--verbose', '-v', is_flag=True)
+@click.option("--coulomb", "-c", is_flag=True)
+@click.option("--reference_energy", "-r", default=0.0)
+def barrier(lands_dir, cation, interp_mesh, end_radii,
+              verbose, coulomb, reference_energy):
+    """ Analyze the barriers in landscape data. """
+    from cage.cli.commands.analyze import barrier_analysis
+
+    if reference_energy == 0.0:
+        reference_energy = None
+
+    barrier_analysis(lands_dir=lands_dir,
+                       cation=cation,
+                       interp_mesh=interp_mesh,
+                       end_radii=end_radii,
+                       verbose=verbose,
+                       coulomb=coulomb,
+                       reference_energy=reference_energy)
+
+
 @analyze.command(context_settings=CONTEXT_SETTINGS)
 @click.argument("reference_dir")
 @click.option("--coulomb_charge", "-c", default=0)
