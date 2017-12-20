@@ -156,9 +156,9 @@ def docksetup(filename, cation, distance, facets, verbose):
         if verbose:
             print("Finding constraints for the calculation...")
 
-        # Constrain the opposite facet
-        far_facet = mol.find_farthest_facet(neq_facet.center)
-        ALT_SETUP['constraints'] = find_constraints(mol, far_facet.sites)
+        # Constrain the opposite facet --> Why?
+        # far_facet = mol.find_farthest_facet(neq_facet.center)
+        # ALT_SETUP['constraints'] = find_constraints(mol, far_facet.sites)
 
         # Set the driver settings for the optimization
         ALT_SETUP["driver"] = DRIVER_SETUP
