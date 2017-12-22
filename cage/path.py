@@ -98,6 +98,16 @@ class Path(object):
             raise ValueError("Number of provided energies does not correspond "
                              "to the number of SiteCollections.")
 
+    def flip(self):
+        """
+        Flip the direction of the path.
+
+        Returns:
+
+        """
+        self._site_collections.reverse()
+        self._energies.reverse()
+
     def set_up_neb(self):
         """
         Sets up the NEB path for a NwChem calculation.
@@ -144,15 +154,22 @@ class Path(object):
 
             return path
 
-    def plot_energies(self, interpolation='cubic spline'):
+    def plot_energies(self, energy_range=None, interpolation='cubic spline'):
         """
 
         :return:
         """
 
+        # Convert the energies from Hartree to eV
         energies = np.array([Energy(energy, "Ha").to("eV")
                              for energy in self.energies])
+
+
         energies = (energies - energies.min())*1000
+
+        if energy_range is None:
+            pass
+
         images = np.linspace(0, len(self.energies)-1, num=len(self.energies))
 
         plt.figure()
