@@ -23,12 +23,17 @@ tools. Requires expansion.
 
 """
 
+# Set the contours for negative values to a solid line, same as the positive
+# ones
+plt.rcParams['contour.negative_linestyle'] = 'solid'
+
 START_FACET = 1  # 0 or 1 -> determines facet to start chain from
 
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
-                       contour_levels, verbose, coulomb, reference_energy=None):
+                       contour_levels, verbose, coulomb_charge,
+                       reference_energy=None):
 
     lands_dir = os.path.abspath(lands_dir)
 
@@ -229,9 +234,9 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     total_angles = np.concatenate(tuple(all_angles))
     total_energy = np.concatenate(tuple(all_energy))
 
-    if coulomb:
-        coulomb_energy = np.array([[coulomb_potential(-1,1, r) for r in row]
-                                   for row in total_radii])
+    if coulomb_charge is not 0:
+        coulomb_energy = np.array([[coulomb_potential(-coulomb_charge,1, r)
+                                    for r in row] for row in total_radii])
         total_energy -= coulomb_energy
 
     if reference_energy is None:
@@ -264,12 +269,13 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     plt.xlabel('Angle', size='large')
     plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
     plt.xticks(facet_angles, xlabel, size='x-large')
-    plt.clabel(cs, fontsize=10, inline_spacing=15, fmt='%1.1f', manual=True)
+    plt.yticks(size="x-large")
+    plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f', manual=True)
     plt.show()
 
 
 def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
-                     verbose, coulomb, reference_energy=None):
+                     verbose, coulomb_charge, reference_energy=None):
 
     lands_dir = os.path.abspath(lands_dir)
 
@@ -470,9 +476,9 @@ def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
     total_angles = np.concatenate(tuple(all_angles))
     total_energy = np.concatenate(tuple(all_energy))
 
-    if coulomb:
-        coulomb_energy = np.array([[coulomb_potential(-1,1, r) for r in row]
-                                   for row in total_radii])
+    if coulomb_charge is not 0:
+        coulomb_energy = np.array([[coulomb_potential(-coulomb_charge,1, r)
+                                    for r in row] for row in total_radii])
         total_energy -= coulomb_energy
 
     if reference_energy is None:
@@ -484,15 +490,16 @@ def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
     plt.plot(total_angles[:,0], total_energy.min(1))
 
     for angle in facet_angles:
-        plt.plot([angle, angle], [total_energy.min(), total_energy.max()],
+        plt.plot([angle, angle], [total_energy.min()-2, total_energy.max()+2],
                  color='k', linestyle='-', linewidth=1)
     xlabel = []
     for i in range(len(facet_angles)):
         xlabel.append('$\Omega_' + str(i+1) + '$')
 
-    plt.xlabel('Angle', size='large')
+    plt.xlabel('Angle', size='x-large')
     plt.xticks(facet_angles, xlabel, size='x-large')
-    plt.ylabel("Energy (eV)", size="large")
+    plt.yticks(size="x-large")
+    plt.ylabel("Energy (eV)", size="x-large")
 
     plt.show()
 
@@ -528,8 +535,10 @@ def reference(reference_dir, coulomb_charge=0):
     minimum_energy = np.array([min(energies)]*len(energies))
 
     plt.figure()
-    plt.xlabel("Radius (Angstrom)")
-    plt.ylabel("Energy (eV)")
+    plt.xlabel("Radius (Angstrom)", size="x-large")
+    plt.ylabel("Energy (eV)", size="x-large")
+    plt.xticks(size="x-large")
+    plt.yticks(size="x-large")
     plt.plot(radii, energies - minimum_energy)
     plt.show()
 
