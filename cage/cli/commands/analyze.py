@@ -529,10 +529,18 @@ def reference(reference_dir, coulomb_charge=0):
 
         radii.append(np.linalg.norm(cation_coords[0]))
 
+    # Sort the data using the radii
+    pairs = list(zip(radii, energies))
+    pairs.sort(key=lambda x:x[0])
+    radii = [pair[0] for pair in pairs]
+    energies = [pair[1] for pair in pairs]
+
     energies = np.array(energies) \
         - np.array([coulomb_potential(coulomb_charge, 1, radius) for radius in radii])
 
     minimum_energy = np.array([min(energies)]*len(energies))
+
+
 
     plt.figure()
     plt.xlabel("Radius (Angstrom)", size="x-large")
