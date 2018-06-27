@@ -540,8 +540,6 @@ def reference(reference_dir, coulomb_charge=0):
 
     minimum_energy = np.array([min(energies)]*len(energies))
 
-
-
     plt.figure()
     plt.xlabel("Radius (Angstrom)", size="x-large")
     plt.ylabel("Energy (eV)", size="x-large")

@@ -312,8 +312,8 @@ class LandscapeAnalyzer(MSONable):
 
                 coordinate = [x, y]
 
-            energy_initial = data['energies'][0]
-            coordinate.append(energy_initial)
+            energy_final = data['energies'][-1]
+            coordinate.append(energy_final)
 
             datapoints.append(coordinate)
 
