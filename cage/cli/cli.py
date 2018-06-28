@@ -312,3 +312,38 @@ def visualize(filename):
     from cage.cli.commands.util import visualize_facets
 
     visualize_facets(filename=filename)
+
+
+@main.group(context_settings=CONTEXT_SETTINGS)
+def workflow():
+    """
+    Workflow setup scripts.
+    """
+    pass
+
+
+@workflow.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('filename')
+@click.option('--cation', '-C', default='Li')
+@click.option('--facets', '-f', type=str, default='tuple')
+@click.option('--operation', '-O', default='energy')
+@click.option('--end_radii', '-R', default=(3.0, 6.0))
+@click.option('--nradii', default=30)
+@click.option('--adensity', default=50)
+def landscape(filename, cation, facets, operation, end_radii, nradii,
+              adensity):
+    """ Set up a 2D landscape along a chain of facets. """
+    from cage.workflow import landscape_workflow
+
+    if facets == 'tuple':
+        facets = tuple
+    else:
+        facets = [int(number) for number in facets.split()]
+
+    landscape_workflow(filename=filename,
+                       facets=facets,
+                       cation=cation,
+                       operation=operation,
+                       end_radii=end_radii,
+                       nradii=nradii,
+                       adensity=adensity)
