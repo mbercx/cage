@@ -1,4 +1,3 @@
-
 import click
 
 """
@@ -8,6 +7,7 @@ Command Line Interface for the cage package.
 
 # This is only used to make '-h' a shorter way to access the CLI help
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 def main():
@@ -45,7 +45,7 @@ def optimize(filename):
               help="The cation to be placed on the dock, provided as a string "
                    "of the chemical symbol, e.g. 'Li' or 'Na'.")
 @click.option('--distance', '-d', default=2.0)
-@click.option('--facets', '-f', type=str,  default='tuple')
+@click.option('--facets', '-f', type=str, default='tuple')
 @click.option('--verbose', '-v', is_flag=True)
 def dock(filename, cation, distance, facets, verbose):
     """
@@ -68,7 +68,7 @@ def dock(filename, cation, distance, facets, verbose):
 @setup.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
-@click.option('--facets', '-f', type=str,  default='tuple')
+@click.option('--facets', '-f', type=str, default='tuple')
 @click.option('--operation', '-O', default='energy')
 @click.option('--end_radii', '-R', default=(3.0, 6.0))
 @click.option('--nradii', default=30)
@@ -95,7 +95,7 @@ def chain(filename, cation, facets, operation, end_radii, nradii, adensity):
 @click.argument('filename')
 @click.option('--cation', '-C', default='Li')
 @click.option('--distance', '-d', default=2)
-@click.option("--facets", "-f", type=str,  default="tuple")
+@click.option("--facets", "-f", type=str, default="tuple")
 @click.option('--edges', is_flag=True)
 def path(filename, cation, distance, facets, edges):
     """ Set up the paths between facets that share a vertex. """
@@ -124,9 +124,9 @@ def neb(paths_dir, nimages):
 @click.argument("filename")
 @click.option("--cation", "-C", default="Li",
               help="Cation for which to calculate the reference energy.")
-@click.option("--distance", "-d", default=6.5,
-              help="Distance to place the cation for the reference energy "
-                   "point.")
+@click.option("--distance", "-d", default=8.0,
+              help="Maximum distance at which to place the cation for the "
+                   "reference energy point.")
 @click.option("--verbose", "-v", is_flag=True)
 def ref(facet_index, filename, cation, distance, verbose):
     """Set up a calculation to determine a reference energy."""
@@ -223,7 +223,7 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
 @click.option("--coulomb_charge", "-c", default=0)
 @click.option("--reference_energy", "-r", default=0.0)
 def barrier(lands_dir, cation, interp_mesh, end_radii,
-              verbose, coulomb_charge, reference_energy):
+            verbose, coulomb_charge, reference_energy):
     """ Analyze the barriers in landscape data. """
     from cage.cli.commands.analyze import barrier_analysis
 
@@ -231,12 +231,12 @@ def barrier(lands_dir, cation, interp_mesh, end_radii,
         reference_energy = None
 
     barrier_analysis(lands_dir=lands_dir,
-                       cation=cation,
-                       interp_mesh=interp_mesh,
-                       end_radii=end_radii,
-                       verbose=verbose,
-                       coulomb=coulomb_charge,
-                       reference_energy=reference_energy)
+                     cation=cation,
+                     interp_mesh=interp_mesh,
+                     end_radii=end_radii,
+                     verbose=verbose,
+                     coulomb=coulomb_charge,
+                     reference_energy=reference_energy)
 
 
 @analyze.command(context_settings=CONTEXT_SETTINGS)
@@ -265,10 +265,10 @@ def geo(output_file):
 
     geo(output_file=output_file)
 
+
 @util.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('output_file')
 def energy(output_file):
-
     from cage.cli.commands.util import energy
 
     energy(output_file=output_file)

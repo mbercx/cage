@@ -20,7 +20,7 @@ __author__ = "Marnik Bercx"
 __version__ = "0.1"
 __maintainer__ = ""
 __email__ = "marnik.bercx@uantwerpen.be"
-__status__ = "Nowhere"
+__status__ = "alpha"
 __date__ = "16 JUN 2017"
 
 class Study(MSONable):
