@@ -35,7 +35,7 @@ LAUNCHPAD = LaunchPad(host="ds221271.mlab.com", port=21271, name="cage",
                       username="mbercx", password="yosemite1")
 
 RUN_NWCHEM_SCRIPT = "/g/g91/bercx1/local/scripts/job_workflow.sh"
-RUN_NWCHEM_COMMAND = "srun -N1 -n36 /g/g91/bercx1/nwchem/nwchem-6.6/bin/LINUX64/nwchem  input > result.out"
+RUN_NWCHEM_COMMAND = "srun -N1 -n36 /g/g91/bercx1/nwchem/nwchem-6.6/bin/LINUX64/nwchem"
 
 def run_nwchem(directory):
     """
@@ -51,8 +51,9 @@ def run_nwchem(directory):
 
     """
 
-    os.chdir(directory)
-    subprocess.Popen(RUN_NWCHEM_COMMAND)
+    command = RUN_NWCHEM_COMMAND + " " + os.path.abspath(directory) + \
+              "/input > " + os.path.abspath(directory) + "/result.out"
+    subprocess.Popen(command)
 
 def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                adensity):
