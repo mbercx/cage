@@ -74,16 +74,19 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
 
     """
 
+    c = Cage.from_file(filename)
+    molecule = c.composition.reduced_formula
+
     # Set up the calculation directories and input
     chainsetup(filename, cation, facets, operation, end_radii, nradii,
                adensity)
 
-    fw_list = []
+    wf_list = []
 
     # For each edge
     for edge in [d for d in os.listdir("chain") if "edge" in d]:
 
-        task_list = []
+        fws_list = []
 
         # Set up the list of FireTasks, i.e. energy calculations:
         for geo in [d for d in os.listdir(os.path.join("chain", edge))
@@ -94,21 +97,18 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                              + os.path.join(dir, "input") + " > " \
                              + os.path.join(dir, "result.out")
 
-            task_list.append(
-                ScriptTask.from_str(nwchem_command)
+            fws_list.append(
+                Firework(tasks= ScriptTask.from_str(nwchem_command),
+                         name= operation + " " + geo)
             )
 
-        fw_list.append(
-            Firework(tasks=task_list, name="Landscape: " + edge)
+        workflow_name = "Landscape: " + cation + " on " + molecule + " (" + \
+                        edge + ")"
+        wf_list.append(
+            Workflow(fireworks=fws_list, name=workflow_name)
         )
 
-    c = Cage.from_file(filename)
-    molecule = c.composition.reduced_formula
-
-    LAUNCHPAD.add_wf(
-        Workflow(fireworks=fw_list,
-                 name="Landscape: " + cation + " on " + molecule)
-    )
+    LAUNCHPAD.bulk_add_wfs(wf_list)
 
 
 def optimize_workflow(filename, charge=0):
