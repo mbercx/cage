@@ -794,12 +794,10 @@ def set_up_molecules(mol, landscape, cation):
     for point in landscape.points:
         configuration = mol.copy()
 
-        # If carbon is in the molecule, the charge is -1, -2 otherwise
+        # Currently, the final molecule is considered to be without charge
         # TODO Find a good way to calculate the charge, if possible
-        if pmg.Element("C") in [site.specie for site in configuration.sites]:
-            configuration.set_charge_and_spin(charge=0)
-        else:
-            configuration.set_charge_and_spin(charge=-1)
+        configuration.set_charge_and_spin(charge=0)
+
 
         # Add the cation to the Molecule
         try:
