@@ -88,10 +88,14 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
         # Set up the list of FireTasks, i.e. energy calculations:
         for geo in [d for d in os.listdir(os.path.join("chain", edge))
                     if "geo" in d]:
+
+            dir = os.path.abspath(os.path.join("chain", edge, geo))
+            nwchem_command = RUN_NWCHEM_COMMAND + " " \
+                             + os.path.join(dir, "input") + " > " \
+                             + os.path.join(dir, "result.out")
+
             task_list.append(
-                PyTask(func="cage.workflow.run_nwchem",
-                       args=[os.path.abspath(os.path.join("chain", edge,
-                                                          geo))])
+                ScriptTask.from_str(nwchem_command)
             )
 
         fw_list.append(
