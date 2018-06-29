@@ -109,7 +109,7 @@ def test_workflow():
 
     current_dir = os.getcwd()
 
-    fw = Firework(ScriptTask.from_str("cat 'This worked!' >> " +
+    fw = Firework(ScriptTask.from_str("echo 'This worked!' >> " +
                                       current_dir + "/test"))
 
     LAUNCHPAD.add_wf(
