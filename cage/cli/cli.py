@@ -347,3 +347,14 @@ def landscape(filename, cation, facets, operation, end_radii, nradii,
                        end_radii=end_radii,
                        nradii=nradii,
                        adensity=adensity)
+
+def test():
+    """
+    Testing if I can get workflows to work on quartz...
+
+    Returns:
+
+    """
+    from cage.workflow import test_workflow
+
+    test_workflow()

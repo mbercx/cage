@@ -15,7 +15,7 @@ from custodian.vasp.handlers import VaspErrorHandler, \
 from custodian.vasp.jobs import VaspJob
 
 from fireworks import Firework, LaunchPad, PyTask, FWorker, \
-    Workflow
+    Workflow, ScriptTask
 from fireworks.user_objects.queue_adapters.common_adapter import CommonAdapter
 
 """
@@ -105,4 +105,12 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                  name="Landscape: " + cation + " on " + molecule)
     )
 
+def test_workflow():
+
+    fw = Firework(ScriptTask.from_str("cat 'This worked!' >> test"))
+
+    LAUNCHPAD.add_wf(
+        Workflow(fireworks=[fw],
+                 name="test workflow")
+    )
 
