@@ -166,6 +166,21 @@ class Cage(Molecule):
         """
         pass  # TODO
 
+    def copy(self):
+        """
+        Convenience method to get a copy of the Cage. Overwritten from the
+        Molecule class to conserve the charge of the molecule.
+
+        Returns:
+            cage.core.Cage
+
+        """
+        copy = super(Cage, self).copy()
+
+        copy.set_charge_and_spin(charge=self.charge)
+
+        return copy
+
     def center(self, point=None):
         """
         Center the Cage around a point by updating the sites, i.e. find the

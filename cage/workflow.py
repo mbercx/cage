@@ -123,6 +123,8 @@ def optimize_workflow(filename, charge=0):
 
     """
 
+    molecule = Cage.from_file(filename)
+
     optimize(filename, charge)
 
     optimize_dir = os.path.join(os.getcwd(), "optimize")
@@ -135,7 +137,7 @@ def optimize_workflow(filename, charge=0):
 
     LAUNCHPAD.add_wf(
         Workflow(fireworks=[fw],
-                 name="Optimize")
+                 name="Optimize " + molecule.composition.reduced_formula)
     )
 
 
