@@ -6,7 +6,7 @@ import os
 import subprocess
 import shlex
 
-from cage.cli.commands.setup import chainsetup
+from cage.cli.commands.setup import optimize, chainsetup
 from cage.core import Cage
 
 from custodian import Custodian
@@ -37,6 +37,7 @@ LAUNCHPAD = LaunchPad(host="ds221271.mlab.com", port=21271, name="cage",
 RUN_NWCHEM_SCRIPT = "/g/g91/bercx1/local/scripts/job_workflow.sh"
 RUN_NWCHEM_COMMAND = "srun -N1 -n36 /g/g91/bercx1/nwchem/nwchem-6.6/bin/LINUX64/nwchem"
 
+
 def run_nwchem(directory):
     """
     Method that simply runs VASP in the directory that is specified. Mainly
@@ -53,10 +54,11 @@ def run_nwchem(directory):
 
     command = RUN_NWCHEM_COMMAND + " " + directory + "/input > " + directory \
               + "/result.out"
-    #subprocess.Popen(command)
+    # subprocess.Popen(command)
+
 
 def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
-               adensity):
+                       adensity):
     """
 
     Args:
@@ -86,11 +88,10 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
         # Set up the list of FireTasks, i.e. energy calculations:
         for geo in [d for d in os.listdir(os.path.join("chain", edge))
                     if "geo" in d]:
-
             task_list.append(
                 PyTask(func="cage.workflow.run_nwchem",
                        args=[os.path.abspath(os.path.join("chain", edge,
-                                                            geo))])
+                                                          geo))])
             )
 
         fw_list.append(
@@ -105,8 +106,36 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                  name="Landscape: " + cation + " on " + molecule)
     )
 
-def test_workflow():
 
+def optimize_workflow(filename, charge=0):
+    """
+    Workflow for the optimization of a molecule
+
+    Args:
+        filename:
+        charge:
+
+    Returns:
+
+    """
+
+    optimize(filename, charge)
+
+    optimize_dir = os.path.join(os.getcwd(), "optimize")
+
+    optimize_command = RUN_NWCHEM_COMMAND \
+                       + os.path.join(optimize_dir, "input") + " > " \
+                       + os.path.join(optimize_dir, "result.out")
+
+    fw = Firework(ScriptTask.from_str(optimize_command))
+
+    LAUNCHPAD.add_wf(
+        Workflow(fireworks=[fw],
+                 name="Optimize")
+    )
+
+
+def test_workflow():
     current_dir = os.getcwd()
 
     fw = Firework(ScriptTask.from_str("echo 'This worked!' >> " +
@@ -116,4 +145,3 @@ def test_workflow():
         Workflow(fireworks=[fw],
                  name="test workflow")
     )
-

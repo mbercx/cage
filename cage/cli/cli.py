@@ -31,6 +31,7 @@ def setup():
 @setup.command(context_settings=CONTEXT_SETTINGS,
                short_help="Initial anion geometric optimization.")
 @click.argument('filename')
+@click.option('--charge', '-c', default=0)
 def optimize(filename):
     """ Set up the initial anion optimization. """
     from cage.cli.commands.setup import optimize
@@ -347,6 +348,17 @@ def landscape(filename, cation, facets, operation, end_radii, nradii,
                        end_radii=end_radii,
                        nradii=nradii,
                        adensity=adensity)
+
+@workflow.command(context_settings=CONTEXT_SETTINGS,
+               short_help="Initial anion geometric optimization.")
+@click.argument('filename')
+@click.option('--charge', '-c', default=0)
+def optimize(filename, charge):
+    """ Set up the initial anion optimization. """
+    from cage.workflow import optimize_workflow
+
+    optimize_workflow(filename, charge)
+
 
 @workflow.command(context_settings=CONTEXT_SETTINGS)
 def test():
