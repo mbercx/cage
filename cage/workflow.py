@@ -80,7 +80,7 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
     # Set up the calculation directories and input
     chainsetup(filename, cation, facets, operation, end_radii, nradii,
                adensity)
-    chain_dir = "chain" + operation
+    chain_dir = "chain" + "_" + operation
 
     wf_list = []
 
