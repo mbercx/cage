@@ -232,13 +232,15 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
 
     # Load the Cage from the file
     try:
-        # Load the POSCAR into a Cage
-        anion = cage.core.Cage.from_poscar(filename)
-    except ValueError:
         # If that fails, try other file formats supported by pymatgen
         anion = cage.core.Cage.from_file(filename)
+    except ValueError:
+        # If that fails, try the VASP POSCAR format
+        anion = cage.core.Cage.from_poscar(filename)
 
+    # Center the anion around the origin
     anion.center()
+
     # Find the chain edges, i.e. the paths between the edge sharing facets of
     # the chain of non-equivalent facets.
     anion.find_surface_facets(ignore=IGNORE)
@@ -251,13 +253,13 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
 
     total_mol = anion.copy()
 
-    chain_dir = 'chain'
+    chain_dir = 'chain_' + operation
     try:
         os.mkdir(chain_dir)
     except FileExistsError:
         pass
 
-    # For each facet, set up the calculation input files
+    # For each edge, set up the calculation input files
     edge_number = 1
 
     for edge in edges:
@@ -270,7 +272,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
             pass
 
         # Write out the molecule and path facets to the edge directory
-        anion.to(fmt="json", filename=os.path.join(edge_dir, "mol.json"))
+        anion.to(fmt="json", filename=os.path.join(edge_dir, "molecule.json"))
         edge[0].to(fmt="json", filename=os.path.join(edge_dir,
                                                      "init_facet.json"))
         edge[1].to(fmt="json", filename=os.path.join(edge_dir,
@@ -296,7 +298,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
         # Get the molecule for each landscape point
         molecules = set_up_molecules(edge_mol, landscape, cation)
 
-        # Set up an xyz file to visualize the edge
+        # Set up an xyz file to visualize the edge and total landscape
         for point in landscape.points:
             try:
                 total_mol.append(pmg.Specie(cation, 1), point,
@@ -775,34 +777,39 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     return lands
 
 
-def set_up_molecules(mol, landscape, cation):
+def set_up_molecules(molecule, landscape, cation):
     """
     Set up the List of molecules from Landscape by adding the cation on the
     various points of the landscape.
 
-    :param mol:
+    :param molecule:
     :param landscape:
     :param cation:
     :return:
     """
 
+    # Check if the molecule has a charge zero
+    if molecule.charge == 0:
+        print("WARNING: Found charge equal to zero for the anion molecule. "
+              "This may be because there was no charge information on the "
+              "structure file used. The charge will be set to -1 by "
+              "assumption. Please provide .json structure files.")
+        molecule.set_charge_and_spin(charge=-1)
+
     # Set up the cation Species
-    cation = pmg.Specie(cation, +1)
+    cation = pmg.Specie(cation, oxidation_state=1)
 
     # Set up the List of Molecules
     molecules = []
     for point in landscape.points:
-        configuration = mol.copy()
-
-        # Currently, the final molecule is considered to be without charge
-        # TODO Find a good way to calculate the charge, if possible
-        configuration.set_charge_and_spin(charge=0)
-
+        configuration = molecule.copy()
 
         # Add the cation to the Molecule
         try:
             configuration.append(cation, point)
+            configuration.set_charge_and_spin(charge=molecule.charge + 1)
             molecules.append(configuration)
+
         except ValueError:
             print("ValueError detected when appending the Li site. "
                   "Ignoring this point in the energy landscape.")
