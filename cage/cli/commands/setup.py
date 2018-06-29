@@ -53,7 +53,7 @@ ALT_SETUP = {}
 DRIVER_SETUP = {'loose': '', 'maxiter': '100'}
 
 
-def optimize(filename, charge=0):
+def optimize(filename, charge=None):
     """
     Set up a NwChem calculation to optimize a molecule structure.
 
@@ -70,7 +70,9 @@ def optimize(filename, charge=0):
         anion = cage.core.Cage.from_file(filename)
 
     # Set the charge for the molecule
-    if pmg.Element('C') in [site.specie for site in anion.sites]:
+    if charge:
+        anion.set_charge_and_spin(charge=charge)
+    elif pmg.Element('C') in [site.specie for site in anion.sites]:
         anion.set_charge_and_spin(charge=-1)
     else:
         anion.set_charge_and_spin(charge=-2)
