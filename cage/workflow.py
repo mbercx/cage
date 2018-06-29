@@ -51,11 +51,9 @@ def run_nwchem(directory):
 
     """
 
-    print(directory)
-
-    command = RUN_NWCHEM_COMMAND + " " + os.path.abspath(directory) + \
-              "/input > " + os.path.abspath(directory) + "/result.out"
-    subprocess.Popen(command)
+    command = RUN_NWCHEM_COMMAND + " " + directory + "/input > " + directory \
+              + "/result.out"
+    #subprocess.Popen(command)
 
 def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                adensity):
