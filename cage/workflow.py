@@ -80,19 +80,20 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
     # Set up the calculation directories and input
     chainsetup(filename, cation, facets, operation, end_radii, nradii,
                adensity)
+    chain_dir = "chain" + operation
 
     wf_list = []
 
     # For each edge
-    for edge in [d for d in os.listdir("chain") if "edge" in d]:
+    for edge in [d for d in os.listdir(chain_dir) if "edge" in d]:
 
         fws_list = []
 
         # Set up the list of FireTasks, i.e. energy calculations:
-        for geo in [d for d in os.listdir(os.path.join("chain", edge))
+        for geo in [d for d in os.listdir(os.path.join(chain_dir, edge))
                     if "geo" in d]:
 
-            dir = os.path.abspath(os.path.join("chain", edge, geo))
+            dir = os.path.abspath(os.path.join(chain_dir, edge, geo))
             nwchem_command = RUN_NWCHEM_COMMAND + " " \
                              + os.path.join(dir, "input") + " > " \
                              + os.path.join(dir, "result.out")
