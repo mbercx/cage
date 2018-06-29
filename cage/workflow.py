@@ -87,7 +87,7 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
 
             task_list.append(
                 PyTask(func="cage.workflow.run_nwchem",
-                       inputs=[os.path.abspath(os.path.join("chain", edge,
+                       args=[os.path.abspath(os.path.join("chain", edge,
                                                             geo))])
             )
 
