@@ -107,7 +107,10 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
 
 def test_workflow():
 
-    fw = Firework(ScriptTask.from_str("cat 'This worked!' >> test"))
+    current_dir = os.getcwd()
+
+    fw = Firework(ScriptTask.from_str("cat 'This worked!' >> " +
+                                      current_dir + "/test"))
 
     LAUNCHPAD.add_wf(
         Workflow(fireworks=[fw],
