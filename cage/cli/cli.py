@@ -348,6 +348,7 @@ def landscape(filename, cation, facets, operation, end_radii, nradii,
                        nradii=nradii,
                        adensity=adensity)
 
+@workflow.command(context_settings=CONTEXT_SETTINGS)
 def test():
     """
     Testing if I can get workflows to work on quartz...
