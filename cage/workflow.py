@@ -123,7 +123,7 @@ def optimize_workflow(filename, charge=0):
 
     optimize_dir = os.path.join(os.getcwd(), "optimize")
 
-    optimize_command = RUN_NWCHEM_COMMAND \
+    optimize_command = RUN_NWCHEM_COMMAND + " " \
                        + os.path.join(optimize_dir, "input") + " > " \
                        + os.path.join(optimize_dir, "result.out")
 
