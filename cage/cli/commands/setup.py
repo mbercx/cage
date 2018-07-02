@@ -98,7 +98,6 @@ def optimize(filename, charge=None):
 
 
 def docksetup(filename, cation, distance, facets, verbose):
-
     if verbose:
         print("Loading structure file " + filename + "...")
 
@@ -338,7 +337,6 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
 
 
 def pathsetup(filename, cation, distance, facets, edges):
-
     # Load the Cage from the file
     try:
         # Load the POSCAR into a Cage
@@ -413,7 +411,7 @@ def pathsetup(filename, cation, distance, facets, edges):
             pass
 
         # Set up the input
-        nwchem.NwInput(start_molecule, tasks, geometry_options=GEO_SETUP)\
+        nwchem.NwInput(start_molecule, tasks, geometry_options=GEO_SETUP) \
             .write_file(os.path.join(path_dir, 'start', 'input'))
         nwchem.NwInput(end_molecule, tasks, geometry_options=GEO_SETUP) \
             .write_file(os.path.join(path_dir, 'end', 'input'))
@@ -422,7 +420,6 @@ def pathsetup(filename, cation, distance, facets, edges):
 
 
 def nebsetup(paths_dir, nimages):
-
     directory = os.path.abspath(paths_dir)
 
     dir_list = [os.path.join(directory, d) for d in os.listdir(directory)
@@ -470,8 +467,9 @@ def nebsetup(paths_dir, nimages):
             dist2 = np.linalg.norm(end_molecule.sites[-1].coords
                                    - lithium_coord)
             li_r = np.linalg.norm(lithium_coord)
-            new_radius = r2*dist1/(dist1 + dist2) + r1*dist2/(dist1 + dist2)
-            translate_vector = lithium_coord/li_r*(new_radius-li_r)
+            new_radius = r2 * dist1 / (dist1 + dist2) + r1 * dist2 / (
+            dist1 + dist2)
+            translate_vector = lithium_coord / li_r * (new_radius - li_r)
             m.translate_sites([len(m) - 1, ], translate_vector)
 
         # Make a path molecule to show the interpolation
@@ -508,18 +506,33 @@ def nebsetup(paths_dir, nimages):
         plot_images(molecules, filename=os.path.join(directory, 'path.neb'))
 
 
-def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
-        verbose=False):
+def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
+              nradii=10, verbose=False):
+    """
+    Set up a calculation to determine a reference energy for an anion,
+    based on a 1D landscape perpendicular to a chosen facet.
 
+    Args:
+        facet_index:
+        filename:
+        cation:
+        end_radius:
+        start_radius:
+        nradii:
+        verbose:
+
+    Returns:
+
+    """
     if verbose:
         print("Loading structure file " + filename + "...")
 
     try:
-        # Load the POSCAR into a Cage
-        anion = cage.core.Cage.from_poscar(filename)
-    except ValueError:
-        # If that fails, try other file formats supported by pymatgen
+        # Load the structure file into a Cage object
         anion = cage.core.Cage.from_file(filename)
+    except ValueError:
+        # If the conventional formats fail, try using the from_poscar method.
+        anion = cage.core.Cage.from_poscar(filename)
 
     if verbose:
         print("Setting up surface facets...")
@@ -530,7 +543,7 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
     if verbose:
         print("Found " + str(len(anion.facets)) + " facets.")
 
-    reference_dir = 'reference'
+    reference_dir = 'reference_' + facet_index
     try:
         os.mkdir(reference_dir)
     except FileExistsError:
@@ -554,13 +567,9 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
         # Set up the cation site
         mol = anion.copy()
         mol.append(pmg.Specie(cation, 1),
-                   unit_vector(reference_facet.center)*radius)
+                   unit_vector(reference_facet.center) * radius)
 
-        # Set the charge for the molecule TODO: Automate
-        if pmg.Element('C') in [site.specie for site in mol.sites]:
-            mol.set_charge_and_spin(charge=0)
-        else:
-            mol.set_charge_and_spin(charge=-1)
+        mol.set_charge_and_spin(charge=anion.charge + 1)
 
         if verbose:
             print("Setting up the task...")
@@ -595,7 +604,6 @@ def ref(facet_index, filename, cation, end_radius, start_radius=4.0, nradii=10,
 
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose):
-
     # Get the docking directories
     dir_list = [os.path.join(dock_dir, directory)
                 for directory in os.listdir(dock_dir)
@@ -760,7 +768,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     :param angle_density:
     :return:
     """
-    line_vector1 = facet1.center/np.linalg.norm(facet1.center)
+    line_vector1 = facet1.center / np.linalg.norm(facet1.center)
     line_vector2 = facet2.center / np.linalg.norm(facet2.center)
     lands = cage.landscape.Landscape.from_vertices(
         [line_vector1 * endpoint_radii[0], line_vector1 * endpoint_radii[1]],
