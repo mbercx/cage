@@ -543,7 +543,7 @@ def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
     if verbose:
         print("Found " + str(len(anion.facets)) + " facets.")
 
-    reference_dir = 'reference_' + facet_index
+    reference_dir = 'reference_' + str(facet_index)
     try:
         os.mkdir(reference_dir)
     except FileExistsError:
