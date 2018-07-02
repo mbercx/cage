@@ -129,19 +129,19 @@ def neb(paths_dir, nimages):
               help="Maximum distance at which to place the cation for the "
                    "reference energy point.")
 @click.option("--verbose", "-v", is_flag=True)
-def ref(facet_index, filename, cation, distance, verbose):
+def reference(facet_index, filename, cation, distance, verbose):
     """Set up a calculation to determine a reference energy."""
 
-    from cage.cli.commands.setup import ref
+    from cage.cli.commands.setup import reference
 
     # Convert string input to integer
     facet_index = int(facet_index)
 
-    ref(facet_index=facet_index,
-        filename=filename,
-        cation=cation,
-        end_radius=distance,
-        verbose=verbose)
+    reference(facet_index=facet_index,
+              filename=filename,
+              cation=cation,
+              end_radius=distance,
+              verbose=verbose)
 
 
 @setup.group(context_settings=CONTEXT_SETTINGS)
@@ -349,8 +349,9 @@ def landscape(filename, cation, facets, operation, end_radii, nradii,
                        nradii=nradii,
                        adensity=adensity)
 
+
 @workflow.command(context_settings=CONTEXT_SETTINGS,
-               short_help="Initial anion geometric optimization.")
+                  short_help="Initial anion geometric optimization.")
 @click.argument('filename')
 @click.option('--charge', '-c', default=0)
 def optimize(filename, charge):
