@@ -201,34 +201,35 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
             print("Minimum Angle = " + str(angles.min()))
             print("Maximum Angle = " + str(angles.max()))
 
-        if interp_mesh == (0.0, 0.0):
-            new_radii = np.transpose(radii)
-            new_angles = np.transpose(angles)
-            new_energy = np.transpose(energy)
-        else:
-            new_angles, new_radii = np.mgrid[
-                                    angles.min():angles.max() + interp_mesh[0]
-                                    :interp_mesh[0],
-                                    max_min_radius:min_max_radius
-                                                   + interp_mesh[1]
-                                    :interp_mesh[1]
-                                    ]
+        all_radii.append(radii)
+        all_angles.append(angles)
+        all_energy.append(energy)
 
-            if verbose:
-                print('-------------')
-                print('Shape new_angles: ' + str(new_angles.shape))
-                print('Shape new_radii: ' + str(new_radii.shape))
-                print("New Minimum Angle = " + str(new_angles.min()))
-                print("New Maximum Angle = " + str(new_angles.max()))
+    if interp_mesh == (0.0, 0.0):
+        new_radii = np.transpose(all_radii)
+        new_angles = np.transpose(all_angles)
+        new_energy = np.transpose(all_energy)
+    else:
+        new_angles, new_radii = np.mgrid[
+                                all_angles.min():all_angles.max() +
+                                                 interp_mesh[0]
+                                :interp_mesh[0],
+                                max_min_radius:min_max_radius
+                                               + interp_mesh[1]
+                                :interp_mesh[1]
+                                ]
 
-            tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
+        if verbose:
+            print('-------------')
+            print('Shape new_angles: ' + str(new_angles.shape))
+            print('Shape new_radii: ' + str(new_radii.shape))
+            print("New Minimum Angle = " + str(new_angles.min()))
+            print("New Maximum Angle = " + str(new_angles.max()))
 
-            new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
-                                             tck)
+        tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
 
-        all_radii.append(new_radii)
-        all_angles.append(new_angles)
-        all_energy.append(new_energy)
+        new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
+                                         tck)
 
     total_radii = np.concatenate(tuple(all_radii))
     total_angles = np.concatenate(tuple(all_angles))
@@ -539,6 +540,7 @@ def reference(reference_dir, coulomb_charge=0):
         - np.array([coulomb_potential(coulomb_charge, 1, radius) for radius in radii])
 
     minimum_energy = np.array([min(energies)]*len(energies))
+
 
     plt.figure()
     plt.xlabel("Radius (Angstrom)", size="x-large")
