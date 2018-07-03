@@ -63,11 +63,11 @@ def optimize(filename, charge=None):
     """
 
     try:
-        # Load the POSCAR into a Cage
-        anion = cage.core.Cage.from_poscar(filename)
-    except ValueError:
-        # If that fails, try other file formats supported by pymatgen
+        # Load the Cage from the file provided
         anion = cage.core.Cage.from_file(filename)
+    except ValueError:
+        # If that fails, try the POSCAR format
+        anion = cage.core.Cage.from_poscar(filename)
 
     # Set the charge for the molecule
     if charge:
