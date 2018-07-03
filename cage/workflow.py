@@ -98,11 +98,8 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                              + os.path.join(dir, "input") + " > " \
                              + os.path.join(dir, "result.out")
 
-            clean_command = "find . -name *gridpts* | xargs -n1 rm"
-
             fws_list.append(
-                Firework(tasks= [ScriptTask.from_str(nwchem_command),
-                                 ScriptTask.from_str(clean_command)],
+                Firework(tasks= [ScriptTask.from_str(nwchem_command)],
                          name= operation + " " + geo)
             )
 
@@ -137,10 +134,7 @@ def optimize_workflow(filename, charge=0):
                        + os.path.join(optimize_dir, "input") + " > " \
                        + os.path.join(optimize_dir, "result.out")
 
-    clean_command = "find . -name *gridpts* | xargs -n1 rm"
-
-    fw = Firework(tasks=[ScriptTask.from_str(optimize_command),
-                         ScriptTask.from_str(clean_command)],
+    fw = Firework(tasks=[ScriptTask.from_str(optimize_command)],
                   name="Run Nwchem")
 
     LAUNCHPAD.add_wf(
