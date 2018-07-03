@@ -205,14 +205,18 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         all_angles.append(angles)
         all_energy.append(energy)
 
+    total_radii = np.concatenate(tuple(all_radii), 1)
+    total_angles = np.concatenate(tuple(all_angles), 1)
+    total_energy = np.concatenate(tuple(all_energy), 1)
+
     if interp_mesh == (0.0, 0.0):
-        new_radii = np.transpose(all_radii)
-        new_angles = np.transpose(all_angles)
-        new_energy = np.transpose(all_energy)
+        new_radii = np.transpose(total_radii)
+        new_angles = np.transpose(total_angles)
+        new_energy = np.transpose(total_energy)
     else:
         new_angles, new_radii = np.mgrid[
-                                all_angles.min():all_angles.max() +
-                                                 interp_mesh[0]
+                                total_angles.min():total_angles.max() +
+                                                   interp_mesh[0]
                                 :interp_mesh[0],
                                 max_min_radius:min_max_radius
                                                + interp_mesh[1]
@@ -226,42 +230,39 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
             print("New Minimum Angle = " + str(new_angles.min()))
             print("New Maximum Angle = " + str(new_angles.max()))
 
-        tck = interpolate.bisplrep(angles, radii, energy, s=0.1)
+        tck = interpolate.bisplrep(total_angles, total_radii, total_energy,
+                                   s=1)
 
         new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
                                          tck)
 
-    total_radii = np.concatenate(tuple(all_radii))
-    total_angles = np.concatenate(tuple(all_angles))
-    total_energy = np.concatenate(tuple(all_energy))
-
     if coulomb_charge is not 0:
         coulomb_energy = np.array([[coulomb_potential(-coulomb_charge,1, r)
-                                    for r in row] for row in total_radii])
-        total_energy -= coulomb_energy
+                                    for r in row] for row in new_radii])
+        new_energy -= coulomb_energy
 
     if reference_energy is None:
-        total_energy -= total_energy.min()
+        new_energy -= new_energy.min()
     else:
-        total_energy -= reference_energy
+        new_energy -= reference_energy
 
     # If no energy range is specified by the user, take (min, max)
     if energy_range == (0.0, 0.0):
-        energy_range = (total_energy.min(), total_energy.max())
+        energy_range = (new_energy.min(), new_energy.max())
 
     contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
 
     # Plot the landscape
     plt.figure()
-    plt.pcolor(total_angles, total_radii, total_energy, vmin=energy_range[0],
+    plt.pcolor(new_angles, new_radii, new_energy, vmin=energy_range[0],
                vmax=energy_range[1], cmap='viridis')
     cbar = plt.colorbar()
     cbar.set_label('Energy (eV)', size='x-large')
-    cs = plt.contour(total_angles, total_radii, total_energy, colors='black',
+    cs = plt.contour(new_angles, new_radii, new_energy, colors='black',
                      levels=contour_levels, linewidths=0.6)
 
     for angle in facet_angles:
-        plt.plot([angle, angle], [total_radii.min(), total_radii.max()],
+        plt.plot([angle, angle], [new_radii.min(), new_radii.max()],
                  color='k', linestyle='-', linewidth=1)
     xlabel = []
     for i in range(len(facet_angles)):
