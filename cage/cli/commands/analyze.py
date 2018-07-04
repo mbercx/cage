@@ -214,14 +214,10 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         new_angles = np.transpose(total_angles)
         new_energy = np.transpose(total_energy)
     else:
-        new_angles, new_radii = np.mgrid[
-                                total_angles.min():total_angles.max() +
-                                                   interp_mesh[0]
-                                :interp_mesh[0],
-                                max_min_radius:min_max_radius
-                                               + interp_mesh[1]
-                                :interp_mesh[1]
-                                ]
+        new_angles, new_radii = \
+            np.mgrid[total_angles.min():total_angles.max():interp_mesh[0],
+            max_min_radius:min_max_radius:interp_mesh[1]
+            ]
 
         if verbose:
             print('-------------')
