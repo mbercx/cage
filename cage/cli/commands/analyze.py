@@ -154,28 +154,61 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     all_angles = []
     all_energy = []
 
-    # TODO There needs to be a better way of interpolating this...
-    # Gather the data into one landscape
-    for landscape in chain_landscapes:
-        data = landscape.datapoints
-
-        all_radii.append(data['Distance'])
-        all_angles.append(data['Angle'])
-        all_energy.append(data['Energy'])
-
-    total_radii = np.concatenate(all_radii)
-    total_angles = np.concatenate(all_angles)
-    total_energy = np.concatenate(all_energy)
-
-    total_coordinates = np.array([total_radii, total_angles]).transpose()
-
     if interp_mesh == (0.0, 0.0):
+
+        for landscape in chain_landscapes:
+
+            data = landscape.datapoints
+
+            data['Distance'] = np.round(data['Distance'], 5)
+            data = np.sort(data, order=['Distance', 'Angle'])
+
+            # Find the number of radii and angles
+            r_init = data['Distance'][0]
+            nangles = 1
+            while abs(data['Distance'][nangles] - r_init) < 1e-5:
+                nangles += 1
+            nradii = int(len(data) / nangles)
+
+            if verbose:
+                print('')
+                print('-----------')
+                print('Number of Angles = ' + str(nangles))
+                print('Number of Radii = ' + str(nradii))
+
+            # Get the right format for the data
+            radii = data['Distance'].reshape(nradii, nangles)
+            angles = data['Angle'].reshape(nradii, nangles)
+            energy = data['Energy'].reshape(nradii, nangles)
+
+            if verbose:
+                print('Shape angles: ' + str(angles.shape))
+                print('Shape radii: ' + str(radii.shape))
+                print('Shape energy: ' + str(energy.shape))
+
+                print("Minimum Angle = " + str(angles.min()))
+                print("Maximum Angle = " + str(angles.max()))
 
         new_radii = np.transpose(total_radii)
         new_angles = np.transpose(total_angles)
         new_energy = np.transpose(total_energy)
 
     else:
+
+        # Gather the data into one landscape
+        for landscape in chain_landscapes:
+            data = landscape.datapoints
+
+            all_radii.append(data['Distance'])
+            all_angles.append(data['Angle'])
+            all_energy.append(data['Energy'])
+
+        total_radii = np.concatenate(all_radii)
+        total_angles = np.concatenate(all_angles)
+        total_energy = np.concatenate(all_energy)
+
+        total_coordinates = np.array([total_radii, total_angles]).transpose()
+
         # Set up the interpolation mesh
         new_angles, new_radii = np.mgrid[
                                 total_angles.min():total_angles.max():interp_mesh[0],
