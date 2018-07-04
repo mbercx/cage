@@ -150,53 +150,14 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         print("Facet Angles:")
         print(facet_angles)
 
-    # facet_angles = [0, landscape_chain[0].datapoints['Angle'].max()]
-    #
-    # for lands in landscape_chain[1:]:
-    #
-    #     if verbose:
-    #         print('Maximum angle = ' + str(facet_angles[-1]))
-    #
-    #     lands.datapoints['Angle'] += facet_angles[-1]
-    #     facet_angles.append(lands.datapoints['Angle'].max())
-
     all_radii = []
     all_angles = []
     all_energy = []
 
     # TODO There needs to be a better way of interpolating this...
-    # Interpolate the landscapes
+    # Gather the data into one landscape
     for landscape in chain_landscapes:
         data = landscape.datapoints
-
-        # data['Distance'] = np.round(data['Distance'], 5)
-        # data = np.sort(data, order=['Distance', 'Angle'])
-        #
-        # # Find the number of radii and angles
-        # r_init = data['Distance'][0]
-        # nangles = 1
-        # while abs(data['Distance'][nangles] - r_init) < 1e-5:
-        #     nangles += 1
-        # nradii = int(len(data) / nangles)
-        #
-        # if verbose:
-        #     print('')
-        #     print('-----------')
-        #     print('Number of Angles = ' + str(nangles))
-        #     print('Number of Radii = ' + str(nradii))
-        #
-        # # Get the right format for the data
-        # radii = data['Distance'].reshape(nradii, nangles)
-        # angles = data['Angle'].reshape(nradii, nangles)
-        # energy = data['Energy'].reshape(nradii, nangles)
-        #
-        # if verbose:
-        #     print('Shape angles: ' + str(angles.shape))
-        #     print('Shape radii: ' + str(radii.shape))
-        #     print('Shape energy: ' + str(energy.shape))
-        #
-        #     print("Minimum Angle = " + str(angles.min()))
-        #     print("Maximum Angle = " + str(angles.max()))
 
         all_radii.append(data['Distance'])
         all_angles.append(data['Angle'])
@@ -215,13 +176,11 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         new_energy = np.transpose(total_energy)
 
     else:
-
+        # Set up the interpolation mesh
         new_angles, new_radii = np.mgrid[
                                 total_angles.min():total_angles.max():interp_mesh[0],
                                 max_min_radius:min_max_radius:interp_mesh[1]
                                 ]
-        new_coords = np.vstack([new_radii.ravel(),
-                                new_angles.ravel()]).transpose()
 
         if verbose:
             print('-------------')
@@ -230,20 +189,17 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
             print("New Minimum Angle = " + str(new_angles.min()))
             print("New Maximum Angle = " + str(new_angles.max()))
 
+        # Interpolation time!
         new_energy = interpolate.griddata(total_coordinates, total_energy,
-                                          new_coords, method="cubic")
+                                          (new_radii, new_angles), method="cubic")
 
-        # tck = interpolate.bisplrep(total_angles, total_radii, total_energy,
-        #                            s=0.1)
-        #
-        # new_energy = interpolate.bisplev(new_angles[:, 0], new_radii[0, :],
-        #                                  tck)
-
+    # Add the Coulomb reference energy if requested
     if coulomb_charge is not 0:
         coulomb_energy = np.array([[coulomb_potential(-coulomb_charge, 1, r)
                                     for r in row] for row in new_radii])
         new_energy -= coulomb_energy
 
+    # Compare the energies versus an reference energy if provided
     if reference_energy is None:
         new_energy -= new_energy.min()
     else:
@@ -257,12 +213,12 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
     # Plot the landscape
     plt.figure()
-    plt.pcolor(new_angles.ravel(), new_radii.ravel(), new_energy,
+    plt.pcolor(new_angles, new_radii, new_energy,
                vmin=energy_range[0],
                vmax=energy_range[1], cmap='viridis')
     cbar = plt.colorbar()
     cbar.set_label('Energy (eV)', size='x-large')
-    cs = plt.contour(new_angles.ravel(), new_radii.ravel(), new_energy,
+    cs = plt.contour(new_angles, new_radii, new_energy,
                      colors='black',
                      levels=contour_levels, linewidths=0.6)
 
