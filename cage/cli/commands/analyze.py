@@ -189,9 +189,13 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
                 print("Minimum Angle = " + str(angles.min()))
                 print("Maximum Angle = " + str(angles.max()))
 
-        new_radii = np.transpose(total_radii)
-        new_angles = np.transpose(total_angles)
-        new_energy = np.transpose(total_energy)
+            all_radii.append(radii)
+            all_angles.append(angles)
+            all_energy.append(energy)
+
+        new_radii = np.concatenate(tuple(all_radii), 1).transpose()
+        new_angles = np.concatenate(tuple(all_angles), 1).transpose()
+        new_energy = np.concatenate(tuple(all_energy), 1).transpose()
 
     else:
 
