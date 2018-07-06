@@ -98,8 +98,14 @@ class Study(MSONable):
                     except FileExistsError:
                         print(geo_dir + ' exists, skipping...')
 
+                    directory_directives = [
+                        ("scratch_dir", os.path.abspath(geo_dir)),
+                        ("permanent_dir", os.path.abspath(geo_dir))
+                    ]
+
                     # Set up the input file
-                    nwinput = nwchem.NwInput(structure, self.tasks, **kwargs)
+                    nwinput = nwchem.NwInput(structure, self.tasks,
+                                             directory_directives, **kwargs)
                     nwinput.write_file(os.path.join(abs_dir, comp_dir,
                                                     geo_dir,'input'))
 
