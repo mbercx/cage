@@ -99,8 +99,10 @@ class Study(MSONable):
                         print(geo_dir + ' exists, skipping...')
 
                     directory_directives = [
-                        ("scratch_dir", os.path.abspath(geo_dir)),
-                        ("permanent_dir", os.path.abspath(geo_dir))
+                        ("scratch_dir", os.path.abspath(os.path.join(
+                            comp_dir, geo_dir))),
+                        ("permanent_dir", os.path.abspath(os.path.join(
+                            comp_dir, geo_dir)))
                     ]
 
                     # Set up the input file
