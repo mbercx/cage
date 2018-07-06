@@ -91,25 +91,23 @@ class Study(MSONable):
 
                 for structure in self._comp_dict[comp]:
 
-                    geo_dir = 'geo' + str(geo_number)
+                    geo_dir = os.path.join(abs_dir, comp_dir,
+                                           'geo' + str(geo_number))
 
                     try:
-                        os.mkdir(os.path.join(abs_dir, comp_dir, geo_dir))
+                        os.mkdir(geo_dir)
                     except FileExistsError:
                         print(geo_dir + ' exists, skipping...')
 
                     directory_directives = [
-                        ("scratch_dir", os.path.abspath(os.path.join(
-                            comp_dir, geo_dir))),
-                        ("permanent_dir", os.path.abspath(os.path.join(
-                            comp_dir, geo_dir)))
+                        ("scratch_dir", geo_dir),
+                        ("permanent_dir", geo_dir)
                     ]
 
                     # Set up the input file
                     nwinput = nwchem.NwInput(structure, self.tasks,
                                              directory_directives, **kwargs)
-                    nwinput.write_file(os.path.join(abs_dir, comp_dir,
-                                                    geo_dir,'input'))
+                    nwinput.write_file(os.path.join(geo_dir, 'input'))
 
                     geo_number += 1
 
