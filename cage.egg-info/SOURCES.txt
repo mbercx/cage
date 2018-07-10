@@ -6,6 +6,7 @@ cage/landscape.py
 cage/path.py
 cage/study.py
 cage/utils.py
+cage/workflow.py
 cage.egg-info/PKG-INFO
 cage.egg-info/SOURCES.txt
 cage.egg-info/dependency_links.txt

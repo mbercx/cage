@@ -1068,18 +1068,18 @@ class OccupiedCage(Cage):
         """
         pass  #TODO
 
-    @classmethod
-    def from_file(cls, filename):
-        """
-        Initialize an OccupiedCage from a file.
-
-        Args:
-            filename:
-
-        Returns:
-
-        """
-        pass  #TODO
+    # @classmethod
+    # def from_file(cls, filename):
+    #     """
+    #     Initialize an OccupiedCage from a file.
+    #
+    #     Args:
+    #         filename:
+    #
+    #     Returns:
+    #
+    #     """
+    #     pass  #TODO
 
     def remove_surface_facet(self, facet):
         """

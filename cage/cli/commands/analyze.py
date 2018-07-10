@@ -237,7 +237,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
     # Compare the energies versus an reference energy if provided
     if reference_energy is None:
-        new_energy -= new_energy.min()
+        new_energy -= np.nanmin(new_energy)
     else:
         new_energy -= reference_energy
 
