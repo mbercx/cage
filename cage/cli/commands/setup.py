@@ -529,7 +529,7 @@ def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
 
     try:
         # Load the structure file into a Cage object
-        anion = cage.core.Cage.from_file(filename)
+        anion = cage.core.OccupiedCage.from_file(filename)
     except ValueError:
         # If the conventional formats fail, try using the from_poscar method.
         anion = cage.core.Cage.from_poscar(filename)
