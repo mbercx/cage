@@ -33,7 +33,7 @@ CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels, verbose, coulomb_charge,
-                       reference_energy=None):
+                       reference_energy=None, interp_method="griddata"):
     lands_dir = os.path.abspath(lands_dir)
 
     dir_list = [os.path.abspath(os.path.join(lands_dir, file))
@@ -225,9 +225,23 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
             print("New Minimum Angle = " + str(new_angles.min()))
             print("New Maximum Angle = " + str(new_angles.max()))
 
-        # Interpolation time!
-        new_energy = interpolate.griddata(total_coordinates, total_energy,
-                                          (new_radii, new_angles), method="cubic")
+        # Interpolation
+        if interp_method == "griddata":
+            new_energy = interpolate.griddata(
+                total_coordinates, total_energy, (new_radii, new_angles),
+                method="cubic"
+            )
+
+        elif interp_method == "spline":
+            tck = interpolate.bisplrep(
+                total_angles, total_radii, total_energy, s=1
+            )
+
+            new_energy = interpolate.bisplev(
+                new_angles[:, 0], new_radii[0, :], tck
+            )
+        else:
+            raise IOError("Interpolation method not recognized.")
 
     # Add the Coulomb reference energy if requested
     if coulomb_charge is not 0:

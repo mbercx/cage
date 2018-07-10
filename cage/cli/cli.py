@@ -196,8 +196,10 @@ def analyze():
 @click.option('--verbose', '-v', is_flag=True)
 @click.option("--coulomb_charge", "-c", default=0)
 @click.option("--reference_energy", "-r", default=0.0)
+@click.option("--interp_method", "-m", default="griddata")
 def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
-              contour_levels, verbose, coulomb_charge, reference_energy):
+              contour_levels, verbose, coulomb_charge, reference_energy,
+              interp_method):
     """ Analyze the landscape data. """
     from cage.cli.commands.analyze import landscape_analysis
 
@@ -212,7 +214,8 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels=contour_levels,
                        verbose=verbose,
                        coulomb_charge=coulomb_charge,
-                       reference_energy=reference_energy)
+                       reference_energy=reference_energy,
+                       interp_method=interp_method)
 
 
 @analyze.command(context_settings=CONTEXT_SETTINGS)
