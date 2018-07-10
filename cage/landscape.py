@@ -265,6 +265,7 @@ class LandscapeAnalyzer(MSONable):
                   "defining the coordinates of the landscape, the program "
                   "will automatically determine the closest facet to the "
                   "cation in the first datapoint.")
+
             cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
             init_cation_coords = [site.coords for site in cage_init.sites
                                   if site.specie == pmg.Element(cation)][-1]
@@ -278,7 +279,8 @@ class LandscapeAnalyzer(MSONable):
 
         for data in self.data:
 
-            cation_coords = [site.coords for site in data["molecules"][0].sites
+            cage = Cage.from_molecule(data["molecules"][0])
+            cation_coords = [site.coords for site in cage.sites
                              if site.specie == pmg.Element(cation)]
 
             if len(cation_coords) == 0:
@@ -292,7 +294,7 @@ class LandscapeAnalyzer(MSONable):
 
             if coordinates == "polar":
 
-                r = np.linalg.norm(cation_coords)
+                r = np.linalg.norm(cation_coords - cage.anion_center)
                 theta = angle_between(facet.center, cation_coords)
                 if theta > math.pi/2:
                     theta = math.pi - theta

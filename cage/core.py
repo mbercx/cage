@@ -123,6 +123,13 @@ class Cage(Molecule):
                                                         SYMMETRY_TOLERANCE)
         
         return self._symmops
+
+    @property
+    def anion_center(self):
+        anion_coords = [site.coords for site in self.sites
+                        if site.specie not in OccupiedCage.CATIONS]
+
+        return sum(anion_coords) / len(anion_coords)
         
     @classmethod
     def from_poscar(cls, filename):
@@ -951,10 +958,7 @@ class OccupiedCage(Cage):
                 molecule.
         """
 
-        anion_coords = [site.coords for site in self.sites
-                        if site.specie not in OccupiedCage.CATIONS]
-
-        anion_center = sum(anion_coords)/len(anion_coords)
+        anion_center = self.anion_center
 
         if point is not None:
             anion_center -= point
