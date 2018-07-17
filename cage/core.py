@@ -1169,7 +1169,7 @@ class Facet(SiteCollection, MSONable):
         normal = normal/np.linalg.norm(normal)
 
         # Flip normal in case it is pointing towards the origin.
-        if utils.angle_between(-self.center, self._normal) < pi/2:
+        if utils.angle_between(-self.center, normal) < math.pi/2:
             normal = - normal
 
         return normal
