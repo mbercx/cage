@@ -288,8 +288,6 @@ class LandscapeAnalyzer(MSONable):
             elif len(cation_coords) == 1:
                 cation_coords = cation_coords[0]
             else:
-                print("More than one cation found in molecule. Taking the last"
-                      "cation of the list.")
                 cation_coords = cation_coords[-1]
 
             if coordinates == "polar":
