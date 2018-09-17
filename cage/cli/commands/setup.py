@@ -6,12 +6,13 @@ import io
 import math
 
 from cage.utils import unit_vector
+from cage.core import Cage, OccupiedCage
+from cage.study import Study
+from cage.landscape import Landscape
 
 import numpy as np
 import pymatgen as pmg
 import pymatgen.io.nwchem as nwchem
-
-import cage
 
 """
 Scripts to set up calculations for studying the geometry and energy landscapes 
@@ -64,10 +65,10 @@ def optimize(filename, charge=None):
 
     try:
         # Load the Cage from the file provided
-        anion = cage.core.Cage.from_file(filename)
+        anion = Cage.from_file(filename)
     except ValueError:
         # If that fails, try the POSCAR format
-        anion = cage.core.Cage.from_poscar(filename)
+        anion = Cage.from_poscar(filename)
 
     # Set the charge for the molecule
     if charge:
@@ -103,10 +104,10 @@ def docksetup(filename, cation, distance, facets, verbose):
 
     try:
         # Load the POSCAR into a Cage
-        anion = cage.core.Cage.from_poscar(filename)
+        anion = Cage.from_poscar(filename)
     except ValueError:
         # If that fails, try other file formats supported by pymatgen
-        anion = cage.core.Cage.from_file(filename)
+        anion = Cage.from_file(filename)
 
     if verbose:
         print("Setting up surface facets...")
@@ -232,10 +233,10 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
     # Load the Cage from the file
     try:
         # If that fails, try other file formats supported by pymatgen
-        anion = cage.core.Cage.from_file(filename)
+        anion = Cage.from_file(filename)
     except ValueError:
         # If that fails, try the VASP POSCAR format
-        anion = cage.core.Cage.from_poscar(filename)
+        anion = Cage.from_poscar(filename)
 
     # Center the anion around the origin
     anion.center()
@@ -326,7 +327,7 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
                                alternate_directives=ALT_SETUP)]
 
         # Set up the input files
-        study = cage.study.Study(molecules, tasks)
+        study = Study(molecules, tasks)
         study.set_up_input(edge_dir, sort_comp=False,
                            geometry_options=GEO_SETUP)
 
@@ -340,10 +341,10 @@ def pathsetup(filename, cation, distance, facets, edges):
     # Load the Cage from the file
     try:
         # Load the POSCAR into a Cage
-        anion = cage.core.Cage.from_poscar(filename)
+        anion = Cage.from_poscar(filename)
     except ValueError:
         # If that fails, try other file formats supported by pymatgen
-        anion = cage.core.Cage.from_file(filename)
+        anion = Cage.from_file(filename)
 
     # TODO Find charge automatically
     if pmg.Element('C') in [site.specie for site in anion.sites]:
@@ -529,10 +530,10 @@ def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
 
     try:
         # Load the structure file into a Cage object
-        anion = cage.core.OccupiedCage.from_file(filename)
+        anion = OccupiedCage.from_file(filename)
     except ValueError:
         # If the conventional formats fail, try using the from_poscar method.
-        anion = cage.core.Cage.from_poscar(filename)
+        anion = Cage.from_poscar(filename)
 
     if verbose:
         print("Setting up surface facets...")
@@ -602,6 +603,53 @@ def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
                                                 'geometry.xyz'))
 
 
+def spheresetup(filename, cation, radius, z_axis=None, density=15):
+
+    cage = Cage.from_file(filename)
+    cage.center()
+
+    if not z_axis:
+        print(cage)
+        z_axis = input("\n Please choose the direction of the z axis (vector "
+                   "format, spaces between the coordinates): ")
+
+        z_axis = np.array([float(number) for number in z_axis.split(" ")])
+
+    sphere_landscape = Landscape.create_sphere(
+        radius=radius,
+        direction=z_axis,
+        density=density
+    )
+
+    molecule_list = set_up_molecules(cage, sphere_landscape, cation)
+
+    total_mol = cage.copy()
+
+    # Set up an xyz file to visualize the edge and total landscape
+    for point in sphere_landscape.points:
+        try:
+            total_mol.append(pmg.Specie(cation, 1), point,
+                             validate_proximity=False)
+        except ValueError:
+            pass
+
+    # Set up the task for the calculations
+    tasks = [nwchem.NwTask(molecule_list[0].charge, None, BASIS,
+                           theory="dft",
+                           operation="energy",
+                           theory_directives=THEORY_SETUP,
+                           alternate_directives=ALT_SETUP)]
+
+    current_dir = os.getcwd()
+    sphere_dir = os.path.join(current_dir, "sphere_" + str(radius))
+
+    # Set up the input files
+    study = Study(molecule_list, tasks)
+    study.set_up_input(sphere_dir, sort_comp=False, geometry_options=GEO_SETUP)
+
+    # Set up an xyz file with all the paths
+    total_mol.to(fmt="xyz", filename=os.path.join(sphere_dir, "total_mol.xyz"))
+
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose):
     # Get the docking directories
@@ -648,7 +696,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
             raise IOError("Requested cation is not found in the molecule.")
 
         # Set up the occupied anion
-        occmol = cage.core.OccupiedCage.from_molecule(mol)
+        occmol = OccupiedCage.from_molecule(mol)
         occmol.center()
         occmol.find_surface_facets(ignore=IGNORE)
         dock = occmol.find_closest_facet(cat_coords)
@@ -733,7 +781,7 @@ def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                                    alternate_directives=ALT_SETUP)]
 
             # Set up the input files
-            study = cage.study.Study(molecules, tasks)
+            study = Study(molecules, tasks)
             study.set_up_input(edge_dir, sort_comp=False,
                                geometry_options=GEO_SETUP)
 
@@ -770,7 +818,7 @@ def set_up_edge_landscape(facet1, facet2, endpoint_radii=(2, 5),
     """
     line_vector1 = facet1.center / np.linalg.norm(facet1.center)
     line_vector2 = facet2.center / np.linalg.norm(facet2.center)
-    lands = cage.landscape.Landscape.from_vertices(
+    lands = Landscape.from_vertices(
         [line_vector1 * endpoint_radii[0], line_vector1 * endpoint_radii[1]],
         num=number_of_radii
     )
@@ -819,7 +867,7 @@ def set_up_molecules(molecule, landscape, cation):
             molecules.append(configuration)
 
         except ValueError:
-            print("ValueError detected when appending the Li site. "
+            print("ValueError detected when appending the cation site. "
                   "Ignoring this point in the energy landscape.")
 
     return molecules
