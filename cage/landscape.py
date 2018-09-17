@@ -73,7 +73,18 @@ class Landscape(MSONable):
         """
         return sum(self.points)/len(self.points)
 
+    def change_center(self, center):
+        """
 
+        Returns:
+
+        """
+        new_points = []
+
+        for point in self.points:
+            new_points.append(point - self.center + center)
+
+        self._points = new_points
 
     def extend_by_rotation(self, axis, density=10, remove_endline=False,
                            distance_tol=1e-3):
@@ -184,7 +195,7 @@ class Landscape(MSONable):
         return Landscape(points)
 
     @classmethod
-    def as_sphere(cls, radius, center=np.array([0, 0, 0]),
+    def create_sphere(cls, radius, center=np.array([0, 0, 0]),
                   direction=np.array([0,0,1]), density=15):
         """
         Set up a spherical landscape with a specified radius.
@@ -219,6 +230,8 @@ class Landscape(MSONable):
             axis= unit_vector(direction) * 2 * math.pi,
             density=density
         )
+
+        sphere_landscape.change_center(center)
 
         return sphere_landscape
 
