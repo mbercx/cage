@@ -38,7 +38,11 @@ class Landscape(MSONable):
 
         :param points: (List of numpy.array)
         """
-        self._points = points
+
+        if type(points) is list:
+            self._points = points
+        else:
+            raise TypeError("Provided points are not formatted in a List.")
 
     def __add__(self, other):
         """
@@ -69,37 +73,10 @@ class Landscape(MSONable):
         """
         return sum(self.points)/len(self.points)
 
-    @classmethod
-    def from_vertices(cls, vertices, num=10):
-        """
-        Define a landscape by providing the vertices (end points in the case of
-        a line).
 
-        :param vertices: (List of numpy.array)
-        :param num: (int)
-        """
-        # Calculate the points of the Landscape depending on the number of
-        # vertices
-        if len(vertices) == 1:
-            raise IOError("Number of vertices must be at least two.")
-        elif len(vertices) == 2:
-            if np.linalg.norm(vertices[1] - vertices[0]) < 1e-3:
-                raise IOError("Vertices are too close to each other.")
-            else:
-                vector = vertices[1] - vertices[0]
-                length = np.linalg.norm(vector)
-                unitvector = vector / length
-                npoints = num  # int(length * num + 1)
-                mesh_distance = length / npoints
-                points = []
-                for i in range(npoints):
-                    points.append(vertices[0] + i * mesh_distance * unitvector)
-        else:
-            raise IOError("Higher dimensions than 2 not implemented yet.")
 
-        return Landscape(points)
-
-    def extend_by_rotation(self, axis, density=10, remove_endline=False):
+    def extend_by_rotation(self, axis, density=10, remove_endline=False,
+                           distance_tol=1e-3):
         """
         Extends the landscape using an axis vector and turning all the vertices
         in the landscape around the origin by a value and direction determined
@@ -129,7 +106,8 @@ class Landscape(MSONable):
         for matrix in rotation_matrices:
             for point in self.points:
                 newpoint = point.dot(matrix)
-                if not (newpoint == np.array([0, 0, 0])).all():
+                distance = np.linalg.norm(point - newpoint)
+                if distance > distance_tol:
                     points.append(newpoint)
 
         self._points = points.copy()
@@ -164,6 +142,8 @@ class Landscape(MSONable):
 
         return dict
 
+
+
     @classmethod
     def from_file(cls, filename, fmt="json"):
         """
@@ -172,6 +152,75 @@ class Landscape(MSONable):
         :return:
         """
         pass
+
+    @classmethod
+    def from_vertices(cls, vertices, num=10):
+        """
+        Define a landscape by providing the vertices (end points in the case of
+        a line).
+
+        :param vertices: (List of numpy.array)
+        :param num: (int)
+        """
+        # Calculate the points of the Landscape depending on the number of
+        # vertices
+        if len(vertices) == 1:
+            raise IOError("Number of vertices must be at least two.")
+        elif len(vertices) == 2:
+            if np.linalg.norm(vertices[1] - vertices[0]) < 1e-3:
+                raise IOError("Vertices are too close to each other.")
+            else:
+                vector = vertices[1] - vertices[0]
+                length = np.linalg.norm(vector)
+                unitvector = vector / length
+                npoints = num  # int(length * num + 1)
+                mesh_distance = length / npoints
+                points = []
+                for i in range(npoints):
+                    points.append(vertices[0] + i * mesh_distance * unitvector)
+        else:
+            raise IOError("Higher dimensions than 2 not implemented yet.")
+
+        return Landscape(points)
+
+    @classmethod
+    def as_sphere(cls, radius, center=np.array([0, 0, 0]),
+                  direction=np.array([0,0,1]), density=15):
+        """
+        Set up a spherical landscape with a specified radius.
+
+        Args:
+            radius:
+            center:
+            direction:
+            density:
+
+        Returns:
+
+        """
+        starting_point = radius * unit_vector(direction)
+
+        sphere_landscape = Landscape([starting_point, ])
+
+        if angle_between(np.array([1, 0, 0]), direction) < 1e-2:
+            axis = unit_vector(
+                np.cross(np.array([0, 1, 0]), starting_point)
+            )
+        else:
+            axis = unit_vector(
+                np.cross(np.array([1, 0, 0]), starting_point)
+            )
+
+        sphere_landscape.extend_by_rotation(
+            axis= axis * math.pi,
+            density=density)
+
+        sphere_landscape.extend_by_rotation(
+            axis= unit_vector(direction) * 2 * math.pi,
+            density=density
+        )
+
+        return sphere_landscape
 
 
 class LandscapeAnalyzer(MSONable):
@@ -311,6 +360,10 @@ class LandscapeAnalyzer(MSONable):
                 print((x, y))
 
                 coordinate = [x, y]
+
+            if coordinates == "angles":
+
+                pass #TODO
 
             energy_final = data['energies'][-1]
             coordinate.append(energy_final)
