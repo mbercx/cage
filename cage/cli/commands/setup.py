@@ -603,7 +603,7 @@ def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
                                                 'geometry.xyz'))
 
 
-def spheresetup(filename, cation, radius, z_axis=None, density=15):
+def spheresetup(filename, cation, radius, z_axis=None, density=20):
 
     cage = Cage.from_file(filename)
     cage.center()

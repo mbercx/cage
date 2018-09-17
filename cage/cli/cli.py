@@ -144,6 +144,21 @@ def reference(facet_index, filename, cation, distance, verbose):
               verbose=verbose)
 
 
+@setup.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('filename')
+@click.option('--cation', '-C', default='Li')
+@click.option('--radius', '-R', default=6.0)
+@click.option('--density', default=20)
+def sphere(filename, cation, radius, density):
+    """ Set up a spherical landscape calculation. """
+    from cage.cli.commands.setup import spheresetup
+
+    spheresetup(filename=filename,
+                cation=cation,
+                radius=radius,
+                density=density)
+
+
 @setup.group(context_settings=CONTEXT_SETTINGS)
 def twocat():
     """
