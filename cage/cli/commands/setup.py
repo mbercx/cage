@@ -603,35 +603,25 @@ def reference(facet_index, filename, cation, end_radius, start_radius=4.0,
                                                 'geometry.xyz'))
 
 
-def spheresetup(filename, cation, radius, z_axis=None, density=20):
+def spheresetup(filename, cation, radius, axis=None, density=20):
 
-    cage = Cage.from_file(filename)
-    cage.center()
+    anion = Cage.from_file(filename)
+    anion.center()
 
-    if not z_axis:
-        print(cage)
-        z_axis = input("\n Please choose the direction of the z axis (vector "
+    if not axis:
+        print(anion)
+        axis = input("\n Please choose the direction of the main axis (vector "
                    "format, spaces between the coordinates): ")
 
-        z_axis = np.array([float(number) for number in z_axis.split(" ")])
+        axis = np.array([float(number) for number in axis.split(" ")])
 
     sphere_landscape = Landscape.create_sphere(
         radius=radius,
-        direction=z_axis,
+        axis=axis,
         density=density
     )
 
-    molecule_list = set_up_molecules(cage, sphere_landscape, cation)
-
-    total_mol = cage.copy()
-
-    # Set up an xyz file to visualize the edge and total landscape
-    for point in sphere_landscape.points:
-        try:
-            total_mol.append(pmg.Specie(cation, 1), point,
-                             validate_proximity=False)
-        except ValueError:
-            pass
+    molecule_list = set_up_molecules(anion, sphere_landscape, cation)
 
     # Set up the task for the calculations
     tasks = [nwchem.NwTask(molecule_list[0].charge, None, BASIS,
@@ -652,8 +642,22 @@ def spheresetup(filename, cation, radius, z_axis=None, density=20):
     study = Study(molecule_list, tasks)
     study.set_up_input(sphere_dir, sort_comp=False, geometry_options=GEO_SETUP)
 
-    # Set up an xyz file with all the paths
+    total_mol = anion.copy()
+
+    # Set up an xyz file to visualize the edge and total landscape
+    for point in sphere_landscape.points:
+        try:
+            total_mol.append(pmg.Specie(cation, 1), point,
+                             validate_proximity=False)
+        except ValueError:
+            pass
+
+    # Write the axis coordinates to a file
+    with open(os.path.join(sphere_dir, "axis.xyz")) as file:
+        file.write(axis.tostring())
+
     total_mol.to(fmt="xyz", filename=os.path.join(sphere_dir, "total_mol.xyz"))
+
 
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose):
