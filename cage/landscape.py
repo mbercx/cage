@@ -95,8 +95,15 @@ class Landscape(MSONable):
 
         Args:
             axis (numpy.ndarray):
+            density:
+            remove_endline:
+            distance_tol:
+
+        Returns:
+
         """
-        # TODO Extend this method so it also allows rotations around other points than origin
+        # TODO Extend this method
+        # so it also allows rotations around other points than origin
 
         # Find the rotation matrices
         rotation_matrices = []
@@ -126,41 +133,53 @@ class Landscape(MSONable):
     def extend_by_translation(self, vector, density=10):
         """
         Extends the Landscape by translating the points along a certain vector.
-        :return:
+
+        Args:
+            vector:
+            density:
+
+        Returns:
+
         """
         pass
-
 
     def extend_from_point(self, point, extension, density=10):
         """
         Extends the Landscape by scaling the points from a specific point or
         origin, i.e. by homothetic transformations.
 
-        :param point:
-        :param extension:
-        :param density:
-        :return:
+        Args:
+            point:
+            extension:
+            density:
+
+        Returns:
+
         """
         pass
-
 
     def as_dict(self):
         """
         A JSON serializable dictionary of the Landscape.
-        :return: (dict)
+
+        Returns:
+
         """
-        dict = {"points": self.points}
+        d = {"points": self.points}
 
-        return dict
-
-
+        return d
 
     @classmethod
     def from_file(cls, filename, fmt="json"):
         """
         Load a Landscape from a file.
-        :param filename: (string)
-        :return:
+
+        Args:
+            filename:
+            fmt:
+
+        Returns:
+
         """
         pass
 
@@ -223,7 +242,7 @@ class Landscape(MSONable):
             )
 
         sphere_landscape.extend_by_rotation(
-            axis= axis * math.pi,
+            axis=axis*math.pi,
             density=density)
 
         sphere_landscape.extend_by_rotation(
@@ -284,27 +303,27 @@ class LandscapeAnalyzer(MSONable):
 
         # Find all the subdirectories in the specified directory
         dir_list = [d for d in os.listdir(directory)
-                   if os.path.isdir(os.path.join(directory, d))]
+                    if os.path.isdir(os.path.join(directory, d))]
 
         # Get all of the output of the calculations in the directory
 
         output = []
 
         if software == 'nwchem':
-            for dir in dir_list:
+            for directory in dir_list:
                 try:
                     out = nw.NwOutput(
-                        os.path.join(directory, dir, output_file)
+                        os.path.join(directory, directory, output_file)
                     )
                 except FileNotFoundError:
-                    print('Did not find output file in directory ' + dir)
+                    print('Did not find output file in directory ' + directory)
                 except IndexError:
                     print('Did not find output in ' + output_file +
-                          ' in directory ' + dir)
+                          ' in directory ' + directory)
 
                 # Check if the output has an error
                 if out.data[-1]['has_error']:
-                    print('Error found in output in directory ' + dir)
+                    print('Error found in output in directory ' + directory)
                 else:
                     if out.data[-1]['task_time'] == 0:
                         print('No timing data found for final task. '
@@ -312,7 +331,7 @@ class LandscapeAnalyzer(MSONable):
                               'successfully.')
 
                     output.append(out)
-                    print('Grabbed output in directory ' + dir)
+                    print('Grabbed output in directory ' + directory)
 
             # TODO This currently only considers the final NwChem task.
             # Not a very general approach, but maybe the most sensible?
@@ -323,7 +342,8 @@ class LandscapeAnalyzer(MSONable):
 
         return LandscapeAnalyzer(data, software=software)
 
-    def analyze_cation_energies(self, coordinates, reference=None, cation="Li"):
+    def analyze_cation_energies(self, coordinates, reference=None,
+                                cation="Li"):
         """
         Extract the total energies for all the calculations, and connect
         them with the proper coordinates. Currently supports the following
@@ -354,9 +374,9 @@ class LandscapeAnalyzer(MSONable):
                 )
 
                 cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
-                init_cation_coords = [site.coords for site in cage_init.sites
-                                      if site.specie == pmg.Element(cation)][
-                    -1]
+                init_cation_coords = [
+                    site.coords for site in cage_init.sites
+                    if site.specie == pmg.Element(cation)][-1]
                 facet_init = cage_init.facets[0]
                 for cage_facet in cage_init.facets:
                     if utils.distance(cage_facet.center, init_cation_coords) \
@@ -398,7 +418,7 @@ class LandscapeAnalyzer(MSONable):
 
                 datapoints.append(coordinate)
 
-        if coordinates=="spherical":
+        if coordinates == "spherical":
 
             pass
 
@@ -422,14 +442,20 @@ class LandscapeAnalyzer(MSONable):
         data[coord_name] = data[coord_name].max() - data[coord_name]
         self._datapoints = data
 
-
-    def plot_energies(self, dimension, style='trisurf'):
+    def plot_energies(self, dimension, coordinates="polar", style='trisurf'):
         """
         Plot the energy landscape from the datapoints.
-        :return:
+
+        Args:
+            dimension:
+            coordinates:
+            style:
+
+        Returns:
+
         """
         if len(self._datapoints) == 0:
-            self.analyze_cation_energies()
+            self.analyze_cation_energies(coordinates=coordinates)
 
         data = self.datapoints
 
@@ -479,8 +505,8 @@ class LandscapeAnalyzer(MSONable):
         Return a dictionary representing the LandscapeAnalyzer instance.
         :return:
         """
-        dict = {"@module": self.__class__.__module__,
-                "@class": self.__class__.__name__}
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__}
 
         data_list = []
         for chunk in self.data:
@@ -500,11 +526,11 @@ class LandscapeAnalyzer(MSONable):
 
             data_list.append(data_dict)
 
-        dict["data"] = data_list
-        dict["datapoints"] = self.datapoints
+        d["data"] = data_list
+        d["datapoints"] = self.datapoints
 
         # TODO MAKE THIS WORK datapoints after analysis
-        return dict
+        return d
 
     @classmethod
     def from_dict(cls, d):
@@ -588,6 +614,7 @@ def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
 
 def rotation_matrix(axis, theta):
     """
