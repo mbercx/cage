@@ -658,6 +658,8 @@ def spheresetup(filename, cation, radius, axis=None, density=20):
 
     total_mol.to(fmt="xyz", filename=os.path.join(sphere_dir, "total_mol.xyz"))
 
+    return sphere_dir
+
 
 def twocat_chainsetup(dock_dir, cation, operation, endradii, nradii, adensity,
                       tolerance, verbose):
