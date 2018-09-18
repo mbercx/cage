@@ -196,24 +196,24 @@ class Landscape(MSONable):
 
     @classmethod
     def create_sphere(cls, radius, center=np.array([0, 0, 0]),
-                  direction=np.array([0,0,1]), density=15):
+                      axis=np.array([0, 0, 1]), density=15):
         """
         Set up a spherical landscape with a specified radius.
 
         Args:
             radius:
             center:
-            direction:
+            axis:
             density:
 
         Returns:
 
         """
-        starting_point = radius * unit_vector(direction)
+        starting_point = radius * unit_vector(axis)
 
         sphere_landscape = Landscape([starting_point, ])
 
-        if angle_between(np.array([1, 0, 0]), direction) < 1e-2:
+        if angle_between(np.array([1, 0, 0]), axis) < 1e-2:
             axis = unit_vector(
                 np.cross(np.array([0, 1, 0]), starting_point)
             )
@@ -227,7 +227,7 @@ class Landscape(MSONable):
             density=density)
 
         sphere_landscape.extend_by_rotation(
-            axis= unit_vector(direction) * 2 * math.pi,
+            axis=unit_vector(axis) * 2 * math.pi,
             density=density
         )
 
@@ -265,13 +265,20 @@ class LandscapeAnalyzer(MSONable):
     @classmethod
     def from_data(cls, directory, output_file='result.out', software='nwchem'):
         """
-        Looks through all subdirectories of 'directory' and looks for output
-        files to extract data from to analyze.
+        Looks through all subdirectories of the provided directory and
+        extracts all output.
+
         :return:
         """
 
         # TODO Make subdirectory finder recursive?
+        # Currently the method only checks in the immediate subdirectories
+        # of the directory provided by the user. It might be useful to
+        # extend this to subdirectories further down the tree. However,
+        # maybe it's best to stick to calculating landscape properties in
+        # the same directory.
 
+        # Check if the directory exists
         if not os.path.isdir(directory):
             raise IOError("Directory " + directory + " not found.")
 
@@ -280,17 +287,20 @@ class LandscapeAnalyzer(MSONable):
                    if os.path.isdir(os.path.join(directory, d))]
 
         # Get all of the output of the calculations in the directory
+
         output = []
+
         if software == 'nwchem':
             for dir in dir_list:
                 try:
-                    out = nw.NwOutput(os.path.join(directory, dir,
-                                                      output_file))
+                    out = nw.NwOutput(
+                        os.path.join(directory, dir, output_file)
+                    )
                 except FileNotFoundError:
                     print('Did not find output file in directory ' + dir)
                 except IndexError:
                     print('Did not find output in ' + output_file +
-                          ' in directory' + dir)
+                          ' in directory ' + dir)
 
                 # Check if the output has an error
                 if out.data[-1]['has_error']:
@@ -300,10 +310,12 @@ class LandscapeAnalyzer(MSONable):
                         print('No timing data found for final task. '
                               'Calculation might not have completed '
                               'successfully.')
+
                     output.append(out)
                     print('Grabbed output in directory ' + dir)
 
-            # TODO This currently only considers the final task. Not a very general approach, but maybe the most sensible?
+            # TODO This currently only considers the final NwChem task.
+            # Not a very general approach, but maybe the most sensible?
             data = [out.data[-1] for out in output]
 
         else:
@@ -311,81 +323,87 @@ class LandscapeAnalyzer(MSONable):
 
         return LandscapeAnalyzer(data, software=software)
 
-    def analyze_cation_energies(self, facet=None , cation="Li",
-                                coordinates="polar"):
+    def analyze_cation_energies(self, coordinates, reference=None, cation="Li"):
         """
-        Extract the total energies for all the calculations. This function is
-        written specifically for studying cation landscapes defined versus a
-        facet.
+        Extract the total energies for all the calculations, and connect
+        them with the proper coordinates. Currently supports the following
+        landscapes for analysis:
+
+        Interfacet wedges: 2D landscapes that connect two Facets via a
+        wedge. Polar coordinates are used to plot this landscape, and the
+        program needs a reference axis to determine an appropriate angle.
+
         :return:
         """
 
-        # If a facet is not provided, try to find the closest one to the first
-        # ion coordinate data point. This might not always work.
-        if not facet:
-            print("No Facet was provided. Since the facet is important for "
-                  "defining the coordinates of the landscape, the program "
-                  "will automatically determine the closest facet to the "
-                  "cation in the first datapoint.")
-
-            cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
-            init_cation_coords = [site.coords for site in cage_init.sites
-                                  if site.specie == pmg.Element(cation)][-1]
-            facet_init = cage_init.facets[0]
-            for cage_facet in cage_init.facets:
-                if utils.distance(cage_facet.center, init_cation_coords) \
-                    < utils.distance(facet_init.center, init_cation_coords):
-                    facet = cage_facet
-
         datapoints = []
 
-        for data in self.data:
+        if coordinates == "polar":
 
-            cage = Cage.from_molecule(data["molecules"][0])
-            cation_coords = [site.coords for site in cage.sites
-                             if site.specie == pmg.Element(cation)]
+            facet = reference
 
-            if len(cation_coords) == 0:
-                raise ValueError("Requested cation not found in molecule.")
-            elif len(cation_coords) == 1:
-                cation_coords = cation_coords[0]
-            else:
-                cation_coords = cation_coords[-1]
+            # If a facet is not provided, try to find the closest one to the
+            # first ion coordinate data point. This might not always work.
+            if not reference:
 
-            if coordinates == "polar":
+                print(
+                    "No Facet was provided. Since the facet is important for "
+                    "defining the coordinates of the landscape, the program "
+                    "will automatically determine the closest facet to the "
+                    "cation in the first datapoint."
+                )
 
+                cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
+                init_cation_coords = [site.coords for site in cage_init.sites
+                                      if site.specie == pmg.Element(cation)][
+                    -1]
+                facet_init = cage_init.facets[0]
+                for cage_facet in cage_init.facets:
+                    if utils.distance(cage_facet.center, init_cation_coords) \
+                            < utils.distance(facet_init.center,
+                                             init_cation_coords):
+                        facet = cage_facet
+
+            for data in self.data:
+
+                # Extract the cartesian coordinates of the cation
+                cage = Cage.from_molecule(data["molecules"][0])
+                cation_coords = [site.coords for site in cage.sites
+                                 if site.specie == pmg.Element(cation)]
+
+                # Check to see how many cations are found in the structure
+                if len(cation_coords) == 0:
+                    # If no cation is found, raise an error
+                    raise ValueError("Requested cation not found in molecule.")
+                elif len(cation_coords) == 1:
+                    cation_coords = cation_coords[0]
+                else:
+                    # Take the last cation, this one is usually the one that
+                    # is part of the landscape
+                    cation_coords = cation_coords[-1]
+
+                # Determine the polar coordinates with the facet center as a
+                # reference axis for the angle
                 r = np.linalg.norm(cation_coords - cage.anion_center)
                 theta = angle_between(facet.center, cation_coords)
-                if theta > math.pi/2:
+
+                if theta > math.pi / 2:
+                    print("GOTCHA")
                     theta = math.pi - theta
+
                 coordinate = [r, theta]
 
-            if coordinates == "facet_cart":
+                energy_final = data['energies'][-1]
+                coordinate.append(energy_final)
 
-                Li_vector = cation_coords - facet.center
-                theta = angle_between(facet.normal, Li_vector)
-                print(theta)
-                if theta > math.pi / 2:
-                    theta = math.pi - theta
+                datapoints.append(coordinate)
 
-                x = np.linalg.norm(Li_vector)*math.sin(theta)
-                y = np.linalg.norm(Li_vector)*math.cos(theta)
-                print((x, y))
+        if coordinates=="spherical":
 
-                coordinate = [x, y]
+            pass
 
-            if coordinates == "angles":
+        data_tuples = [tuple(point) for point in datapoints]
 
-                pass #TODO
-
-            energy_final = data['energies'][-1]
-            coordinate.append(energy_final)
-
-            datapoints.append(coordinate)
-
-        data_tuples = []
-        for point in datapoints:
-            data_tuples.append(tuple(point))
         dtype = [('Distance', float), ('Angle', float), ('Energy', float)]
         darray = np.array(data_tuples, dtype=dtype)
 
