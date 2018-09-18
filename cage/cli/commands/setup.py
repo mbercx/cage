@@ -643,6 +643,11 @@ def spheresetup(filename, cation, radius, z_axis=None, density=20):
     current_dir = os.getcwd()
     sphere_dir = os.path.join(current_dir, "sphere_" + str(radius))
 
+    try:
+        os.mkdir(sphere_dir)
+    except FileExistsError:
+        pass
+
     # Set up the input files
     study = Study(molecule_list, tasks)
     study.set_up_input(sphere_dir, sort_comp=False, geometry_options=GEO_SETUP)
