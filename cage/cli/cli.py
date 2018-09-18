@@ -368,6 +368,21 @@ def landscape(filename, cation, facets, operation, end_radii, nradii,
                        adensity=adensity)
 
 
+@workflow.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('filename')
+@click.option('--cation', '-C', default='Li')
+@click.option("--radius", '-R', default=6.0)
+@click.option('--density', default=20)
+def sphere(filename, cation, radius, axis, density):
+    """ Set up a 2D landscape along a chain of facets. """
+    from cage.workflow import sphere_workflow
+
+    sphere_workflow(filename=filename,
+                    cation=cation,
+                    radius=radius,
+                    density=density)
+
+
 @workflow.command(context_settings=CONTEXT_SETTINGS,
                   short_help="Initial anion geometric optimization.")
 @click.argument('filename')

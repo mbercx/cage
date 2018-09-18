@@ -85,7 +85,8 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
         # coordinates.
 
         chain[data]['landscape'].analyze_cation_energies(
-            facet=chain[data]['link'][0],
+            coordinates="polar",
+            reference=chain[data]['link'][0],
             cation=cation
         )
 
@@ -559,6 +560,10 @@ def reference(reference_dir, coulomb_charge=0):
     plt.plot(radii, energies - minimum_energy)
     plt.show()
 
+
+def sphere_analysis():
+
+    pass
 
 ###########
 # METHODS #

@@ -6,7 +6,7 @@ import os
 import subprocess
 import shlex
 
-from cage.cli.commands.setup import optimize, chainsetup
+from cage.cli.commands.setup import optimize, chainsetup, spheresetup
 from cage.core import Cage
 
 from custodian import Custodian
@@ -108,6 +108,37 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
         wf_list.append(
             Workflow(fireworks=fws_list, name=workflow_name)
         )
+
+    LAUNCHPAD.bulk_add_wfs(wf_list)
+
+def sphere_workflow(filename, cation, radius, axis, density):
+
+    c = Cage.from_file(filename)
+    molecule = c.composition.reduced_formula
+
+    # Set up the calculation directories and input
+    sphere_dir = spheresetup(filename, cation, axis, density)
+
+    fws_list = []
+
+    # Set up the list of FireTasks, i.e. energy calculations:
+    for geo in [d for d in os.listdir(sphere_dir) if "geo" in d]:
+
+        dir = os.path.abspath(os.path.join(sphere_dir, geo))
+
+        nwchem_command = RUN_NWCHEM_COMMAND + " " \
+                         + os.path.join(dir, "input") + " > " \
+                         + os.path.join(dir, "result.out")
+
+        fws_list.append(
+            Firework(tasks= [ScriptTask.from_str(nwchem_command)],
+                     name= "energy " + geo)
+        )
+
+    workflow_name = "Landscape: " + cation + " on " + molecule + " (" + \
+                     sphere_dir + ")"
+
+    wf_list = [Workflow(fireworks=fws_list, name=workflow_name), ]
 
     LAUNCHPAD.bulk_add_wfs(wf_list)
 
