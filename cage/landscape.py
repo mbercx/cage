@@ -288,7 +288,7 @@ class LandscapeAnalyzer(MSONable):
         return self._datapoints
 
     @classmethod
-    def from_data(cls, directory, output_file='result.out', software='nwchem'):
+    def from_data(cls, data_dir, output_file='result.out', software='nwchem'):
         """
         Looks through all subdirectories of the provided directory and
         extracts all output.
@@ -310,12 +310,12 @@ class LandscapeAnalyzer(MSONable):
         # the same directory.
 
         # Check if the directory exists
-        if not os.path.isdir(directory):
-            raise IOError("Directory " + directory + " not found.")
+        if not os.path.isdir(data_dir):
+            raise IOError("Directory " + data_dir + " not found.")
 
         # Find all the subdirectories in the specified directory
-        dir_list = [d for d in os.listdir(directory)
-                    if os.path.isdir(os.path.join(directory, d))]
+        dir_list = [d for d in os.listdir(data_dir)
+                    if os.path.isdir(os.path.join(data_dir, d))]
 
         # Get all of the output of the calculations in the directory
 
@@ -325,7 +325,7 @@ class LandscapeAnalyzer(MSONable):
             for directory in dir_list:
                 try:
                     out = nw.NwOutput(
-                        os.path.join(directory, directory, output_file)
+                        os.path.join(data_dir, directory, output_file)
                     )
 
                 except FileNotFoundError:
