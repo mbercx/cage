@@ -455,7 +455,7 @@ class LandscapeAnalyzer(MSONable):
 
             i = 0
             perp_axis = None
-            while i < len(cage_init) and not perp_axis:
+            while i < len(cage_init) and perp_axis is None:
                 v = cage_init.sites[i].coords
                 if axis.dot(cage_init.sites[i].coords) > 1e-2:
                     perp_axis = unit_vector(
