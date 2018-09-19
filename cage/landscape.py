@@ -383,7 +383,7 @@ class LandscapeAnalyzer(MSONable):
 
             # If a facet is not provided, try to find the closest one to the
             # first ion coordinate data point. This might not always work.
-            if not reference:
+            if reference is None:
 
                 print(
                     "No Facet was provided. Since the facet is important for "
@@ -443,7 +443,7 @@ class LandscapeAnalyzer(MSONable):
 
             dtype = [('Theta', float), ('Phi', float), ('Energy', float)]
 
-            if not reference:
+            if reference is None:
 
                 raise IOError("No reference axis was provided for the "
                               "analysis of the landscape energies. The "
