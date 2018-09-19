@@ -36,7 +36,8 @@ class Landscape(MSONable):
         """
         Initializes a Landscape from the points that it consists of.
 
-        :param points: (List of numpy.array)
+        Args:
+            points:
         """
 
         if type(points) is list:
@@ -48,8 +49,11 @@ class Landscape(MSONable):
         """
         Add two Landscapes to each other into a new Landscape.
 
-        :param other: (Landscape)
-        :return: (Landscape)
+        Args:
+            other:
+
+        Returns:
+
         """
         points = self.points + other.points
 
@@ -287,7 +291,13 @@ class LandscapeAnalyzer(MSONable):
         Looks through all subdirectories of the provided directory and
         extracts all output.
 
-        :return:
+        Args:
+            directory:
+            output_file:
+            software:
+
+        Returns:
+
         """
 
         # TODO Make subdirectory finder recursive?
