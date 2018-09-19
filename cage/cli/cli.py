@@ -373,8 +373,8 @@ def landscape(filename, cation, facets, operation, end_radii, nradii,
 @click.option('--cation', '-C', default='Li')
 @click.option("--radius", '-R', default=6.0)
 @click.option('--density', default=20)
-def sphere(filename, cation, radius, axis, density):
-    """ Set up a 2D landscape along a chain of facets. """
+def sphere(filename, cation, radius, density):
+    """ Set up a 2D spherical landscape. """
     from cage.workflow import sphere_workflow
 
     sphere_workflow(filename=filename,

@@ -111,13 +111,16 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
 
     LAUNCHPAD.bulk_add_wfs(wf_list)
 
-def sphere_workflow(filename, cation, radius, axis, density):
+def sphere_workflow(filename, cation, radius, density):
 
     c = Cage.from_file(filename)
     molecule = c.composition.reduced_formula
 
     # Set up the calculation directories and input
-    sphere_dir = spheresetup(filename, cation, axis, density)
+    sphere_dir = spheresetup(filename=filename,
+                             cation=cation,
+                             radius=radius,
+                             density=density)
 
     fws_list = []
 
