@@ -653,8 +653,8 @@ def spheresetup(filename, cation, radius, axis=None, density=20):
             pass
 
     # Write the axis coordinates to a file
-    with open(os.path.join(sphere_dir, "axis.xyz")) as file:
-        file.write(axis.tostring())
+    with open(os.path.join(sphere_dir, "axis.xyz"), "w") as file:
+        file.write(np.array_str(axis).strip("[]"))
 
     total_mol.to(fmt="xyz", filename=os.path.join(sphere_dir, "total_mol.xyz"))
 
