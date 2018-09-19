@@ -327,23 +327,25 @@ class LandscapeAnalyzer(MSONable):
                     out = nw.NwOutput(
                         os.path.join(directory, directory, output_file)
                     )
+
                 except FileNotFoundError:
                     print('Did not find output file in directory ' + directory)
                 except IndexError:
                     print('Did not find output in ' + output_file +
                           ' in directory ' + directory)
-
-                # Check if the output has an error
-                if out.data[-1]['has_error']:
-                    print('Error found in output in directory ' + directory)
                 else:
-                    if out.data[-1]['task_time'] == 0:
-                        print('No timing data found for final task. '
-                              'Calculation might not have completed '
-                              'successfully.')
+                    # Check if the output has an error
+                    if out.data[-1]['has_error']:
+                        print(
+                            'Error found in output in directory ' + directory)
+                    else:
+                        if out.data[-1]['task_time'] == 0:
+                            print('No timing data found for final task. '
+                                  'Calculation might not have completed '
+                                  'successfully.')
 
-                    output.append(out)
-                    print('Grabbed output in directory ' + directory)
+                        output.append(out)
+                        print('Grabbed output in directory ' + directory)
 
             # TODO This currently only considers the final NwChem task.
             # Not a very general approach, but maybe the most sensible?
