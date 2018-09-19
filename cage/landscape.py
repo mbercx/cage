@@ -9,6 +9,8 @@ import json
 import math
 import os
 
+import pdb
+
 import matplotlib.pyplot as plt
 import pymatgen as pmg
 import pymatgen.io.nwchem as nw
@@ -363,14 +365,19 @@ class LandscapeAnalyzer(MSONable):
         wedge. Polar coordinates are used to plot this landscape, and the
         program needs a reference axis to determine an appropriate angle.
 
+        Spherical landscapes:
+
         :return:
         """
 
         datapoints = []
+        dtype = None
 
         if coordinates == "polar":
 
             facet = reference
+
+            dtype = [('Distance', float), ('Angle', float), ('Energy', float)]
 
             # If a facet is not provided, try to find the closest one to the
             # first ion coordinate data point. This might not always work.
@@ -430,11 +437,65 @@ class LandscapeAnalyzer(MSONable):
 
         if coordinates == "spherical":
 
-            pass
+            axis = reference
+
+            dtype = [('Theta', float), ('Phi', float), ('Energy', float)]
+
+            if not reference:
+
+                raise IOError("No reference axis was provided for the "
+                              "analysis of the landscape energies. The "
+                              "program currently has no recourse for "
+                              "determining this axis automatically.")
+
+            # Find a suitable perpendicular axis
+            cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
+
+            i = 0
+            perp_axis = None
+            while i < len(cage_init) and not perp_axis:
+                v = cage_init.sites[i].coords
+                if axis.dot(cage_init.sites[i].coords) > 1e-2:
+                    perp_axis = unit_vector(
+                        perpendicular_part(v, axis)
+                    )
+
+            pdb.set_trace()
+
+            for data in self.data:
+
+                # Extract the cartesian coordinates of the cation
+                cage = Cage.from_molecule(data["molecules"][0])
+                cation_coords = [site.coords for site in cage.sites
+                                 if site.specie == pmg.Element(cation)]
+
+                # Check to see how many cations are found in the structure
+                if len(cation_coords) == 0:
+                    # If no cation is found, raise an error
+                    raise ValueError("Requested cation not found in molecule.")
+                elif len(cation_coords) == 1:
+                    cation_coords = cation_coords[0]
+                else:
+                    # Take the last cation, this one is usually the one that
+                    # is part of the landscape
+                    cation_coords = cation_coords[-1]
+
+                # Determine the spherical coordinates with the reference axis
+                # for the angles
+                theta = angle_between(axis, cation_coords)
+                phi = angle_between(
+                    perpendicular_part(cation_coords, axis), perp_axis
+                )
+
+                coordinate = [theta, phi]
+
+                energy_final = data['energies'][-1]
+                coordinate.append(energy_final)
+
+                datapoints.append(coordinate)
 
         data_tuples = [tuple(point) for point in datapoints]
 
-        dtype = [('Distance', float), ('Angle', float), ('Energy', float)]
         darray = np.array(data_tuples, dtype=dtype)
 
         self._datapoints = darray
@@ -608,6 +669,10 @@ class LandscapeAnalyzer(MSONable):
             raise NotImplementedError("Only json format is currently "
                                       "supported.")
         # TODO Add support for .yaml
+
+def perpendicular_part(v1, v2):
+    """ Returns the projection of v1 on the plane perpendicular to v2. """
+    return v1 - v1.dot(v2) * v2 / np.linalg.norm(v2)**2
 
 
 # Functions stolen from SO
