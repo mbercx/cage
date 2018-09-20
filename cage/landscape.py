@@ -239,16 +239,16 @@ class Landscape(MSONable):
         sphere_landscape = Landscape([starting_point, ])
 
         if angle_between(np.array([1, 0, 0]), axis) < 1e-2:
-            axis = unit_vector(
+            phi_axis = unit_vector(
                 np.cross(np.array([0, 1, 0]), starting_point)
             )
         else:
-            axis = unit_vector(
+            phi_axis = unit_vector(
                 np.cross(np.array([1, 0, 0]), starting_point)
             )
 
         sphere_landscape.extend_by_rotation(
-            axis=axis*math.pi,
+            axis=phi_axis*math.pi,
             density=density)
 
         sphere_landscape.extend_by_rotation(
@@ -454,11 +454,11 @@ class LandscapeAnalyzer(MSONable):
             cage_init = Cage.from_molecule(self.data[0]['molecules'][0])
 
             i = 0
-            perp_axis = None
-            while i < len(cage_init) and perp_axis is None:
+            phi_axis = None
+            while i < len(cage_init) and phi_axis is None:
                 v = cage_init.sites[i].coords
                 if axis.dot(cage_init.sites[i].coords) > 1e-2:
-                    perp_axis = unit_vector(
+                    phi_axis = unit_vector(
                         perpendicular_part(v, axis)
                     )
 
@@ -484,8 +484,12 @@ class LandscapeAnalyzer(MSONable):
                 # for the angles
                 theta = angle_between(axis, cation_coords)
                 phi = angle_between(
-                    perpendicular_part(cation_coords, axis), perp_axis
+                    perpendicular_part(cation_coords, axis), phi_axis
                 )
+                if angle_between(np.cross(phi_axis, axis), cation_coords)\
+                        > \
+                        math.pi/2:
+                    phi = 2*math.pi - phi
 
                 coordinate = [theta, phi]
 
