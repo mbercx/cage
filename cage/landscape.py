@@ -462,8 +462,6 @@ class LandscapeAnalyzer(MSONable):
                         perpendicular_part(v, axis)
                     )
 
-            pdb.set_trace()
-
             for data in self.data:
 
                 # Extract the cartesian coordinates of the cation
