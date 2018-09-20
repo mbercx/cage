@@ -603,6 +603,8 @@ def sphere_analysis(directory, cation, interp_mesh, energy_range,
         data['Phi'] = np.round(data['Phi'], 5)
         data = np.sort(data, order=['Theta', 'Phi'])
 
+        pdb.set_trace()
+
         # Find the number of radii and angles
         theta_init = data['Theta'][0]
         n_phi = 1
