@@ -561,9 +561,129 @@ def reference(reference_dir, coulomb_charge=0):
     plt.show()
 
 
-def sphere_analysis():
+def sphere_analysis(directory, cation, interp_mesh, energy_range,
+                    contour_levels, reference_energy=None,
+                    interp_method="griddata"):
 
-    pass
+    # Load the landscape data
+    if os.path.isfile(os.path.join(directory, 'landscape.json')):
+
+        landscape = LandscapeAnalyzer.from_file(
+            os.path.join(directory, 'landscape.json')
+        )
+
+    else:
+        print("No landscape.json file found in " + directory +
+              ". Trying to extract the data from the subdirectories.")
+
+        landscape = LandscapeAnalyzer.from_data(directory)
+
+    if os.path.isfile(os.path.join(directory, 'axis.xyz')):
+
+        with open("axis.xyz", "r") as file:
+            axis = file.read()
+            axis = np.fromstring(axis, sep=" ")
+
+    else:
+        raise FileNotFoundError("No axis file found in " + directory +
+              ". The program currently isn't able to figure out how the "
+              "spherical landscape was set up automatically.")
+
+    landscape.analyze_cation_energies(coordinates="spherical",
+                                      reference=axis,
+                                      cation=cation)
+
+    # Interpolate the data
+    if interp_mesh == (0.0, 0.0):
+
+        # No interpolation, simply sort the data
+        data = landscape.datapoints
+
+        data['Theta'] = np.round(data['Theta'], 5)
+        data['Phi'] = np.round(data['Phi'], 5)
+        data = np.sort(data, order=['Theta', 'Phi'])
+
+        # Find the number of radii and angles
+        theta_init = data['Theta'][0]
+        n_phi = 1
+        while abs(data['Theta'][n_phi] - theta_init) < 1e-5:
+            n_phi += 1
+        n_theta = int(len(data) / n_phi)
+
+
+        # Get the right format for the data
+        theta = data['Theta'].reshape(n_theta, n_phi)
+        phi = data['Phi'].reshape(n_theta, n_phi)
+        energy = data['Energy'].reshape(n_theta, n_phi)
+
+        new_theta = theta.transpose()
+        new_phi = phi.transpose()
+        new_energy = energy.transpose()
+
+    else:
+
+        data = landscape.datapoints
+
+        # Gather the data into one landscape
+        theta = data['Theta']
+        phi = data['Phi']
+        energy = data['Energy']
+
+        # Set up the interpolation mesh
+        new_theta, new_phi = np.mgrid[
+                                theta.min():theta.max():interp_mesh[0],
+                                phi.min():phi.max():interp_mesh[1]
+                                ]
+
+        # Interpolation
+        if interp_method == "griddata":
+
+            coordinates = np.array([theta, phi]).transpose()
+
+            new_energy = interpolate.griddata(
+                coordinates, energy, (new_theta, new_phi),
+                method="cubic"
+            )
+
+        elif interp_method == "spline":
+            tck = interpolate.bisplrep(
+                theta, phi, energy, s=1
+            )
+
+            new_energy = interpolate.bisplev(
+                new_phi[:, 0], new_theta[0, :], tck
+            )
+        else:
+            raise IOError("Interpolation method not recognized.")
+
+    # Compare the energies versus an reference energy if provided
+    if reference_energy is None:
+        new_energy -= np.nanmin(new_energy)
+    else:
+        new_energy -= reference_energy
+
+    # If no energy range is specified by the user, take (min, max)
+    if energy_range == (0.0, 0.0):
+        energy_range = (np.nanmin(new_energy), np.nanmax(new_energy))
+
+    contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
+
+    # Plot the landscape
+    plt.figure()
+    plt.pcolor(new_phi, new_theta, new_energy,
+               vmin=energy_range[0],
+               vmax=energy_range[1], cmap='viridis')
+    cbar = plt.colorbar()
+    cbar.set_label('Energy (eV)', size='x-large')
+    cs = plt.contour(new_phi, new_theta, new_energy,
+                     colors='black',
+                     levels=contour_levels, linewidths=0.6)
+    plt.xlabel('$\\phi$', size='x-large', fontname='Georgia')
+    plt.ylabel('$\\theta$', size='x-large', fontname='Georgia')
+    plt.xticks(size="x-large")
+    plt.yticks(size="x-large")
+    plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f', manual=True)
+    plt.show()
 
 ###########
 # METHODS #

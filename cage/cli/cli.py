@@ -267,6 +267,31 @@ def reference(reference_dir, coulomb_charge):
     reference(reference_dir, coulomb_charge)
 
 
+@analyze.command(context_settings=CONTEXT_SETTINGS)
+@click.argument('lands_dir')
+@click.option('--cation', '-C', default='Li')
+@click.option('--energy_range', '-E', default=(0.0, 0.0))
+@click.option('--interp_mesh', '-I', default=(0.01, 0.01))
+@click.option('--contour_levels', '-l', default=0.1)
+@click.option("--reference_energy", "-r", default=0.0)
+@click.option("--interp_method", "-m", default="griddata")
+def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
+              reference_energy, interp_method):
+    """ Analyze the landscape data. """
+    from cage.cli.commands.analyze import sphere_analysis
+
+    if reference_energy == 0.0:
+        reference_energy = None
+
+    sphere_analysis(directory=lands_dir,
+                    cation=cation,
+                    interp_mesh=interp_mesh,
+                    energy_range=energy_range,
+                    contour_levels=contour_levels,
+                    reference_energy=reference_energy,
+                    interp_method=interp_method)
+
+
 @main.group(context_settings=CONTEXT_SETTINGS)
 def util():
     """
