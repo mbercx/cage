@@ -275,7 +275,7 @@ def reference(reference_dir, coulomb_charge):
 @click.option('--contour_levels', '-l', default=0.1)
 @click.option("--reference_energy", "-r", default=0.0)
 @click.option("--interp_method", "-m", default="griddata")
-def landscape(lands_dir, cation, energy_range, interp_mesh, contour_levels,
+def sphere(lands_dir, cation, energy_range, interp_mesh, contour_levels,
               reference_energy, interp_method):
     """ Analyze the landscape data. """
     from cage.cli.commands.analyze import sphere_analysis
