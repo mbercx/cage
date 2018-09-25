@@ -39,7 +39,8 @@ class Landscape(MSONable):
         Initializes a Landscape from the points that it consists of.
 
         Args:
-            points:
+            points (list): List of 3x1 numpy.array coordinates of the points
+            in the landscape.
         """
 
         if type(points) is list:
@@ -52,11 +53,15 @@ class Landscape(MSONable):
         Add two Landscapes to each other into a new Landscape.
 
         Args:
-            other:
+            other (cage.landscape.Landscape): Landscape to which the current
+            Landscape should be added.
 
         Returns:
+            Sum of the two landscapes, i.e. a landscape that consists of the
+            points of the two landscapes combined.
 
         """
+
         points = self.points + other.points
 
         return Landscape(points)
@@ -66,7 +71,10 @@ class Landscape(MSONable):
         """
         All of the points of the Landscape.
 
-        :return: (List of numpy.array)
+        Returns:
+            (list) List of 3x1 numpy.array coordinates of the points
+            in the landscape.
+
         """
         return self._points
 
@@ -75,14 +83,20 @@ class Landscape(MSONable):
         """
         Center of the points of the Landscape.
 
-        :return:
+        Returns:
+            (3x1 numpy.array) Coordinates of the mathematical center of the
+            points of the landscape.
         """
         return sum(self.points)/len(self.points)
 
     def change_center(self, center):
         """
+        Change the center of the landscape. This simply translates all the
+        coordinates so the new mathematical center is the one provided by
+        the user.
 
-        Returns:
+        Args:
+            center (3x1 numpy.array): New center of the landscape.
 
         """
         new_points = []
@@ -92,7 +106,7 @@ class Landscape(MSONable):
 
         self._points = new_points
 
-    def extend_by_rotation(self, axis, density=10, remove_endline=False,
+    def extend_by_rotation(self, axis, density=10.0, remove_endline=False,
                            distance_tol=1e-3):
         """
         Extends the landscape using an axis vector and turning all the vertices
@@ -100,10 +114,15 @@ class Landscape(MSONable):
         by the axis vector.
 
         Args:
-            axis (numpy.ndarray):
-            density:
-            remove_endline:
-            distance_tol:
+            axis (numpy.ndarray): Axis around which the landscape is
+            rotated. The length of the vector determines the total rotation
+            angle in radians.
+            density (float): Density of grid points along the rotation
+            angle. Defined in #grid points per radians.
+            remove_endline (bool): Include the final rotation angle grid
+            points.
+            distance_tol (float): Minimum distance between two points in
+            the landscape.
 
         Returns:
 
@@ -114,7 +133,7 @@ class Landscape(MSONable):
         # Find the rotation matrices
         rotation_matrices = []
         total_angle = np.linalg.norm(axis)
-        npoints = int(total_angle/math.pi*density)
+        npoints = int(total_angle * density)
 
         if remove_endline:
             for i in range(npoints-1):
@@ -141,13 +160,13 @@ class Landscape(MSONable):
         Extends the Landscape by translating the points along a certain vector.
 
         Args:
-            vector:
-            density:
+            vector (3x1 numpy.array): Translation vector of the extension.
+            density (float): Density of the grid.
 
         Returns:
 
         """
-        pass
+        pass #TODO
 
     def extend_from_point(self, point, extension, density=10):
         """
@@ -162,7 +181,7 @@ class Landscape(MSONable):
         Returns:
 
         """
-        pass
+        pass #TODO
 
     def as_dict(self):
         """
@@ -195,8 +214,12 @@ class Landscape(MSONable):
         Define a landscape by providing the vertices (end points in the case of
         a line).
 
-        :param vertices: (List of numpy.array)
-        :param num: (int)
+        Args:
+            vertices:
+            num:
+
+        Returns:
+
         """
         # Calculate the points of the Landscape depending on the number of
         # vertices
@@ -215,7 +238,7 @@ class Landscape(MSONable):
                 for i in range(npoints):
                     points.append(vertices[0] + i * mesh_distance * unitvector)
         else:
-            raise IOError("Higher dimensions than 2 not implemented yet.")
+            raise NotImplementedError("Higher dimensions than 1 not implemented yet.")
 
         return Landscape(points)
 
@@ -226,12 +249,16 @@ class Landscape(MSONable):
         Set up a spherical landscape with a specified radius.
 
         Args:
-            radius:
-            center:
-            axis:
-            density:
+            radius (float): Radius of the spherical landscape.
+            center (3x1 numpy.array): Coordinates of the center of the
+            spherical landscape.
+            axis (3x1 numpy.array): Rotational axis which is used to
+            construct the landscape.
+            density (float): Grid density of the landscape, provided in
+            number of grid points per radians.
 
         Returns:
+            (Landscape): Spherical Landscape object as specified by the user.
 
         """
         starting_point = radius * unit_vector(axis)
