@@ -867,7 +867,7 @@ class Cage(Molecule):
             newdistance = np.linalg.norm(point - facet.center)
             if newdistance > distance:
                 furthest_facet = facet
-                distance = newdistanceex
+                distance = newdistance
 
         return furthest_facet
     

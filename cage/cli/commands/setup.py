@@ -23,9 +23,9 @@ want to use it for anything else, they might need some adjustments.
 
 """
 
-##############
-# PARAMETERS #
-##############
+####################
+# GLOBAL VARIABLES #
+####################
 
 # Elements to ignore for the surface facet determination
 IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
@@ -35,7 +35,7 @@ IGNORE = (pmg.Element('Li'), pmg.Element('Na'), pmg.Element('Mg'),
 # Name of the output file
 OUTPUT_FILE = 'result.out'
 
-# Calculation parameters
+# NwChem calculation setup
 THEORY_SETUP = {'iterations': '300',
                 'xc': 'xpbe96 xpbe96',
                 'direct': '',
@@ -69,6 +69,10 @@ def optimize(filename, charge=None):
     except ValueError:
         # If that fails, try the POSCAR format
         anion = Cage.from_poscar(filename)
+
+    # TODO
+    # The charge of the molecule should not be determined in such a silly
+    # way, but be included in the structure file, or requested from the user.
 
     # Set the charge for the molecule
     if charge:

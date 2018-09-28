@@ -3,20 +3,12 @@
 # Distributed under the terms of the MIT License
 
 import os
-import subprocess
-import shlex
 
 from cage.cli.commands.setup import optimize, chainsetup, spheresetup
 from cage.core import Cage
 
-from custodian import Custodian
-from custodian.vasp.handlers import VaspErrorHandler, \
-    UnconvergedErrorHandler
-from custodian.vasp.jobs import VaspJob
-
 from fireworks import Firework, LaunchPad, PyTask, FWorker, \
     Workflow, ScriptTask
-from fireworks.user_objects.queue_adapters.common_adapter import CommonAdapter
 
 """
 Workflow setup for the cage calculations.
@@ -38,28 +30,13 @@ RUN_NWCHEM_SCRIPT = "/g/g91/bercx1/local/scripts/job_workflow.sh"
 RUN_NWCHEM_COMMAND = "srun -N1 -n36 /g/g91/bercx1/nwchem/nwchem-6.6/bin/LINUX64/nwchem"
 
 
-def run_nwchem(directory):
-    """
-    Method that simply runs VASP in the directory that is specified. Mainly
-    used to set up a PyTask that uses outputs from PyTasks in previous
-    FireWorks to run VASP in the appropriate directory.
-
-    Args:
-        directory: Absolute path to the directory in which VASP should be run.
-
-    Returns:
-        None
-
-    """
-
-    command = RUN_NWCHEM_COMMAND + " " + directory + "/input > " + directory \
-              + "/result.out"
-    # subprocess.Popen(command)
-
-
 def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                        adensity):
     """
+    Workflow to calculate the 2D landscape along a List of facets.
+
+    Currently based upon the directory structure created by the setup
+    script. This works fine, but perhaps isn't the cleanest solution.
 
     Args:
         filename:
@@ -73,7 +50,7 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
     Returns:
 
     """
-
+    # Load the cage molecule from the filename provided
     c = Cage.from_file(filename)
     molecule = c.composition.reduced_formula
 
@@ -109,9 +86,22 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
             Workflow(fireworks=fws_list, name=workflow_name)
         )
 
+    # Set the workflows up to run from the launchpad
     LAUNCHPAD.bulk_add_wfs(wf_list)
 
 def sphere_workflow(filename, cation, radius, density):
+    """
+    Set up a spherical landscape calculation of a specified radius.
+
+    Args:
+        filename:
+        cation:
+        radius:
+        density:
+
+    Returns:
+
+    """
 
     c = Cage.from_file(filename)
     molecule = c.composition.reduced_formula
@@ -157,9 +147,10 @@ def optimize_workflow(filename, charge=0):
     Returns:
 
     """
-
+    # Load the cage molecule from the filename provided
     molecule = Cage.from_file(filename)
 
+    # Set up optimization calculation
     optimize(filename, charge)
 
     optimize_dir = os.path.join(os.getcwd(), "optimize")
