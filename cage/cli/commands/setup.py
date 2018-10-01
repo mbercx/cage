@@ -56,10 +56,11 @@ DRIVER_SETUP = {'loose': '', 'maxiter': '100'}
 
 def optimize(filename, charge=None):
     """
-    Set up a NwChem calculation to optimize a molecule structure.
+    Set up a NwChem calculation to optimize the geometry of a molecule.
 
     Args:
         filename (str): Structure file of the molecule.
+        charge (int): Charge of the molecule.
 
     """
 

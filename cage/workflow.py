@@ -39,15 +39,34 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
     script. This works fine, but perhaps isn't the cleanest solution.
 
     Args:
-        filename:
-        cation:
-        facets:
-        operation:
-        end_radii:
-        nradii:
-        adensity:
+        filename (str): Path to the structure file of the cage molecule.
+        Json formats with charge assigned are preferred, as the program
+        currently has no recourse for determining the charge.
+
+        cation (str): Cation which composes the landscape, written as its
+        chemical symbol, e.g. "Li" or "Na".
+
+        facets (list): List of integers that indicate the Facets along which
+        the landscape should be constructed.
+
+        operation (str): String that indicates which operation should be
+        performed in the calculation of the energy landscape:
+
+        "energy" - Static calculation of the energy.
+        "optimize" - Optimize the geometry of the cation-anion system. In
+        order to make sure the cation doesn't simply return to its optimal
+        position, the facet opposite to the cation is fixed in the
+        optimization.
+
+        end_radii (tuple): Tuple of the minimum and maximum radius of the
+        wedges that describe the landscape.
+
+        nradii (int): Number of grid points for the radius coordinate.
+
+        adensity (int): Density of grid points along the angular coordinate.
 
     Returns:
+        None
 
     """
     # Load the cage molecule from the filename provided
@@ -94,12 +113,20 @@ def sphere_workflow(filename, cation, radius, density):
     Set up a spherical landscape calculation of a specified radius.
 
     Args:
-        filename:
-        cation:
-        radius:
-        density:
+        filename (str): Path to the structure file of the cage molecule.
+        Json formats with charge assigned are preferred, as the program
+        currently has no recourse for determining the charge.
+
+        cation (str): Cation which composes the landscape, written as its
+        chemical symbol, e.g. "Li" or "Na".
+
+        radius (float): Radius of the spherical landscape.
+
+        density (float): Angular density of the grid points. Expressed as
+        number of grid points per radians.
 
     Returns:
+        None
 
     """
 
@@ -141,8 +168,10 @@ def optimize_workflow(filename, charge=0):
     Workflow for the optimization of a molecule
 
     Args:
-        filename:
-        charge:
+        filename (str): Path to the structure file of the cage molecule.
+        Json formats with charge assigned are preferred.
+
+        charge (int): Charge of the molecule.
 
     Returns:
 
