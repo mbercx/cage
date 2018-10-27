@@ -133,7 +133,7 @@ class Landscape(MSONable):
         # Find the rotation matrices
         rotation_matrices = []
         total_angle = np.linalg.norm(axis)
-        npoints = int(total_angle * density)
+        npoints = int(total_angle / np.pi * density )
 
         if remove_endline:
             for i in range(npoints-1):
@@ -525,9 +525,6 @@ class LandscapeAnalyzer(MSONable):
                 coordinate.append(energy_final)
 
                 datapoints.append(coordinate)
-                print("Appended datapoint:\n"
-                      "E = " + str(energy_final) + "\n"
-                      "coordinate = " + str(theta) + "," + str(phi))
 
         data_tuples = [tuple(point) for point in datapoints]
 
