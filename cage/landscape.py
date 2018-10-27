@@ -488,6 +488,7 @@ class LandscapeAnalyzer(MSONable):
                     phi_axis = unit_vector(
                         perpendicular_part(v, axis)
                     )
+                i += 1
 
             for data in self.data:
 
@@ -524,6 +525,9 @@ class LandscapeAnalyzer(MSONable):
                 coordinate.append(energy_final)
 
                 datapoints.append(coordinate)
+                print("Appended datapoint:\n"
+                      "E = " + str(energy_final) + "\n"
+                      "coordinate = " + str(theta) + "," + str(phi))
 
         data_tuples = [tuple(point) for point in datapoints]
 

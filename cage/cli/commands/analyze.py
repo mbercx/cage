@@ -631,6 +631,8 @@ def sphere_analysis(directory, cation, interp_mesh, energy_range,
         phi = data['Phi']
         energy = data['Energy']
 
+        pdb.set_trace()
+
         # Set up the interpolation mesh
         new_theta, new_phi = np.mgrid[
                                 theta.min():theta.max():interp_mesh[0],
