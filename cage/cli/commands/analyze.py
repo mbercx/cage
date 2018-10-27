@@ -631,7 +631,19 @@ def sphere_analysis(directory, cation, interp_mesh, energy_range,
         phi = data['Phi']
         energy = data['Energy']
 
-        pdb.set_trace()
+        # Add extra datapoints for theta = 0 and pi, for interpolation purposes
+        zero_theta_energy = energy[np.where(theta == min(theta))[0][0]]
+        pi_theta_energy = energy[np.where(theta == max(theta))[0][0]]
+        phi_values = np.unique(np.round(phi,3))
+        theta = np.append(
+            np.append(theta, [min(theta)] * len(phi_values)),
+            [max(theta)] * len(phi_values)
+        )
+        energy = np.append(
+            np.append(energy, [zero_theta_energy] * len(phi_values)),
+            [pi_theta_energy] * len(phi_values)
+        )
+        phi = np.append(np.append(phi, phi_values), phi_values)
 
         # Set up the interpolation mesh
         new_theta, new_phi = np.mgrid[
@@ -687,6 +699,7 @@ def sphere_analysis(directory, cation, interp_mesh, energy_range,
     plt.xticks(size="x-large")
     plt.yticks(size="x-large")
     plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f', manual=True)
+    plt.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
     plt.show()
 
 ###########
