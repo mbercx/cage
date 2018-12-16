@@ -3,9 +3,11 @@
 import pdb
 
 import os
+import matplotlib; matplotlib.use("TkAgg")
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
+
 
 from cage.landscape import LandscapeAnalyzer
 from cage.core import Facet
