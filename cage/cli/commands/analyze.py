@@ -564,8 +564,8 @@ def reference(reference_dir, coulomb_charge=0):
 
 
 def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
-                    energy_range=(0.0, 0.0),
-                    contour_levels=0.1, reference_energy=None,
+                    energy_range=(0.0, 0.0), contour_levels=0.1,
+                    set_contour_levels_manually=False, reference_energy=None,
                     interp_method="griddata"):
 
     # Load the landscape data
@@ -701,7 +701,8 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
     plt.ylabel('$\\theta$', size='x-large', fontname='Georgia')
     plt.xticks(size="x-large")
     plt.yticks(size="x-large")
-    plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f', manual=True)
+    plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f',
+               manual=set_contour_levels_manually)
     plt.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
     plt.show()
 

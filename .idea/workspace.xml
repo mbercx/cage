@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/CageStudy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CageStudy.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="Force TkAgg backend for analysis scripts">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage.egg-info/SOURCES.txt" beforeDir="false" afterPath="$PROJECT_DIR$/cage.egg-info/SOURCES.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cage/cli/commands/analyze.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/commands/analyze.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -28,8 +25,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="125">
-              <caret line="565" column="35" selection-start-line="565" selection-start-column="35" selection-end-line="565" selection-end-column="35" />
+            <state relative-caret-position="655">
+              <caret line="702" column="29" lean-forward="true" selection-start-line="702" selection-start-column="29" selection-end-line="702" selection-end-column="29" />
+              <folding>
+                <element signature="e#19#29#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -442,7 +442,21 @@
       <option name="project" value="LOCAL" />
       <updated>1498691721768</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Two fixes:&#10;1) Added defaults for cage.cli.commands.analyze.sphere_analysis.&#10;2) Fixed issue with axis.xyz; previously it had to be in the current directory, not the input argument directory of the script.">
+      <created>1544979332472</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1544979332472</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Force TkAgg backend for analysis scripts">
+      <created>1544979556012</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1544979556012</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TodoView">
@@ -497,7 +511,9 @@
     <MESSAGE value="&#10;#1 Written a bunch of methods for Facet that allow it to be written to&#10;a json file.&#10;#2 Started working on a test suite. Will add more tests as I go along." />
     <MESSAGE value="&#10;#1 Changed the find_surface_facets method of the Cage class to allow a&#10;more general list of elements which should be ignored in the search for&#10;the surface facets.&#10;#2 Added a class method from_molecule to the Cage class&#10;#3 Created a cage.utils module, which will serve to hold small functions&#10;that we need in the main modules.&#10;#4 Implemented the facetLandscape.py script" />
     <MESSAGE value="Changes:&#10;#1 Large reorganisation of the facetsetup.py script. Also added&#10;functionality to study carbon containing cage molecules.&#10;#2 Changed the __init__.py for the cage and scripts module." />
-    <option name="LAST_COMMIT_MESSAGE" value="Changes:&#10;#1 Large reorganisation of the facetsetup.py script. Also added&#10;functionality to study carbon containing cage molecules.&#10;#2 Changed the __init__.py for the cage and scripts module." />
+    <MESSAGE value="Two fixes:&#10;1) Added defaults for cage.cli.commands.analyze.sphere_analysis.&#10;2) Fixed issue with axis.xyz; previously it had to be in the current directory, not the input argument directory of the script." />
+    <MESSAGE value="Force TkAgg backend for analysis scripts" />
+    <option name="LAST_COMMIT_MESSAGE" value="Force TkAgg backend for analysis scripts" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/groups.py" />
@@ -564,8 +580,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
-          <caret line="565" column="35" selection-start-line="565" selection-start-column="35" selection-end-line="565" selection-end-column="35" />
+        <state relative-caret-position="655">
+          <caret line="702" column="29" lean-forward="true" selection-start-line="702" selection-start-column="29" selection-end-line="702" selection-end-column="29" />
+          <folding>
+            <element signature="e#19#29#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
