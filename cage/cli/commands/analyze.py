@@ -561,8 +561,9 @@ def reference(reference_dir, coulomb_charge=0):
     plt.show()
 
 
-def sphere_analysis(directory, cation, interp_mesh, energy_range,
-                    contour_levels, reference_energy=None,
+def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
+                    energy_range=(0.0, 0.0),
+                    contour_levels=0.1, reference_energy=None,
                     interp_method="griddata"):
 
     # Load the landscape data
@@ -580,7 +581,7 @@ def sphere_analysis(directory, cation, interp_mesh, energy_range,
 
     if os.path.isfile(os.path.join(directory, 'axis.xyz')):
 
-        with open("axis.xyz", "r") as file:
+        with open(os.path.join(directory, "axis.xyz"), "r") as file:
             axis = file.read()
             axis = np.fromstring(axis, sep=" ")
 
