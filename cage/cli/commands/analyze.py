@@ -3,11 +3,12 @@
 import pdb
 
 import os
-import matplotlib; matplotlib.use("TkAgg")
+import matplotlib;
+
+matplotlib.use("TkAgg")
 import numpy as np
 from scipy import interpolate
 import matplotlib.pyplot as plt
-
 
 from cage.landscape import LandscapeAnalyzer
 from cage.core import Facet
@@ -32,6 +33,7 @@ plt.rcParams['contour.negative_linestyle'] = 'solid'
 START_FACET = 1  # 0 or 1 -> determines facet to start chain from
 
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
+
 
 def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        contour_levels, verbose, coulomb_charge,
@@ -288,6 +290,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     plt.yticks(size="x-large")
     plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f', manual=True)
     plt.show()
+
 
 def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
                      verbose, coulomb_charge, reference_energy=None):
@@ -567,7 +570,6 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
                     energy_range=(0.0, 0.0), contour_levels=0.1,
                     set_contour_levels_manually=False, reference_energy=None,
                     interp_method="griddata"):
-
     # Load the landscape data
     if os.path.isfile(os.path.join(directory, 'landscape.json')):
 
@@ -589,8 +591,8 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
 
     else:
         raise FileNotFoundError("No axis file found in " + directory +
-              ". The program currently isn't able to figure out how the "
-              "spherical landscape was set up automatically.")
+                                ". The program currently isn't able to figure out how the "
+                                "spherical landscape was set up automatically.")
 
     landscape.analyze_cation_energies(coordinates="spherical",
                                       reference=axis,
@@ -615,7 +617,6 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
             n_phi += 1
         n_theta = int(len(data) / n_phi)
 
-
         # Get the right format for the data
         theta = data['Theta'].reshape(n_theta, n_phi)
         phi = data['Phi'].reshape(n_theta, n_phi)
@@ -637,7 +638,7 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
         # Add extra datapoints for theta = 0 and pi, for interpolation purposes
         zero_theta_energy = energy[np.where(theta == min(theta))[0][0]]
         pi_theta_energy = energy[np.where(theta == max(theta))[0][0]]
-        phi_values = np.unique(np.round(phi,3))
+        phi_values = np.unique(np.round(phi, 3))
         theta = np.append(
             np.append(theta, [min(theta)] * len(phi_values)),
             [max(theta)] * len(phi_values)
@@ -650,9 +651,9 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
 
         # Set up the interpolation mesh
         new_theta, new_phi = np.mgrid[
-                                theta.min():theta.max():interp_mesh[0],
-                                phi.min():phi.max():interp_mesh[1]
-                                ]
+                             theta.min():theta.max():interp_mesh[0],
+                             phi.min():phi.max():interp_mesh[1]
+                             ]
 
         # Interpolation
         if interp_method == "griddata":
@@ -675,35 +676,78 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
         else:
             raise IOError("Interpolation method not recognized.")
 
+    landscape_data = {
+        "type": "sphere",
+        "energy": new_energy,
+        "x_coords": new_phi,
+        "y_coords": new_theta
+    }
+
+    return landscape_data
+
+
+def plot_landscape(landscape_data, reference_energy=None, energy_range=None,
+                   contour_levels=0.1, set_contour_levels_manually=False):
+    """
+    Plot a landscape based on the data provided.
+
+    Args:
+        landscape_data:
+        reference_energy:
+        energy_range:
+        contour_levels:
+        set_contour_levels_manually:
+
+    Returns:
+
+    """
+    landscape_type = landscape_data["type"]
+    energy = landscape_data["energy"].copy()
+    x_coords = landscape_data["x_coords"].copy()
+    y_coords = landscape_data["y_coords"].copy()
+
     # Compare the energies versus an reference energy if provided
     if reference_energy is None:
-        new_energy -= np.nanmin(new_energy)
+        energy -= np.nanmin(energy)
     else:
-        new_energy -= reference_energy
+        energy -= reference_energy
 
     # If no energy range is specified by the user, take (min, max)
-    if energy_range == (0.0, 0.0):
-        energy_range = (np.nanmin(new_energy), np.nanmax(new_energy))
+    if energy_range is None:
+        if reference_energy is None:
+            energy_range = (np.nanmin(energy), np.nanmax(energy))
+        else:
+            energy_range = (np.nanmin(energy), 0)
 
     contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
 
     # Plot the landscape
     plt.figure()
-    plt.pcolor(new_phi, new_theta, new_energy,
-               vmin=energy_range[0],
-               vmax=energy_range[1], cmap='viridis')
+    plt.pcolormesh(x_coords, y_coords, energy, vmin=energy_range[0],
+                   vmax=energy_range[1], cmap='viridis')
     cbar = plt.colorbar()
     cbar.set_label('Energy (eV)', size='x-large')
-    cs = plt.contour(new_phi, new_theta, new_energy,
-                     colors='black',
+    cs = plt.contour(x_coords, y_coords, energy, colors='black',
                      levels=contour_levels, linewidths=0.6)
-    plt.xlabel('$\\phi$', size='x-large', fontname='Georgia')
-    plt.ylabel('$\\theta$', size='x-large', fontname='Georgia')
-    plt.xticks(size="x-large")
-    plt.yticks(size="x-large")
-    plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f',
-               manual=set_contour_levels_manually)
+
+    if landscape_type == "sphere":
+        plt.xlabel('$\\phi$', size='x-large', fontname='Georgia')
+        plt.ylabel('$\\theta$', size='x-large', fontname='Georgia')
+        plt.xticks(size="x-large")
+        plt.yticks(size="x-large")
+    else:
+        raise NotImplementedError
+
+    if set_contour_levels_manually:
+        plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f',
+                   manual=True)
+    elif set_contour_levels_manually is None:
+        pass
+    else:
+        plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f')
+
     plt.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
+
     plt.show()
 
 ###########
