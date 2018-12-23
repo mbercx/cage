@@ -4,24 +4,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>cage package &#8212; cage 0.1a1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1a1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -30,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="cage-package">
@@ -58,7 +50,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="cage.cli.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cage.cli.html#module-cage.cli.cage">cage.cli.cage module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cage.cli.html#cage-cli-cage-module">cage.cli.cage module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cage.cli.html#module-cage.cli">Module contents</a></li>
 </ul>
 </li>
@@ -107,9 +99,14 @@
 <dl class="class">
 <dt id="cage.core.Cage">
 <em class="property">class </em><code class="descclassname">cage.core.</code><code class="descname">Cage</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>charge=0</em>, <em>spin_multiplicity=None</em>, <em>validate_proximity=False</em>, <em>site_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pymatgen.core.structure.Molecule</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pymatgen.core.structure.Molecule</span></code></p>
 <p>A Cage is a pymatgen.Molecule-based object for molecules shaped similar
 to fullerenes.</p>
+<dl class="attribute">
+<dt id="cage.core.Cage.anion_center">
+<code class="descname">anion_center</code><a class="headerlink" href="#cage.core.Cage.anion_center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="cage.core.Cage.append">
 <code class="descname">append</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>validate_proximity=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.append" title="Permalink to this definition">¶</a></dt>
@@ -150,6 +147,21 @@ information to None.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> (<em>(</em><em>3</em><em>,</em><em>) </em><em>numpy.ndarray</em>) – Point around which to center the
 molecule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cage.core.Cage.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to get a copy of the Cage. Overwritten from the
+Molecule class to conserve the charge of the molecule.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">cage.core.Cage</td>
 </tr>
 </tbody>
 </table>
@@ -240,7 +252,7 @@ provided.</p>
 
 <dl class="method">
 <dt id="cage.core.Cage.find_noneq_chain_links">
-<code class="descname">find_noneq_chain_links</code><span class="sig-paren">(</span><em>symm_tol=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_chain_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_chain_links" title="Permalink to this definition">¶</a></dt>
+<code class="descname">find_noneq_chain_links</code><span class="sig-paren">(</span><em>facets=&lt;class 'tuple'&gt;</em>, <em>symm_tol=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_chain_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_chain_links" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the links between the facets of the chain that connects a
 set of non equivalent facets.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -248,6 +260,9 @@ set of non equivalent facets.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>facets</strong> (<em>tuple</em>) – Tuple of Facets which are to be used for the
+chain. In case no facets are provided, the full list of
+non-equivalent facets will be used.</li>
 <li><strong>symm_tol</strong> (<em>float</em>) – Tolerance for the equivalence condition, i.e.
 how much the distance between the centers is allowed to be
 after a symmetry operation.</li>
@@ -271,8 +286,8 @@ Facets.</p>
 
 <dl class="method">
 <dt id="cage.core.Cage.find_noneq_facet_chain">
-<code class="descname">find_noneq_facet_chain</code><span class="sig-paren">(</span><em>start=0</em>, <em>facets=()</em>, <em>symm_tol=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_facet_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_facet_chain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find a chain of non equivalent facets, i.e. a collection of facets that
+<code class="descname">find_noneq_facet_chain</code><span class="sig-paren">(</span><em>start=0</em>, <em>facets=&lt;class 'tuple'&gt;</em>, <em>symm_tol=0.01</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.find_noneq_facet_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.find_noneq_facet_chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a chain of facets, i.e. a collection of facets that
 are connected by edges. Automatically sorts the facets so they
 are connected by their neighbours in the list.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -284,7 +299,7 @@ are connected by their neighbours in the list.</p>
 constructed. This might be useful if the chain is not
 constructed as the user would like.</li>
 <li><strong>facets</strong> (<em>tuple</em>) – Tuple of Facets which are to be used for the
-chain. In case no facets are provided, the full list of
+chain. In case no facets are provided, the list of
 non-equivalent facets will be used.</li>
 <li><strong>symm_tol</strong> (<em>float</em>) – Tolerance for the equivalence condition, i.e.
 how much the distance between the centers is allowed to be
@@ -494,12 +509,29 @@ See the <em>fmt</em> argument.</p>
 <dd><p>Writes the Cage to a POSCAR file.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="cage.core.Cage.visualize_facets">
+<code class="descname">visualize_facets</code><span class="sig-paren">(</span><em>filename</em>, <em>ignore=()</em>, <em>max_bond_length=1.9</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Cage.visualize_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Cage.visualize_facets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the facets of the Cage by setting up a VESTA file with
+the various facets in different colours and with the corresponding
+index given to the atom, labeled ‘Fa’ placed at the center of the
+facet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) – Name of the VESTA file to be written.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="cage.core.Facet">
 <em class="property">class </em><code class="descclassname">cage.core.</code><code class="descname">Facet</code><span class="sig-paren">(</span><em>sites</em>, <em>normal=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#Facet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.Facet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pymatgen.core.structure.SiteCollection</span></code>, <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pymatgen.core.structure.SiteCollection</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>Facet of a Molecule object, defined by a list of Sites.</p>
 <dl class="method">
 <dt id="cage.core.Facet.add_site">
@@ -760,7 +792,7 @@ written.</li>
 <dl class="class">
 <dt id="cage.core.OccupiedCage">
 <em class="property">class </em><code class="descclassname">cage.core.</code><code class="descname">OccupiedCage</code><span class="sig-paren">(</span><em>species</em>, <em>coords</em>, <em>charge=0</em>, <em>spin_multiplicity=None</em>, <em>validate_proximity=False</em>, <em>site_properties=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#cage.core.Cage" title="cage.core.Cage"><code class="xref py py-class docutils literal"><span class="pre">cage.core.Cage</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#cage.core.Cage" title="cage.core.Cage"><code class="xref py py-class docutils literal notranslate"><span class="pre">cage.core.Cage</span></code></a></p>
 <p>A Cage Molecule that has one or more cations docked on it.</p>
 <dl class="attribute">
 <dt id="cage.core.OccupiedCage.CATIONS">
@@ -820,7 +852,24 @@ molecule.</td>
 <dl class="attribute">
 <dt id="cage.core.OccupiedCage.facets">
 <code class="descname">facets</code><a class="headerlink" href="#cage.core.OccupiedCage.facets" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Surface Facets of the Cage. Note that in case the surface facets have
+not been set up using <em>find.surface.facets()</em>, the property is equal to
+<em>None</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>The surface facets of the Cage, as set up using</dt>
+<dd>find_surface_facets()</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">(List of Facets)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="cage.core.OccupiedCage.find_surface_facets">
@@ -867,21 +916,6 @@ cation present.</li>
 </dd></dl>
 
 <dl class="classmethod">
-<dt id="cage.core.OccupiedCage.from_file">
-<em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize an OccupiedCage from a file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – </td>
-</tr>
-</tbody>
-</table>
-<p>Returns:</p>
-</dd></dl>
-
-<dl class="classmethod">
 <dt id="cage.core.OccupiedCage.from_poscar">
 <em class="property">classmethod </em><code class="descname">from_poscar</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/core.html#OccupiedCage.from_poscar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.core.OccupiedCage.from_poscar" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize an OccupiedCage from a VASP POSCAR file.</p>
@@ -919,24 +953,77 @@ molecule.</td>
 <dl class="class">
 <dt id="cage.landscape.Landscape">
 <em class="property">class </em><code class="descclassname">cage.landscape.</code><code class="descname">Landscape</code><span class="sig-paren">(</span><em>points</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
-<p>A discrete mesh representing a line, area or volume.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
+<p>A selection of points representing a line, area or volume.</p>
 <dl class="method">
 <dt id="cage.landscape.Landscape.as_dict">
 <code class="descname">as_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.as_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>A JSON serializable dictionary of the Landscape.
-:return: (dict)</p>
+<dd><p>A JSON serializable dictionary of the Landscape.</p>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="cage.landscape.Landscape.center">
 <code class="descname">center</code><a class="headerlink" href="#cage.landscape.Landscape.center" title="Permalink to this definition">¶</a></dt>
-<dd><p>Center of the points of the Landscape.</p>
+<dd><p>//cnn.com&gt;`</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>(3,) shaped array of the coordinates of the mathematical</dt>
+<dd>center of the points of the landscape.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">numpy.array</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Center of the points of the Landscape. <a href="#id1"><span class="problematic" id="id2">`</span></a>CNN &lt;http</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cage.landscape.Landscape.change_center">
+<code class="descname">change_center</code><span class="sig-paren">(</span><em>center</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.change_center"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.change_center" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the center of the landscape. This simply translates all the
+coordinates so the new mathematical center is the one provided by
+the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>center</strong> (<em>3x1 numpy.array</em>) – New center of the landscape.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="cage.landscape.Landscape.create_sphere">
+<em class="property">classmethod </em><code class="descname">create_sphere</code><span class="sig-paren">(</span><em>radius</em>, <em>center=array([0</em>, <em>0</em>, <em>0])</em>, <em>axis=array([0</em>, <em>0</em>, <em>1])</em>, <em>density=15</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.create_sphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.create_sphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a spherical landscape with a specified radius.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>radius</strong> (<em>float</em>) – Radius of the spherical landscape.</li>
+<li><strong>center</strong> (<em>3x1 numpy.array</em>) – Coordinates of the center of the</li>
+<li><strong>landscape.</strong> (<em>spherical</em>) – </li>
+<li><strong>axis</strong> (<em>3x1 numpy.array</em>) – Rotational axis which is used to</li>
+<li><strong>the landscape.</strong> (<em>construct</em>) – </li>
+<li><strong>density</strong> (<em>float</em>) – Grid density of the landscape, provided in</li>
+<li><strong>of grid points per radians.</strong> (<em>number</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Spherical Landscape object as specified by the user.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(<a class="reference internal" href="#cage.landscape.Landscape" title="cage.landscape.Landscape">Landscape</a>)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -944,15 +1031,29 @@ molecule.</td>
 
 <dl class="method">
 <dt id="cage.landscape.Landscape.extend_by_rotation">
-<code class="descname">extend_by_rotation</code><span class="sig-paren">(</span><em>axis</em>, <em>density=10</em>, <em>remove_endline=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.extend_by_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.extend_by_rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extends the landscape using a axis vector and turning all the vertices
+<code class="descname">extend_by_rotation</code><span class="sig-paren">(</span><em>axis</em>, <em>density=10.0</em>, <em>remove_endline=False</em>, <em>distance_tol=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.extend_by_rotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.extend_by_rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extends the landscape using an axis vector and turning all the vertices
 in the landscape around the origin by a value and direction determined
 by the axis vector.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>axis</strong> (<em>numpy.ndarray</em>) – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>axis</strong> (<em>numpy.ndarray</em>) – Axis around which the landscape is</li>
+<li><strong>The length of the vector determines the total rotation</strong> (<em>rotated.</em>) – </li>
+<li><strong>in radians.</strong> (<em>angle</em>) – </li>
+<li><strong>density</strong> (<em>float</em>) – Density of grid points along the rotation</li>
+<li><strong>Defined in #grid points per radians.</strong> (<em>angle.</em>) – </li>
+<li><strong>remove_endline</strong> (<em>bool</em>) – Include the final rotation angle grid</li>
+<li><strong>points.</strong> – </li>
+<li><strong>distance_tol</strong> (<em>float</em>) – Minimum distance between two points in</li>
+<li><strong>landscape.</strong> (<em>the</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -961,26 +1062,60 @@ by the axis vector.</p>
 <dl class="method">
 <dt id="cage.landscape.Landscape.extend_by_translation">
 <code class="descname">extend_by_translation</code><span class="sig-paren">(</span><em>vector</em>, <em>density=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.extend_by_translation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.extend_by_translation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extends the Landscape by translating the points along a certain vector.
-:return:</p>
+<dd><p>Extends the Landscape by translating the points along a certain vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vector</strong> (<em>3x1 numpy.array</em>) – Translation vector of the extension.</li>
+<li><strong>density</strong> (<em>float</em>) – Density of the grid.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="cage.landscape.Landscape.extend_from_point">
 <code class="descname">extend_from_point</code><span class="sig-paren">(</span><em>point</em>, <em>extension</em>, <em>density=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.extend_from_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.extend_from_point" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extends the Landscape by scaling the points from a specific point.
-:param point:
-:param extension:
-:param density:
-:return:</p>
+<dd><p>Extends the Landscape by scaling the points from a specific point or
+origin, i.e. by homothetic transformations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>point</strong> – </li>
+<li><strong>extension</strong> – </li>
+<li><strong>density</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="cage.landscape.Landscape.from_file">
 <em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em>, <em>fmt='json'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#Landscape.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.Landscape.from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Load a Landscape from a file.
-:param filename: (string)
-:return:</p>
+<dd><p>Load a Landscape from a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> – </li>
+<li><strong>fmt</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -993,13 +1128,14 @@ a line).</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>vertices</strong> – (List of numpy.array)</li>
-<li><strong>num</strong> – (int)</li>
+<li><strong>vertices</strong> – </li>
+<li><strong>num</strong> – </li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1010,7 +1146,10 @@ a line).</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(List of numpy.array)</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of 3x1 numpy.array coordinates of the points
+in the landscape.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
 </tr>
 </tbody>
 </table>
@@ -1021,15 +1160,26 @@ a line).</p>
 <dl class="class">
 <dt id="cage.landscape.LandscapeAnalyzer">
 <em class="property">class </em><code class="descclassname">cage.landscape.</code><code class="descname">LandscapeAnalyzer</code><span class="sig-paren">(</span><em>data</em>, <em>datapoints=()</em>, <em>software='nwchem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>An analyzer class for interpreting data from calculations on a landscape.</p>
 <dl class="method">
 <dt id="cage.landscape.LandscapeAnalyzer.analyze_cation_energies">
-<code class="descname">analyze_cation_energies</code><span class="sig-paren">(</span><em>facet=None</em>, <em>cation='Li'</em>, <em>coordinates='polar'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer.analyze_cation_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer.analyze_cation_energies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract the total energies for all the calculations. This function is
-written specifically for studying cation landscapes defined versus a
-facet.
-:return:</p>
+<code class="descname">analyze_cation_energies</code><span class="sig-paren">(</span><em>coordinates</em>, <em>reference=None</em>, <em>cation='Li'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer.analyze_cation_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer.analyze_cation_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract the total energies for all the calculations, and connect
+them with the proper coordinates. Currently supports the following
+landscapes for analysis:</p>
+<p>Interfacet wedges: 2D landscapes that connect two Facets via a
+wedge. Polar coordinates are used to plot this landscape, and the
+program needs a reference axis to determine an appropriate angle.</p>
+<p>Spherical landscapes:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1059,10 +1209,23 @@ facet.
 
 <dl class="classmethod">
 <dt id="cage.landscape.LandscapeAnalyzer.from_data">
-<em class="property">classmethod </em><code class="descname">from_data</code><span class="sig-paren">(</span><em>directory</em>, <em>output_file='result.out'</em>, <em>software='nwchem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer.from_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer.from_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Looks through all subdirectories of ‘directory’ and looks for output
-files to extract data from to analyze.
-:return:</p>
+<em class="property">classmethod </em><code class="descname">from_data</code><span class="sig-paren">(</span><em>data_dir</em>, <em>output_file='result.out'</em>, <em>software='nwchem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer.from_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer.from_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks through all subdirectories of the provided directory and
+extracts all output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>directory</strong> – </li>
+<li><strong>output_file</strong> – </li>
+<li><strong>software</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="classmethod">
@@ -1089,9 +1252,22 @@ files to extract data from to analyze.
 
 <dl class="method">
 <dt id="cage.landscape.LandscapeAnalyzer.plot_energies">
-<code class="descname">plot_energies</code><span class="sig-paren">(</span><em>dimension</em>, <em>style='trisurf'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer.plot_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer.plot_energies" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot the energy landscape from the datapoints.
-:return:</p>
+<code class="descname">plot_energies</code><span class="sig-paren">(</span><em>dimension</em>, <em>coordinates='polar'</em>, <em>style='trisurf'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#LandscapeAnalyzer.plot_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.LandscapeAnalyzer.plot_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the energy landscape from the datapoints.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dimension</strong> – </li>
+<li><strong>coordinates</strong> – </li>
+<li><strong>style</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1115,6 +1291,12 @@ files to extract data from to analyze.
 </dd></dl>
 
 <dl class="function">
+<dt id="cage.landscape.perpendicular_part">
+<code class="descclassname">cage.landscape.</code><code class="descname">perpendicular_part</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#perpendicular_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.perpendicular_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the projection of v1 on the plane perpendicular to v2.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="cage.landscape.rotation_matrix">
 <code class="descclassname">cage.landscape.</code><code class="descname">rotation_matrix</code><span class="sig-paren">(</span><em>axis</em>, <em>theta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/landscape.html#rotation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.landscape.rotation_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the rotation matrix associated with clockwise rotation about
@@ -1133,25 +1315,55 @@ the given axis by theta radians.</p>
 <dl class="class">
 <dt id="cage.path.Path">
 <em class="property">class </em><code class="descclassname">cage.path.</code><code class="descname">Path</code><span class="sig-paren">(</span><em>site_collections</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/path.html#Path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.path.Path" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A Path is defined by a List of SiteCollections.</p>
+<dl class="attribute">
+<dt id="cage.path.Path.barrier">
+<code class="descname">barrier</code><a class="headerlink" href="#cage.path.Path.barrier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the energy barrier along the path. This is defined as the
+largest energy minus the initial energy. Expressed in eV.</p>
+<p>Returns:</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="cage.path.Path.energies">
 <code class="descname">energies</code><a class="headerlink" href="#cage.path.Path.energies" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>return</em></p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">return</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="cage.path.Path.flip">
+<code class="descname">flip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/path.html#Path.flip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.path.Path.flip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flip the direction of the path.</p>
+<p>Returns:</p>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="cage.path.Path.from_file">
 <em class="property">classmethod </em><code class="descname">from_file</code><span class="sig-paren">(</span><em>filename</em>, <em>fmt='xyz'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/path.html#Path.from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.path.Path.from_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the path from a file.
-:param filename:
-:return:</p>
+<dd><p>Read the path from the NwChem input.neb.xyz file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="cage.path.Path.plot_energies">
-<code class="descname">plot_energies</code><span class="sig-paren">(</span><em>interpolation='Cubic Spline'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/path.html#Path.plot_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.path.Path.plot_energies" title="Permalink to this definition">¶</a></dt>
+<code class="descname">plot_energies</code><span class="sig-paren">(</span><em>energy_range=None</em>, <em>interpolation='cubic spline'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/path.html#Path.plot_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.path.Path.plot_energies" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1187,7 +1399,14 @@ the given axis by theta radians.</p>
 <dl class="attribute">
 <dt id="cage.path.Path.site_collections">
 <code class="descname">site_collections</code><a class="headerlink" href="#cage.path.Path.site_collections" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>return</em></p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">return</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -1198,7 +1417,7 @@ the given axis by theta radians.</p>
 <dl class="class">
 <dt id="cage.study.Study">
 <em class="property">class </em><code class="descclassname">cage.study.</code><code class="descname">Study</code><span class="sig-paren">(</span><em>structures</em>, <em>tasks</em>, <em>software='nwchem'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/study.html#Study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.study.Study" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">monty.json.MSONable</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">monty.json.MSONable</span></code></p>
 <p>A Study is a List of Tasks which need to be performed on a List of
 Structures.</p>
 <dl class="method">
@@ -1304,31 +1523,34 @@ Manguin one.
 </dd></dl>
 
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-cage"></span></div>
+<div class="section" id="module-cage">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cage" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">cage package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cage.core">cage.core module</a></li>
-<li><a class="reference internal" href="#module-cage.landscape">cage.landscape module</a></li>
-<li><a class="reference internal" href="#module-cage.path">cage.path module</a></li>
-<li><a class="reference internal" href="#module-cage.study">cage.study module</a></li>
-<li><a class="reference internal" href="#module-cage.utils">cage.utils module</a></li>
-<li><a class="reference internal" href="#module-contents">Module contents</a></li>
+<h1 class="logo"><a href="index.html">cage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 </ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -1336,23 +1558,26 @@ Manguin one.
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/cage.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -1361,8 +1586,8 @@ Manguin one.
       &copy;2017, Marnik Bercx.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/cage.rst.txt"

@@ -4,24 +4,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>cage.cli.commands.util &#8212; cage 0.1a1 documentation</title>
     <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../../',
-        VERSION:     '0.1a1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
    
@@ -30,23 +21,40 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for cage.cli.commands.util</h1><div class="highlight"><pre>
 <span></span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">pymatgen</span> <span class="k">as</span> <span class="nn">pmg</span>
 <span class="kn">import</span> <span class="nn">pymatgen.io.nwchem</span> <span class="k">as</span> <span class="nn">nwchem</span>
+
+<span class="kn">from</span> <span class="nn">cage.landscape</span> <span class="k">import</span> <span class="n">LandscapeAnalyzer</span>
+<span class="kn">from</span> <span class="nn">cage</span> <span class="k">import</span> <span class="n">Cage</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="k">import</span> <span class="n">JSONDecodeError</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Small utility scripts that support the use of the cage package.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Elements to ignore for the surface facet determination</span>
+<span class="n">IGNORE</span> <span class="o">=</span> <span class="p">(</span><span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Li&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Na&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Mg&#39;</span><span class="p">),</span>
+          <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;I&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Br&#39;</span><span class="p">),</span>
+          <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">),</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">))</span>
+
+<span class="n">OUTPUT_FILE</span> <span class="o">=</span> <span class="s2">&quot;result.out&quot;</span>
+<span class="n">JOB_SCRIPT</span> <span class="o">=</span> <span class="s2">&quot;job_nwchem.sh&quot;</span>
+
 
 <div class="viewcode-block" id="geo"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.geo">[docs]</a><span class="k">def</span> <span class="nf">geo</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -57,15 +65,287 @@
 <span class="sd">        output_file (str): Output file of the nwchem calculation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;initial_mol.xyz&#39;</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;final_mol.xyz&#39;</span><span class="p">)</span></div>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;initial_geo.xyz&#39;</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;xyz&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;final_geo.xyz&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="energy"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.energy">[docs]</a><span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="n">output_file</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">output_file</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Total energy = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;energies&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="check_calculation"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.check_calculation">[docs]</a><span class="k">def</span> <span class="nf">check_calculation</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Script that checks if a calculation has completed successfully from the</span>
+<span class="sd">    output file(s).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        output (str): Output file or directory</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO Make this method recursively check subdirectories</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+
+        <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">directory</span> <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+
+            <span class="n">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">JSONDecodeError</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;File not found.&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No output file found in &quot;</span> <span class="o">+</span> <span class="n">directory</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;File: &#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculation completed in &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                        <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s1">&#39;No timing information found. Calculation might not &#39;</span>
+                        <span class="s1">&#39;have completed successfully.&#39;</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculation has error: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+            <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data found in file!&quot;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">JSONDecodeError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;File not found.&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;File: &#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculation completed in &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No timing information found. Calculation might not &#39;</span>
+                      <span class="s1">&#39;have completed successfully.&#39;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Calculation has error: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data found in file!&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="gather_landscape"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.gather_landscape">[docs]</a><span class="k">def</span> <span class="nf">gather_landscape</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gather the results from a landscape calculation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        directory (str): Directory which contains all the geometry directories</span>
+<span class="sd">            that describe the landscape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lands_analyzer</span> <span class="o">=</span> <span class="n">LandscapeAnalyzer</span><span class="o">.</span><span class="n">from_data</span><span class="p">(</span><span class="n">data_dir</span><span class="o">=</span><span class="n">directory</span><span class="p">)</span>
+    <span class="n">lands_analyzer</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s2">&quot;landscape.json&quot;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="process_output"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.process_output">[docs]</a><span class="k">def</span> <span class="nf">process_output</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Process the results in an output file or all subdirectories in a directory.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        output (str): File or directory that contains the output. If a</span>
+<span class="sd">            directory is provided, the output has to be in the subdirectories</span>
+<span class="sd">            of that directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>
+
+        <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">directory</span> <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing output in &quot;</span> <span class="o">+</span>
+                  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span>
+                  <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File: &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span>
+                          <span class="s2">&quot; contains errors!&quot;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No timing information found in &#39;</span> <span class="o">+</span>
+                          <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="s1">&#39;data.json&#39;</span><span class="p">))</span>
+
+            <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data found in file. &quot;</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is empty!&quot;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing output in &#39;</span> <span class="o">+</span> <span class="n">output</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Could not find proper nwchem output file.&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">output</span><span class="p">[</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File: &quot;</span> <span class="o">+</span> <span class="n">output</span> <span class="o">+</span> <span class="s2">&quot; contains errors!&quot;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No timing information found in &#39;</span> <span class="o">+</span> <span class="n">output</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output</span><span class="p">),</span>
+                                         <span class="s1">&#39;data.json&#39;</span><span class="p">))</span>
+
+        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data found in file. &quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is empty!&quot;</span><span class="p">)</span>
+
+        <span class="n">out</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="s1">&#39;data.json&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="search_and_reboot"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.search_and_reboot">[docs]</a><span class="k">def</span> <span class="nf">search_and_reboot</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Look to a directory for calculations in its subdirectories, and reboot them</span>
+<span class="sd">    if they did not complete successfully.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        directory (str):</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">subdir</span> <span class="k">for</span> <span class="n">subdir</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">subdir</span><span class="p">)]</span>
+
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Checking output in &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span>
+              <span class="s2">&quot;...&quot;</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">nwchem</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">output</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;File: &quot;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span>
+                      <span class="s2">&quot; contains errors! Simply rebooting is probably not &quot;</span>
+                      <span class="s2">&quot;sufficient.&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">output</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No timing information found in &#39;</span> <span class="o">+</span>
+                      <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">OUTPUT_FILE</span><span class="p">)</span> <span class="o">+</span>
+                      <span class="s1">&#39;. Rebooting calculation...&#39;</span><span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span>
+                    <span class="s2">&quot;sh -c &#39;cd &quot;</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot; &amp;&amp; msub &quot;</span> <span class="o">+</span> <span class="n">JOB_SCRIPT</span> <span class="o">+</span> <span class="s2">&quot; &#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No data found in file. Rebooting calculation...&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sh -c &#39;cd &quot;</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot; &amp;&amp; msub &quot;</span> <span class="o">+</span> <span class="n">JOB_SCRIPT</span>
+                      <span class="o">+</span> <span class="s2">&quot; &#39;&quot;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data is empty! Rebooting Calculation...&quot;</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;sh -c &#39;cd &quot;</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot; &amp;&amp; msub &quot;</span> <span class="o">+</span> <span class="n">JOB_SCRIPT</span>
+                      <span class="o">+</span> <span class="s2">&quot; &#39;&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="visualize_facets"><a class="viewcode-back" href="../../../../cage.cli.commands.html#cage.cli.commands.util.visualize_facets">[docs]</a><span class="k">def</span> <span class="nf">visualize_facets</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Visualize the facets of a molecule based on a structure file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (str): Structure file of the molecule.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Load the POSCAR into a Cage</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_poscar</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># If that fails, try other file formats supported by pymatgen</span>
+        <span class="n">anion</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">anion</span><span class="o">.</span><span class="n">find_surface_facets</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span>
+
+    <span class="n">facet_filename</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>\
+                     <span class="o">+</span> <span class="s2">&quot;.vesta&quot;</span>
+
+    <span class="n">anion</span><span class="o">.</span><span class="n">visualize_facets</span><span class="p">(</span><span class="n">facet_filename</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="n">IGNORE</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">cage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorial.html">Tutorial</a></li>
+</ul>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../../index.html">Documentation overview</a><ul>
@@ -76,14 +356,24 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -92,8 +382,8 @@
       &copy;2017, Marnik Bercx.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

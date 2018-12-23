@@ -4,24 +4,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>cage.landscape &#8212; cage 0.1a1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.1a1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -30,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for cage.landscape</h1><div class="highlight"><pre>
@@ -50,6 +42,8 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">pdb</span>
 
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">pymatgen</span> <span class="k">as</span> <span class="nn">pmg</span>
@@ -72,22 +66,36 @@
 
 <div class="viewcode-block" id="Landscape"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape">[docs]</a><span class="k">class</span> <span class="nc">Landscape</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A discrete mesh representing a line, area or volume.</span>
+<span class="sd">    A selection of points representing a line, area or volume.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initializes a Landscape from the points that it consists of.</span>
 
-<span class="sd">        :param points: (List of numpy.array)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            list: List of 3x1 numpy.array coordinates of the points</span>
+<span class="sd">                in the landscape.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">points</span>
+
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">points</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Provided points are not formatted in a List or Tuple.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add two Landscapes to each other into a new Landscape.</span>
 
-<span class="sd">        :param other: (Landscape)</span>
-<span class="sd">        :return: (Landscape)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            other (cage.landscape.Landscape): Landscape to which the current</span>
+<span class="sd">            Landscape should be added.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Landscape: Sum of the two landscapes, i.e. a landscape that consists</span>
+<span class="sd">                of the points of the two landscapes combined.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">points</span>
 
@@ -98,18 +106,143 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        All of the points of the Landscape.</span>
 
-<span class="sd">        :return: (List of numpy.array)</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of 3x1 numpy.array coordinates of the points</span>
+<span class="sd">            in the landscape.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Center of the points of the Landscape.</span>
+<span class="sd">        Center of the points of the Landscape. `CNN &lt;http://cnn.com&gt;`</span>
 
-<span class="sd">        :return:</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.array: (3,) shaped array of the coordinates of the mathematical</span>
+<span class="sd">                center of the points of the landscape.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Landscape.change_center"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.change_center">[docs]</a>    <span class="k">def</span> <span class="nf">change_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change the center of the landscape. This simply translates all the</span>
+<span class="sd">        coordinates so the new mathematical center is the one provided by</span>
+<span class="sd">        the user.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            center (3x1 numpy.array): New center of the landscape.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_points</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+            <span class="n">new_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">+</span> <span class="n">center</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">new_points</span></div>
+
+<div class="viewcode-block" id="Landscape.extend_by_rotation"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.extend_by_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">extend_by_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">remove_endline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">distance_tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extends the landscape using an axis vector and turning all the vertices</span>
+<span class="sd">        in the landscape around the origin by a value and direction determined</span>
+<span class="sd">        by the axis vector.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axis (numpy.ndarray): Axis around which the landscape is</span>
+<span class="sd">            rotated. The length of the vector determines the total rotation</span>
+<span class="sd">            angle in radians.</span>
+<span class="sd">            density (float): Density of grid points along the rotation</span>
+<span class="sd">            angle. Defined in #grid points per radians.</span>
+<span class="sd">            remove_endline (bool): Include the final rotation angle grid</span>
+<span class="sd">            points.</span>
+<span class="sd">            distance_tol (float): Minimum distance between two points in</span>
+<span class="sd">            the landscape.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO Extend this method</span>
+        <span class="c1"># so it also allows rotations around other points than origin</span>
+
+        <span class="c1"># Find the rotation matrices</span>
+        <span class="n">rotation_matrices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+        <span class="n">npoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_angle</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">density</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">remove_endline</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="n">total_angle</span>
+                <span class="n">rotation_matrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
+                <span class="n">angle</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="n">total_angle</span>
+                <span class="n">rotation_matrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
+
+        <span class="c1"># Add all the points TODO This might be done more quickly</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="n">rotation_matrices</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
+                <span class="n">newpoint</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">point</span> <span class="o">-</span> <span class="n">newpoint</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&gt;</span> <span class="n">distance_tol</span><span class="p">:</span>
+                    <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newpoint</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Landscape.extend_by_translation"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.extend_by_translation">[docs]</a>    <span class="k">def</span> <span class="nf">extend_by_translation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extends the Landscape by translating the points along a certain vector.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            vector (3x1 numpy.array): Translation vector of the extension.</span>
+<span class="sd">            density (float): Density of the grid.</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span> <span class="c1">#TODO</span></div>
+
+<div class="viewcode-block" id="Landscape.extend_from_point"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.extend_from_point">[docs]</a>    <span class="k">def</span> <span class="nf">extend_from_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">extension</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extends the Landscape by scaling the points from a specific point or</span>
+<span class="sd">        origin, i.e. by homothetic transformations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            point:</span>
+<span class="sd">            extension:</span>
+<span class="sd">            density:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span> <span class="c1">#TODO</span></div>
+
+<div class="viewcode-block" id="Landscape.as_dict"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A JSON serializable dictionary of the Landscape.</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">d</span></div>
+
+<div class="viewcode-block" id="Landscape.from_file"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.from_file">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a Landscape from a file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename:</span>
+<span class="sd">            fmt:</span>
+
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="Landscape.from_vertices"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.from_vertices">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_vertices</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vertices</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
@@ -117,8 +250,12 @@
 <span class="sd">        Define a landscape by providing the vertices (end points in the case of</span>
 <span class="sd">        a line).</span>
 
-<span class="sd">        :param vertices: (List of numpy.array)</span>
-<span class="sd">        :param num: (int)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            vertices:</span>
+<span class="sd">            num:</span>
+
+<span class="sd">        Returns:</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Calculate the points of the Landscape depending on the number of</span>
         <span class="c1"># vertices</span>
@@ -137,79 +274,54 @@
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
                     <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">mesh_distance</span> <span class="o">*</span> <span class="n">unitvector</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Higher dimensions than 2 not implemented yet.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Higher dimensions than 1 not implemented yet.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Landscape</span><span class="p">(</span><span class="n">points</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Landscape.extend_by_rotation"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.extend_by_rotation">[docs]</a>    <span class="k">def</span> <span class="nf">extend_by_rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">remove_endline</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Landscape.create_sphere"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.create_sphere">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create_sphere</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                      <span class="n">axis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">density</span><span class="o">=</span><span class="mi">15</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Extends the landscape using a axis vector and turning all the vertices</span>
-<span class="sd">        in the landscape around the origin by a value and direction determined</span>
-<span class="sd">        by the axis vector.</span>
+<span class="sd">        Set up a spherical landscape with a specified radius.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            axis (numpy.ndarray):</span>
+<span class="sd">            radius (float): Radius of the spherical landscape.</span>
+<span class="sd">            center (3x1 numpy.array): Coordinates of the center of the</span>
+<span class="sd">            spherical landscape.</span>
+<span class="sd">            axis (3x1 numpy.array): Rotational axis which is used to</span>
+<span class="sd">            construct the landscape.</span>
+<span class="sd">            density (float): Grid density of the landscape, provided in</span>
+<span class="sd">            number of grid points per radians.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Landscape): Spherical Landscape object as specified by the user.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO Extend this method so it also allows rotations around other points than origin</span>
+        <span class="n">starting_point</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">unit_vector</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
 
-        <span class="c1"># Find the rotation matrices</span>
-        <span class="n">rotation_matrices</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">total_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
-        <span class="n">npoints</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">total_angle</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">density</span><span class="p">)</span>
+        <span class="n">sphere_landscape</span> <span class="o">=</span> <span class="n">Landscape</span><span class="p">([</span><span class="n">starting_point</span><span class="p">,</span> <span class="p">])</span>
 
-        <span class="k">if</span> <span class="n">remove_endline</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-                <span class="n">angle</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="n">total_angle</span>
-                <span class="n">rotation_matrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">angle_between</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">axis</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-2</span><span class="p">:</span>
+            <span class="n">phi_axis</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">starting_point</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
-                <span class="n">angle</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">npoints</span><span class="o">*</span><span class="n">total_angle</span>
-                <span class="n">rotation_matrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotation_matrix</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">angle</span><span class="p">))</span>
+            <span class="n">phi_axis</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">starting_point</span><span class="p">)</span>
+            <span class="p">)</span>
 
-        <span class="c1"># Add all the points TODO This might be done more quickly</span>
-        <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="n">rotation_matrices</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">:</span>
-                <span class="n">newpoint</span> <span class="o">=</span> <span class="n">point</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">newpoint</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-                    <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newpoint</span><span class="p">)</span>
+        <span class="n">sphere_landscape</span><span class="o">.</span><span class="n">extend_by_rotation</span><span class="p">(</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">phi_axis</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+            <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+        <span class="n">sphere_landscape</span><span class="o">.</span><span class="n">extend_by_rotation</span><span class="p">(</span>
+            <span class="n">axis</span><span class="o">=</span><span class="n">unit_vector</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+            <span class="n">density</span><span class="o">=</span><span class="n">density</span>
+        <span class="p">)</span>
 
-<div class="viewcode-block" id="Landscape.extend_by_translation"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.extend_by_translation">[docs]</a>    <span class="k">def</span> <span class="nf">extend_by_translation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Extends the Landscape by translating the points along a certain vector.</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
+        <span class="n">sphere_landscape</span><span class="o">.</span><span class="n">change_center</span><span class="p">(</span><span class="n">center</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Landscape.extend_from_point"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.extend_from_point">[docs]</a>    <span class="k">def</span> <span class="nf">extend_from_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">extension</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Extends the Landscape by scaling the points from a specific point.</span>
-<span class="sd">        :param point:</span>
-<span class="sd">        :param extension:</span>
-<span class="sd">        :param density:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div>
-
-<div class="viewcode-block" id="Landscape.as_dict"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        A JSON serializable dictionary of the Landscape.</span>
-<span class="sd">        :return: (dict)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">}</span>
-
-        <span class="k">return</span> <span class="nb">dict</span></div>
-
-<div class="viewcode-block" id="Landscape.from_file"><a class="viewcode-back" href="../../cage.html#cage.landscape.Landscape.from_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Load a Landscape from a file.</span>
-<span class="sd">        :param filename: (string)</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
+        <span class="k">return</span> <span class="n">sphere_landscape</span></div></div>
 
 
 <div class="viewcode-block" id="LandscapeAnalyzer"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">LandscapeAnalyzer</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
@@ -218,8 +330,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">datapoints</span><span class="o">=</span><span class="p">(),</span> <span class="n">software</span><span class="o">=</span><span class="s2">&quot;nwchem&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize an instance of LandscapeAnalyzer. This method will rarely</span>
-<span class="sd">        be used directly. Usually a LandscapeAnalyzer is initialized from a</span>
+<span class="sd">        Initialize an instance of LandscapeAnalyzer. This method is rarely</span>
+<span class="sd">        used directly. Usually a LandscapeAnalyzer is initialized from a</span>
 <span class="sd">        directory or file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
@@ -239,47 +351,67 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span>
 
 <div class="viewcode-block" id="LandscapeAnalyzer.from_data"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.from_data">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s1">&#39;result.out&#39;</span><span class="p">,</span> <span class="n">software</span><span class="o">=</span><span class="s1">&#39;nwchem&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data_dir</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s1">&#39;result.out&#39;</span><span class="p">,</span> <span class="n">software</span><span class="o">=</span><span class="s1">&#39;nwchem&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Looks through all subdirectories of &#39;directory&#39; and looks for output</span>
-<span class="sd">        files to extract data from to analyze.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        Looks through all subdirectories of the provided directory and</span>
+<span class="sd">        extracts all output.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            directory:</span>
+<span class="sd">            output_file:</span>
+<span class="sd">            software:</span>
+
+<span class="sd">        Returns:</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># TODO Make subdirectory finder recursive?</span>
+        <span class="c1"># Currently the method only checks in the immediate subdirectories</span>
+        <span class="c1"># of the directory provided by the user. It might be useful to</span>
+        <span class="c1"># extend this to subdirectories further down the tree. However,</span>
+        <span class="c1"># maybe it&#39;s best to stick to calculating landscape properties in</span>
+        <span class="c1"># the same directory.</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Directory &quot;</span> <span class="o">+</span> <span class="n">directory</span> <span class="o">+</span> <span class="s2">&quot; not found.&quot;</span><span class="p">)</span>
+        <span class="c1"># Check if the directory exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">data_dir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Directory &quot;</span> <span class="o">+</span> <span class="n">data_dir</span> <span class="o">+</span> <span class="s2">&quot; not found.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Find all the subdirectories in the specified directory</span>
-        <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
-                   <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">d</span><span class="p">))]</span>
+        <span class="n">dir_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">d</span><span class="p">))]</span>
 
         <span class="c1"># Get all of the output of the calculations in the directory</span>
+
         <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="k">if</span> <span class="n">software</span> <span class="o">==</span> <span class="s1">&#39;nwchem&#39;</span><span class="p">:</span>
-            <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">dir_list</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">out</span> <span class="o">=</span> <span class="n">nw</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="nb">dir</span><span class="p">,</span>
-                                                      <span class="n">output_file</span><span class="p">))</span>
+                    <span class="n">out</span> <span class="o">=</span> <span class="n">nw</span><span class="o">.</span><span class="n">NwOutput</span><span class="p">(</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">output_file</span><span class="p">)</span>
+                    <span class="p">)</span>
+
                 <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Did not find output file in directory &#39;</span> <span class="o">+</span> <span class="nb">dir</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Did not find output file in directory &#39;</span> <span class="o">+</span> <span class="n">directory</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Did not find output in &#39;</span> <span class="o">+</span> <span class="n">output_file</span> <span class="o">+</span>
-                          <span class="s1">&#39; in directory&#39;</span> <span class="o">+</span> <span class="nb">dir</span><span class="p">)</span>
-
-                <span class="c1"># Check if the output has an error</span>
-                <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Error found in output in directory &#39;</span> <span class="o">+</span> <span class="nb">dir</span><span class="p">)</span>
+                          <span class="s1">&#39; in directory &#39;</span> <span class="o">+</span> <span class="n">directory</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No timing data found for final task. &#39;</span>
-                              <span class="s1">&#39;Calculation might not have completed &#39;</span>
-                              <span class="s1">&#39;successfully.&#39;</span><span class="p">)</span>
-                    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Grabbed output in directory &#39;</span> <span class="o">+</span> <span class="nb">dir</span><span class="p">)</span>
+                    <span class="c1"># Check if the output has an error</span>
+                    <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;has_error&#39;</span><span class="p">]:</span>
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="s1">&#39;Error found in output in directory &#39;</span> <span class="o">+</span> <span class="n">directory</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;task_time&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No timing data found for final task. &#39;</span>
+                                  <span class="s1">&#39;Calculation might not have completed &#39;</span>
+                                  <span class="s1">&#39;successfully.&#39;</span><span class="p">)</span>
 
-            <span class="c1"># TODO This currently only considers the final task. Not a very general approach</span>
+                        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Grabbed output in directory &#39;</span> <span class="o">+</span> <span class="n">directory</span><span class="p">)</span>
+
+            <span class="c1"># TODO This currently only considers the final NwChem task.</span>
+            <span class="c1"># Not a very general approach, but maybe the most sensible?</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">out</span> <span class="ow">in</span> <span class="n">output</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>
@@ -287,78 +419,151 @@
 
         <span class="k">return</span> <span class="n">LandscapeAnalyzer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">software</span><span class="o">=</span><span class="n">software</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LandscapeAnalyzer.analyze_cation_energies"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.analyze_cation_energies">[docs]</a>    <span class="k">def</span> <span class="nf">analyze_cation_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facet</span><span class="o">=</span><span class="kc">None</span> <span class="p">,</span> <span class="n">cation</span><span class="o">=</span><span class="s2">&quot;Li&quot;</span><span class="p">,</span>
-                                <span class="n">coordinates</span><span class="o">=</span><span class="s2">&quot;polar&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="LandscapeAnalyzer.analyze_cation_energies"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.analyze_cation_energies">[docs]</a>    <span class="k">def</span> <span class="nf">analyze_cation_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                <span class="n">cation</span><span class="o">=</span><span class="s2">&quot;Li&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Extract the total energies for all the calculations. This function is</span>
-<span class="sd">        written specifically for studying cation landscapes defined versus a</span>
-<span class="sd">        facet.</span>
+<span class="sd">        Extract the total energies for all the calculations, and connect</span>
+<span class="sd">        them with the proper coordinates. Currently supports the following</span>
+<span class="sd">        landscapes for analysis:</span>
+
+<span class="sd">        Interfacet wedges: 2D landscapes that connect two Facets via a</span>
+<span class="sd">        wedge. Polar coordinates are used to plot this landscape, and the</span>
+<span class="sd">        program needs a reference axis to determine an appropriate angle.</span>
+
+<span class="sd">        Spherical landscapes:</span>
+
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># If a facet is not provided, try to find the closest one to the first</span>
-        <span class="c1"># ion coordinate data point. This might not always work.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">facet</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No Facet was provided. Since the facet is important for &quot;</span>
-                  <span class="s2">&quot;defining the coordinates of the landscape, the program &quot;</span>
-                  <span class="s2">&quot;will automatically determine the closest facet to the &quot;</span>
-                  <span class="s2">&quot;cation in the first datapoint.&quot;</span><span class="p">)</span>
-            <span class="n">cage_init</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">init_cation_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">sites</span>
-                                  <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">facet_init</span> <span class="o">=</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">facets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">cage_facet</span> <span class="ow">in</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">cage_facet</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">init_cation_coords</span><span class="p">)</span> \
-                    <span class="o">&lt;</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">facet_init</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">init_cation_coords</span><span class="p">):</span>
-                    <span class="n">facet</span> <span class="o">=</span> <span class="n">cage_facet</span>
-
         <span class="n">datapoints</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">coordinates</span> <span class="o">==</span> <span class="s2">&quot;polar&quot;</span><span class="p">:</span>
 
-            <span class="n">cation_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;molecules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sites</span>
-                             <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">)]</span>
+            <span class="n">facet</span> <span class="o">=</span> <span class="n">reference</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Requested cation not found in molecule.&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">cation_coords</span> <span class="o">=</span> <span class="n">cation_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;More than one cation found in molecule. Taking the last&quot;</span>
-                      <span class="s2">&quot;cation of the list.&quot;</span><span class="p">)</span>
-                <span class="n">cation_coords</span> <span class="o">=</span> <span class="n">cation_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Distance&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Angle&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Energy&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">)]</span>
 
-            <span class="k">if</span> <span class="n">coordinates</span> <span class="o">==</span> <span class="s2">&quot;polar&quot;</span><span class="p">:</span>
+            <span class="c1"># If a facet is not provided, try to find the closest one to the</span>
+            <span class="c1"># first ion coordinate data point. This might not always work.</span>
+            <span class="k">if</span> <span class="n">reference</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;No Facet was provided. Since the facet is important for &quot;</span>
+                    <span class="s2">&quot;defining the coordinates of the landscape, the program &quot;</span>
+                    <span class="s2">&quot;will automatically determine the closest facet to the &quot;</span>
+                    <span class="s2">&quot;cation in the first datapoint.&quot;</span>
+                <span class="p">)</span>
+
+                <span class="n">cage_init</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">init_cation_coords</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">sites</span>
+                    <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">)][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">facet_init</span> <span class="o">=</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">facets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">cage_facet</span> <span class="ow">in</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">facets</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">cage_facet</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">init_cation_coords</span><span class="p">)</span> \
+                            <span class="o">&lt;</span> <span class="n">utils</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">facet_init</span><span class="o">.</span><span class="n">center</span><span class="p">,</span>
+                                             <span class="n">init_cation_coords</span><span class="p">):</span>
+                        <span class="n">facet</span> <span class="o">=</span> <span class="n">cage_facet</span>
+
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+
+                <span class="c1"># Extract the cartesian coordinates of the cation</span>
+                <span class="n">cage</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;molecules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">cation_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">cage</span><span class="o">.</span><span class="n">sites</span>
+                                 <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">)]</span>
+
+                <span class="c1"># Check to see how many cations are found in the structure</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># If no cation is found, raise an error</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Requested cation not found in molecule.&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">cation_coords</span> <span class="o">=</span> <span class="n">cation_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Take the last cation, this one is usually the one that</span>
+                    <span class="c1"># is part of the landscape</span>
+                    <span class="n">cation_coords</span> <span class="o">=</span> <span class="n">cation_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># Determine the polar coordinates with the facet center as a</span>
+                <span class="c1"># reference axis for the angle</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cation_coords</span> <span class="o">-</span> <span class="n">cage</span><span class="o">.</span><span class="n">anion_center</span><span class="p">)</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="n">angle_between</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">cation_coords</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">theta</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="n">theta</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GOTCHA&quot;</span><span class="p">)</span>
                     <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">theta</span>
+
                 <span class="n">coordinate</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">]</span>
 
-            <span class="k">if</span> <span class="n">coordinates</span> <span class="o">==</span> <span class="s2">&quot;facet_cart&quot;</span><span class="p">:</span>
+                <span class="n">energy_final</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">coordinate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energy_final</span><span class="p">)</span>
 
-                <span class="n">Li_vector</span> <span class="o">=</span> <span class="n">cation_coords</span> <span class="o">-</span> <span class="n">facet</span><span class="o">.</span><span class="n">center</span>
-                <span class="n">theta</span> <span class="o">=</span> <span class="n">angle_between</span><span class="p">(</span><span class="n">facet</span><span class="o">.</span><span class="n">normal</span><span class="p">,</span> <span class="n">Li_vector</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">theta</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">theta</span>
+                <span class="n">datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
 
-                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Li_vector</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-                <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">Li_vector</span><span class="p">)</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
-                <span class="nb">print</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">coordinates</span> <span class="o">==</span> <span class="s2">&quot;spherical&quot;</span><span class="p">:</span>
 
-                <span class="n">coordinate</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="n">reference</span>
 
-            <span class="n">energy_initial</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">coordinate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energy_initial</span><span class="p">)</span>
+            <span class="n">dtype</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Theta&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Phi&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Energy&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">)]</span>
 
-            <span class="n">datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">reference</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="n">data_tuples</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
-            <span class="n">data_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
-        <span class="n">dtype</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;Distance&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Angle&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;Energy&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">)]</span>
+                <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;No reference axis was provided for the &quot;</span>
+                              <span class="s2">&quot;analysis of the landscape energies. The &quot;</span>
+                              <span class="s2">&quot;program currently has no recourse for &quot;</span>
+                              <span class="s2">&quot;determining this axis automatically.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Find a suitable perpendicular axis</span>
+            <span class="n">cage_init</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;molecules&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">phi_axis</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">cage_init</span><span class="p">)</span> <span class="ow">and</span> <span class="n">phi_axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">cage_init</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
+                <span class="k">if</span> <span class="n">axis</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">cage_init</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-2</span><span class="p">:</span>
+                    <span class="n">phi_axis</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span>
+                        <span class="n">perpendicular_part</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+
+                <span class="c1"># Extract the cartesian coordinates of the cation</span>
+                <span class="n">cage</span> <span class="o">=</span> <span class="n">Cage</span><span class="o">.</span><span class="n">from_molecule</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;molecules&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">cation_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">cage</span><span class="o">.</span><span class="n">sites</span>
+                                 <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="n">cation</span><span class="p">)]</span>
+
+                <span class="c1"># Check to see how many cations are found in the structure</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># If no cation is found, raise an error</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Requested cation not found in molecule.&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">cation_coords</span> <span class="o">=</span> <span class="n">cation_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Take the last cation, this one is usually the one that</span>
+                    <span class="c1"># is part of the landscape</span>
+                    <span class="n">cation_coords</span> <span class="o">=</span> <span class="n">cation_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># Determine the spherical coordinates with the reference axis</span>
+                <span class="c1"># for the angles</span>
+                <span class="n">theta</span> <span class="o">=</span> <span class="n">angle_between</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">cation_coords</span><span class="p">)</span>
+                <span class="n">phi</span> <span class="o">=</span> <span class="n">angle_between</span><span class="p">(</span>
+                    <span class="n">perpendicular_part</span><span class="p">(</span><span class="n">cation_coords</span><span class="p">,</span> <span class="n">axis</span><span class="p">),</span> <span class="n">phi_axis</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">angle_between</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">phi_axis</span><span class="p">,</span> <span class="n">axis</span><span class="p">),</span> <span class="n">cation_coords</span><span class="p">)</span>\
+                        <span class="o">&gt;</span> \
+                        <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">phi</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">phi</span>
+
+                <span class="n">coordinate</span> <span class="o">=</span> <span class="p">[</span><span class="n">theta</span><span class="p">,</span> <span class="n">phi</span><span class="p">]</span>
+
+                <span class="n">energy_final</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;energies&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">coordinate</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">energy_final</span><span class="p">)</span>
+
+                <span class="n">datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+
+        <span class="n">data_tuples</span> <span class="o">=</span> <span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">]</span>
+
         <span class="n">darray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data_tuples</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span> <span class="o">=</span> <span class="n">darray</span></div>
@@ -376,14 +581,20 @@
         <span class="n">data</span><span class="p">[</span><span class="n">coord_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">coord_name</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">coord_name</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span> <span class="o">=</span> <span class="n">data</span></div>
 
-
-<div class="viewcode-block" id="LandscapeAnalyzer.plot_energies"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.plot_energies">[docs]</a>    <span class="k">def</span> <span class="nf">plot_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;trisurf&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="LandscapeAnalyzer.plot_energies"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.plot_energies">[docs]</a>    <span class="k">def</span> <span class="nf">plot_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="s2">&quot;polar&quot;</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="s1">&#39;trisurf&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Plot the energy landscape from the datapoints.</span>
-<span class="sd">        :return:</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dimension:</span>
+<span class="sd">            coordinates:</span>
+<span class="sd">            style:</span>
+
+<span class="sd">        Returns:</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_datapoints</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">analyze_cation_energies</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analyze_cation_energies</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="n">coordinates</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapoints</span>
 
@@ -433,8 +644,8 @@
 <span class="sd">        Return a dictionary representing the LandscapeAnalyzer instance.</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
-                <span class="s2">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+             <span class="s2">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">}</span>
 
         <span class="n">data_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
@@ -454,11 +665,11 @@
 
             <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
 
-        <span class="nb">dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_list</span>
-        <span class="nb">dict</span><span class="p">[</span><span class="s2">&quot;datapoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapoints</span>
+        <span class="n">d</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_list</span>
+        <span class="n">d</span><span class="p">[</span><span class="s2">&quot;datapoints&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datapoints</span>
 
         <span class="c1"># TODO MAKE THIS WORK datapoints after analysis</span>
-        <span class="k">return</span> <span class="nb">dict</span></div>
+        <span class="k">return</span> <span class="n">d</span></div>
 
 <div class="viewcode-block" id="LandscapeAnalyzer.from_dict"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
@@ -507,6 +718,10 @@
 
                 <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)</span>
 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Only json format is currently &quot;</span>
+                                      <span class="s2">&quot;supported.&quot;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">LandscapeAnalyzer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datapoints</span><span class="o">=</span><span class="n">file_data</span><span class="p">[</span><span class="s2">&quot;datapoints&quot;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="LandscapeAnalyzer.to"><a class="viewcode-back" href="../../cage.html#cage.landscape.LandscapeAnalyzer.to">[docs]</a>    <span class="k">def</span> <span class="nf">to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">):</span>
@@ -519,8 +734,13 @@
                 <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">f</span><span class="p">)</span>
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;Only json formats supported currently.&#39;</span><span class="p">)</span></div></div>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Only json format is currently &quot;</span>
+                                      <span class="s2">&quot;supported.&quot;</span><span class="p">)</span></div></div>
         <span class="c1"># TODO Add support for .yaml</span>
+
+<div class="viewcode-block" id="perpendicular_part"><a class="viewcode-back" href="../../cage.html#cage.landscape.perpendicular_part">[docs]</a><span class="k">def</span> <span class="nf">perpendicular_part</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns the projection of v1 on the plane perpendicular to v2. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">v1</span> <span class="o">-</span> <span class="n">v1</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span> <span class="o">*</span> <span class="n">v2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span></div>
 
 
 <span class="c1"># Functions stolen from SO</span>
@@ -537,6 +757,7 @@
     <span class="n">v1_u</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
     <span class="n">v2_u</span> <span class="o">=</span> <span class="n">unit_vector</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">v1_u</span><span class="p">,</span> <span class="n">v2_u</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span></div>
+
 
 <div class="viewcode-block" id="rotation_matrix"><a class="viewcode-back" href="../../cage.html#cage.landscape.rotation_matrix">[docs]</a><span class="k">def</span> <span class="nf">rotation_matrix</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -555,10 +776,28 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">cage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+</ul>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
@@ -569,14 +808,24 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -585,8 +834,8 @@
       &copy;2017, Marnik Bercx.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

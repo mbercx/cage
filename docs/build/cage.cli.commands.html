@@ -4,24 +4,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>cage.cli.commands package &#8212; cage 0.1a1 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.1a1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -30,13 +21,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="cage-cli-commands-package">
@@ -47,8 +39,71 @@
 <div class="section" id="module-cage.cli.commands.analyze">
 <span id="cage-cli-commands-analyze-module"></span><h2>cage.cli.commands.analyze module<a class="headerlink" href="#module-cage.cli.commands.analyze" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="cage.cli.commands.analyze.barrier_analysis">
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">barrier_analysis</code><span class="sig-paren">(</span><em>lands_dir</em>, <em>cation</em>, <em>interp_mesh</em>, <em>end_radii</em>, <em>verbose</em>, <em>coulomb_charge</em>, <em>reference_energy=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#barrier_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.barrier_analysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.analyze.coulomb_potential">
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">coulomb_potential</code><span class="sig-paren">(</span><em>Q</em>, <em>q</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#coulomb_potential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.coulomb_potential" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>Q</strong> – Charge in # of elementary charges. Include sign!</li>
+<li><strong>q</strong> – Charge in # of elementary charges. Include sign!</li>
+<li><strong>r</strong> – Distance between the two charges in Angstrom</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Coulomb potential energy in eV</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="cage.cli.commands.analyze.landscape_analysis">
-<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">landscape_analysis</code><span class="sig-paren">(</span><em>lands_dir</em>, <em>cation</em>, <em>energy_range</em>, <em>interp_mesh</em>, <em>contour_levels</em>, <em>verbose</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#landscape_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.landscape_analysis" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">landscape_analysis</code><span class="sig-paren">(</span><em>lands_dir</em>, <em>cation</em>, <em>energy_range</em>, <em>interp_mesh</em>, <em>end_radii</em>, <em>contour_levels</em>, <em>verbose</em>, <em>coulomb_charge</em>, <em>reference_energy=None</em>, <em>interp_method='griddata'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#landscape_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.landscape_analysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.analyze.plot_landscape">
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">plot_landscape</code><span class="sig-paren">(</span><em>landscape_data</em>, <em>reference_energy=None</em>, <em>energy_range=None</em>, <em>contour_levels=0.1</em>, <em>set_contour_levels_manually=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#plot_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.plot_landscape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a landscape based on the data provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>landscape_data</strong> – </li>
+<li><strong>reference_energy</strong> – </li>
+<li><strong>energy_range</strong> – </li>
+<li><strong>contour_levels</strong> – </li>
+<li><strong>set_contour_levels_manually</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.analyze.reconstruct_chain">
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">reconstruct_chain</code><span class="sig-paren">(</span><em>chain</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#reconstruct_chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.reconstruct_chain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.analyze.reference">
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">reference</code><span class="sig-paren">(</span><em>reference_dir</em>, <em>coulomb_charge=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#reference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.reference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.analyze.sphere_analysis">
+<code class="descclassname">cage.cli.commands.analyze.</code><code class="descname">sphere_analysis</code><span class="sig-paren">(</span><em>directory</em>, <em>cation</em>, <em>interp_mesh=(0.01</em>, <em>0.01)</em>, <em>energy_range=(0.0</em>, <em>0.0)</em>, <em>contour_levels=0.1</em>, <em>set_contour_levels_manually=False</em>, <em>reference_energy=None</em>, <em>interp_method='griddata'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/analyze.html#sphere_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.analyze.sphere_analysis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -56,12 +111,32 @@
 <span id="cage-cli-commands-setup-module"></span><h2>cage.cli.commands.setup module<a class="headerlink" href="#module-cage.cli.commands.setup" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="cage.cli.commands.setup.chainsetup">
-<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">chainsetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>operation</em>, <em>endradii</em>, <em>nradii</em>, <em>adensity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#chainsetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.chainsetup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">chainsetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>facets</em>, <em>operation</em>, <em>end_radii</em>, <em>nradii</em>, <em>adensity</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#chainsetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.chainsetup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up calculations to study the 2D edge landscapes between a chain of
+facets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> – </li>
+<li><strong>cation</strong> – </li>
+<li><strong>facets</strong> – </li>
+<li><strong>operation</strong> – </li>
+<li><strong>end_radii</strong> – </li>
+<li><strong>nradii</strong> – </li>
+<li><strong>adensity</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="cage.cli.commands.setup.docksetup">
-<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">docksetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>distance</em>, <em>verbose</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#docksetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.docksetup" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">docksetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>distance</em>, <em>facets</em>, <em>verbose</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#docksetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.docksetup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -77,12 +152,25 @@
 
 <dl class="function">
 <dt id="cage.cli.commands.setup.optimize">
-<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">optimize</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.optimize" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">optimize</code><span class="sig-paren">(</span><em>filename</em>, <em>charge=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#optimize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a NwChem calculation to optimize the geometry of a molecule.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>str</em>) – Structure file of the molecule.</li>
+<li><strong>charge</strong> (<em>int</em>) – Charge of the molecule.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="cage.cli.commands.setup.pathsetup">
-<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">pathsetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>distance</em>, <em>edges</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#pathsetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.pathsetup" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">pathsetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>distance</em>, <em>facets</em>, <em>edges</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#pathsetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.pathsetup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -101,8 +189,33 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="cage.cli.commands.setup.reference">
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">reference</code><span class="sig-paren">(</span><em>facet_index</em>, <em>filename</em>, <em>cation</em>, <em>end_radius</em>, <em>start_radius=4.0</em>, <em>nradii=10</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#reference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.reference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up a calculation to determine a reference energy for an anion,
+based on a 1D landscape perpendicular to a chosen facet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>facet_index</strong> – </li>
+<li><strong>filename</strong> – </li>
+<li><strong>cation</strong> – </li>
+<li><strong>end_radius</strong> – </li>
+<li><strong>start_radius</strong> – </li>
+<li><strong>nradii</strong> – </li>
+<li><strong>verbose</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="cage.cli.commands.setup.set_up_edge_landscape">
-<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">set_up_edge_landscape</code><span class="sig-paren">(</span><em>facet1</em>, <em>facet2</em>, <em>endpoint_radii=(2</em>, <em>5)</em>, <em>number_of_radii=None</em>, <em>angle_density=50</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#set_up_edge_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.set_up_edge_landscape" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">set_up_edge_landscape</code><span class="sig-paren">(</span><em>facet1</em>, <em>facet2</em>, <em>endpoint_radii=(2</em>, <em>5)</em>, <em>number_of_radii=None</em>, <em>angle_density=50</em>, <em>remove_endline=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#set_up_edge_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.set_up_edge_landscape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up the Landscape to study the energy landscape between two facets.</p>
 <p>The script creates a line, whose direction is determined by the vector
 connecting the origin to the center of the first facet. The line endpoints
@@ -146,7 +259,7 @@ facet normals.</p>
 
 <dl class="function">
 <dt id="cage.cli.commands.setup.set_up_molecules">
-<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">set_up_molecules</code><span class="sig-paren">(</span><em>mol</em>, <em>landscape</em>, <em>cation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#set_up_molecules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.set_up_molecules" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">set_up_molecules</code><span class="sig-paren">(</span><em>molecule</em>, <em>landscape</em>, <em>cation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#set_up_molecules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.set_up_molecules" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set up the List of molecules from Landscape by adding the cation on the
 various points of the landscape.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -154,7 +267,7 @@ various points of the landscape.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>mol</strong> – </li>
+<li><strong>molecule</strong> – </li>
 <li><strong>landscape</strong> – </li>
 <li><strong>cation</strong> – </li>
 </ul>
@@ -168,6 +281,11 @@ various points of the landscape.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="cage.cli.commands.setup.spheresetup">
+<code class="descclassname">cage.cli.commands.setup.</code><code class="descname">spheresetup</code><span class="sig-paren">(</span><em>filename</em>, <em>cation</em>, <em>radius</em>, <em>axis=None</em>, <em>density=20</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#spheresetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.spheresetup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="cage.cli.commands.setup.twocat_chainsetup">
 <code class="descclassname">cage.cli.commands.setup.</code><code class="descname">twocat_chainsetup</code><span class="sig-paren">(</span><em>dock_dir</em>, <em>cation</em>, <em>operation</em>, <em>endradii</em>, <em>nradii</em>, <em>adensity</em>, <em>tolerance</em>, <em>verbose</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/setup.html#twocat_chainsetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.setup.twocat_chainsetup" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -175,6 +293,41 @@ various points of the landscape.</p>
 </div>
 <div class="section" id="module-cage.cli.commands.util">
 <span id="cage-cli-commands-util-module"></span><h2>cage.cli.commands.util module<a class="headerlink" href="#module-cage.cli.commands.util" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="cage.cli.commands.util.check_calculation">
+<code class="descclassname">cage.cli.commands.util.</code><code class="descname">check_calculation</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#check_calculation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.check_calculation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Script that checks if a calculation has completed successfully from the
+output file(s).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> (<em>str</em>) – Output file or directory</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.util.energy">
+<code class="descclassname">cage.cli.commands.util.</code><code class="descname">energy</code><span class="sig-paren">(</span><em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.util.gather_landscape">
+<code class="descclassname">cage.cli.commands.util.</code><code class="descname">gather_landscape</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#gather_landscape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.gather_landscape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gather the results from a landscape calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directory</strong> (<em>str</em>) – Directory which contains all the geometry directories
+that describe the landscape.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="function">
 <dt id="cage.cli.commands.util.geo">
 <code class="descclassname">cage.cli.commands.util.</code><code class="descname">geo</code><span class="sig-paren">(</span><em>output_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#geo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.geo" title="Permalink to this definition">¶</a></dt>
@@ -190,6 +343,51 @@ optimization to xyz files.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="cage.cli.commands.util.process_output">
+<code class="descclassname">cage.cli.commands.util.</code><code class="descname">process_output</code><span class="sig-paren">(</span><em>output</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#process_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.process_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the results in an output file or all subdirectories in a directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> (<em>str</em>) – File or directory that contains the output. If a
+directory is provided, the output has to be in the subdirectories
+of that directory.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.util.search_and_reboot">
+<code class="descclassname">cage.cli.commands.util.</code><code class="descname">search_and_reboot</code><span class="sig-paren">(</span><em>directory</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#search_and_reboot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.search_and_reboot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Look to a directory for calculations in its subdirectories, and reboot them
+if they did not complete successfully.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>directory</strong> (<em>str</em>) – </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="cage.cli.commands.util.visualize_facets">
+<code class="descclassname">cage.cli.commands.util.</code><code class="descname">visualize_facets</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cage/cli/commands/util.html#visualize_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#cage.cli.commands.util.visualize_facets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visualize the facets of a molecule based on a structure file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) – Structure file of the molecule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-cage.cli.commands">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cage.cli.commands" title="Permalink to this headline">¶</a></h2>
@@ -198,21 +396,27 @@ optimization to xyz files.</p>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">cage.cli.commands package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-cage.cli.commands.analyze">cage.cli.commands.analyze module</a></li>
-<li><a class="reference internal" href="#module-cage.cli.commands.setup">cage.cli.commands.setup module</a></li>
-<li><a class="reference internal" href="#module-cage.cli.commands.util">cage.cli.commands.util module</a></li>
-<li><a class="reference internal" href="#module-cage.cli.commands">Module contents</a></li>
+<h1 class="logo"><a href="index.html">cage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 </ul>
-</li>
-</ul>
+
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
@@ -220,23 +424,26 @@ optimization to xyz files.</p>
   </ul></li>
 </ul>
 </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/cage.cli.commands.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -245,8 +452,8 @@ optimization to xyz files.</p>
       &copy;2017, Marnik Bercx.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/cage.cli.commands.rst.txt"

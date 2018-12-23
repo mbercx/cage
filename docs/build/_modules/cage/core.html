@@ -4,24 +4,15 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>cage.core &#8212; cage 0.1a1 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.1a1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -30,18 +21,18 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for cage.core</h1><div class="highlight"><pre>
-<span></span><span class="c1"># encoding: utf-8</span>
-<span class="c1"># Copyright (c) Uncle Sam</span>
+<span></span><span class="c1"># Encoding: utf-8</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">math</span>
@@ -74,7 +65,7 @@
 <span class="c1"># This is a tolerance value to determine the symmetry operations of the Cage.</span>
 <span class="c1"># It is also used to determine which facets are equivalent. The standard value</span>
 <span class="c1"># of 1E-2 is usually pretty good. In case the right non-equivalent facets are</span>
-<span class="c1"># not found, it might be worth to try tweaking this value.</span>
+<span class="c1"># not found, it might be worth trying to tweaking this value.</span>
 
 <span class="n">ANGLE_TOLERANCE</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">20</span>
 <span class="c1"># This value is important when determining whether or not a new site is a part</span>
@@ -166,6 +157,13 @@
                                                         <span class="n">SYMMETRY_TOLERANCE</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmops</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">anion_center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">anion_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span>
+                        <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">OccupiedCage</span><span class="o">.</span><span class="n">CATIONS</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anion_coords</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">anion_coords</span><span class="p">)</span>
         
 <div class="viewcode-block" id="Cage.from_poscar"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.from_poscar">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_poscar</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
@@ -208,6 +206,21 @@
 <span class="sd">        Writes the Cage to a POSCAR file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>  <span class="c1"># TODO</span></div>
+
+<div class="viewcode-block" id="Cage.copy"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience method to get a copy of the Cage. Overwritten from the</span>
+<span class="sd">        Molecule class to conserve the charge of the molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            cage.core.Cage</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">copy</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Cage</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">copy</span><span class="o">.</span><span class="n">set_charge_and_spin</span><span class="p">(</span><span class="n">charge</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">copy</span></div>
 
 <div class="viewcode-block" id="Cage.center"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.center">[docs]</a>    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -497,11 +510,136 @@
                                  <span class="s2">&quot;equal to number of surface facets. &quot;</span>
                                  <span class="s2">&quot;Something must have gone wrong.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Cage.find_noneq_facet_chain"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_facet_chain">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facet_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">facets</span><span class="o">=</span><span class="p">(),</span>
+<div class="viewcode-block" id="Cage.visualize_facets"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.visualize_facets">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_facets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="p">(),</span> <span class="n">max_bond_length</span><span class="o">=</span><span class="mf">1.9</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Visualize the facets of the Cage by setting up a VESTA file with</span>
+<span class="sd">        the various facets in different colours and with the corresponding</span>
+<span class="sd">        index given to the atom, labeled &#39;Fa&#39; placed at the center of the</span>
+<span class="sd">        facet.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filename (str): Name of the VESTA file to be written.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TODO This method is very specific. We probably should find a more general way to do this.</span>
+        <span class="c1"># TODO Fix bug for facets with more than three sites</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;#VESTA_FORMAT_VERSION 3.3.0</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;MOLECULE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write structure data</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;STRUC&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">site_number</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">specie_number</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">:</span>
+
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">site_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span>
+                       <span class="nb">str</span><span class="p">(</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">specie_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">1.000&quot;</span> <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">site</span><span class="o">.</span><span class="n">coords</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">-</span><span class="se">\n\t\t\t\t</span><span class="s2">0.0000</span><span class="se">\t</span><span class="s2">0.0000</span><span class="se">\t</span><span class="s2">0.0000</span><span class="se">\t</span><span class="s2">0.00</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">site</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">specie</span> \
+                        <span class="o">==</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="p">:</span>
+                    <span class="n">specie_number</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">specie_number</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="n">site_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># Add the centers of the facets</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">)):</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">site_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Fa&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Fa&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+                       <span class="o">+</span> <span class="s2">&quot;1.000&quot;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">facets</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">center</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">coord</span><span class="p">))</span>
+
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">-</span><span class="se">\n\t\t\t\t</span><span class="s2">0.0000</span><span class="se">\t</span><span class="s2">0.0000</span><span class="se">\t</span><span class="s2">0.0000</span><span class="se">\t</span><span class="s2">0.00</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">site_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; 0&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the bond data</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;SBOND</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">bonds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">([</span><span class="n">element</span> <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">],</span>
+                                  <span class="mi">2</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">:</span>
+            <span class="n">bonds</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">element</span><span class="p">,</span> <span class="n">element</span><span class="p">))</span>
+
+        <span class="n">bond_number</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">bond</span> <span class="ow">in</span> <span class="n">bonds</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">bond_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">bond</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+                       <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">bond</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">0.00000</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_bond_length</span><span class="p">)</span> <span class="o">+</span>
+                       <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">0</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">0</span><span class="se">\t</span><span class="s2">0</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">0.250</span><span class="se">\t</span><span class="s2">2.000</span><span class="se">\t</span><span class="s2">127</span><span class="se">\t</span><span class="s2">127</span><span class="se">\t</span><span class="s2">127</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">bond_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">element</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">bond_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Fa&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span>
+                           <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">0.00000</span><span class="se">\t</span><span class="s2">1.85</span><span class="se">\t</span><span class="s2">0</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">0</span><span class="se">\t</span><span class="s2">1</span><span class="se">\t</span><span class="s2">0.250</span><span class="se">\t</span><span class="s2">2.000&quot;</span>
+                           <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">210</span><span class="se">\t</span><span class="s2">50</span><span class="se">\t</span><span class="s2">20</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">bond_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; 0&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Write the atom data</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;ATOMT</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">atom_number</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">composition</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">atom_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">element</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+                       <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">atomic_radius</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Add the RGB colour of the atom</span>
+            <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;31</span><span class="se">\t</span><span class="s2">162</span><span class="se">\t</span><span class="s2">15</span><span class="se">\t</span><span class="s2">31</span><span class="se">\t</span><span class="s2">162</span><span class="se">\t</span><span class="s2">15</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;128</span><span class="se">\t</span><span class="s2">73</span><span class="se">\t</span><span class="s2">41</span><span class="se">\t</span><span class="s2">128</span><span class="se">\t</span><span class="s2">73</span><span class="se">\t</span><span class="s2">41</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Br&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;255</span><span class="se">\t</span><span class="s2">24</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">24</span><span class="se">\t</span><span class="s2">255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;F&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">element</span> <span class="o">==</span> <span class="n">pmg</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;I&#39;</span><span class="p">):</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;25</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">255</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\t</span><span class="s2">204</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">atom_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">atom_number</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Fa</span><span class="se">\t</span><span class="s2">0.4</span><span class="se">\t</span><span class="s2">140</span><span class="se">\t</span><span class="s2">40</span><span class="se">\t</span><span class="s2">40&quot;</span>
+                                      <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">215</span><span class="se">\t</span><span class="s2">50</span><span class="se">\t</span><span class="s2">20</span><span class="se">\t</span><span class="s2">220</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">atom_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; 0&quot;</span><span class="p">)</span>
+
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;STYLE</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;MODEL 2 1 0</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;POLYS 2</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cage.find_noneq_facet_chain"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_facet_chain">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_facet_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">facets</span><span class="o">=</span><span class="nb">tuple</span><span class="p">,</span>
                                <span class="n">symm_tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">,</span>
                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Find a chain of non equivalent facets, i.e. a collection of facets that</span>
+<span class="sd">        Construct a chain of facets, i.e. a collection of facets that</span>
 <span class="sd">        are connected by edges. Automatically sorts the facets so they</span>
 <span class="sd">        are connected by their neighbours in the list.</span>
 
@@ -510,7 +648,7 @@
 <span class="sd">                constructed. This might be useful if the chain is not</span>
 <span class="sd">                constructed as the user would like.</span>
 <span class="sd">            facets (tuple): Tuple of Facets which are to be used for the</span>
-<span class="sd">                chain. In case no facets are provided, the full list of</span>
+<span class="sd">                chain. In case no facets are provided, the list of</span>
 <span class="sd">                non-equivalent facets will be used.</span>
 <span class="sd">            symm_tol (float): Tolerance for the equivalence condition, i.e.</span>
 <span class="sd">                how much the distance between the centers is allowed to be</span>
@@ -537,7 +675,8 @@
         <span class="n">facet_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_up_facet_list</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">)</span>
 
         <span class="c1"># If no facets are provided, set up the connected non-equivalent facets</span>
-        <span class="k">if</span> <span class="n">facets</span> <span class="o">==</span> <span class="p">():</span>
+        <span class="k">if</span> <span class="n">facets</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+
             <span class="n">noneq_facets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_noneq_facets</span><span class="p">(</span><span class="n">tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">)</span>
             <span class="n">chain_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">noneq_facets</span><span class="p">)</span>
 
@@ -579,13 +718,16 @@
                                 <span class="n">new_chain_facet</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="k">break</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">chain_facets</span> <span class="o">=</span> <span class="n">facets</span>
+            <span class="n">chain_facets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">facets</span><span class="p">)</span>
             <span class="n">chain_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">facets</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chain_facets</span><span class="p">))</span> <span class="o">+</span>
-                  <span class="s2">&quot; non-equivalent facets in chain.&quot;</span><span class="p">)</span>
+                  <span class="s2">&quot; facets in chain.&quot;</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">chain_length</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">chain_length</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of facets is too small to form a chain.&quot;</span><span class="p">)</span>
 
         <span class="c1"># Find the termination facets. These are defined as facets which only</span>
         <span class="c1"># have one edge with other chain facets.</span>
@@ -606,8 +748,9 @@
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">end_facets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No termination facets found! Setting up chain &quot;</span>
-                             <span class="s2">&quot;aborted.&quot;</span><span class="p">)</span>
+            <span class="n">end_facets</span> <span class="o">=</span> <span class="n">chain_facets</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find a termination facet. Starting chain buildup &#39;</span>
+                  <span class="s1">&#39;from the first facet in the list.&#39;</span><span class="p">)</span>
 
         <span class="c1"># Sort the chain:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -709,13 +852,16 @@
 
         <span class="k">return</span> <span class="n">noneq_links</span></div>
 
-<div class="viewcode-block" id="Cage.find_noneq_chain_links"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_chain_links">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_chain_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symm_tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">,</span>
+<div class="viewcode-block" id="Cage.find_noneq_chain_links"><a class="viewcode-back" href="../../cage.html#cage.core.Cage.find_noneq_chain_links">[docs]</a>    <span class="k">def</span> <span class="nf">find_noneq_chain_links</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facets</span><span class="o">=</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">symm_tol</span><span class="o">=</span><span class="n">SYMMETRY_TOLERANCE</span><span class="p">,</span>
                                <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find the links between the facets of the chain that connects a</span>
 <span class="sd">        set of non equivalent facets.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            facets (tuple): Tuple of Facets which are to be used for the</span>
+<span class="sd">                chain. In case no facets are provided, the full list of</span>
+<span class="sd">                non-equivalent facets will be used.</span>
 <span class="sd">            symm_tol (float): Tolerance for the equivalence condition, i.e.</span>
 <span class="sd">                how much the distance between the centers is allowed to be</span>
 <span class="sd">                after a symmetry operation.</span>
@@ -726,10 +872,9 @@
 <span class="sd">            (*List of (cage.Facet, cage.Facet) Tuples*) --</span>
 <span class="sd">                The links between the Facets in the chain of non-equivalent</span>
 <span class="sd">                Facets.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">facet_chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_noneq_facet_chain</span><span class="p">(</span><span class="n">symm_tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">,</span>
+        <span class="n">facet_chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_noneq_facet_chain</span><span class="p">(</span><span class="n">facets</span><span class="o">=</span><span class="n">facets</span><span class="p">,</span>
+                                                  <span class="n">symm_tol</span><span class="o">=</span><span class="n">symm_tol</span><span class="p">,</span>
                                                   <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
         <span class="n">chain_links</span> <span class="o">=</span> <span class="p">[]</span>
@@ -847,10 +992,7 @@
 <span class="sd">                molecule.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">anion_coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span><span class="o">.</span><span class="n">coords</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span>
-                        <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">OccupiedCage</span><span class="o">.</span><span class="n">CATIONS</span><span class="p">]</span>
-
-        <span class="n">anion_center</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">anion_coords</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">anion_coords</span><span class="p">)</span>
+        <span class="n">anion_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">anion_center</span>
 
         <span class="k">if</span> <span class="n">point</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">anion_center</span> <span class="o">-=</span> <span class="n">point</span>
@@ -964,18 +1106,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span>  <span class="c1">#TODO</span></div>
 
-<div class="viewcode-block" id="OccupiedCage.from_file"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.from_file">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize an OccupiedCage from a file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            filename:</span>
-
-<span class="sd">        Returns:</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>  <span class="c1">#TODO</span></div>
+    <span class="c1"># @classmethod</span>
+    <span class="c1"># def from_file(cls, filename):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Initialize an OccupiedCage from a file.</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Args:</span>
+    <span class="c1">#         filename:</span>
+    <span class="c1">#</span>
+    <span class="c1">#     Returns:</span>
+    <span class="c1">#</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     pass  #TODO</span>
 
 <div class="viewcode-block" id="OccupiedCage.remove_surface_facet"><a class="viewcode-back" href="../../cage.html#cage.core.OccupiedCage.remove_surface_facet">[docs]</a>    <span class="k">def</span> <span class="nf">remove_surface_facet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facet</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1059,6 +1201,10 @@
 
         <span class="c1"># Make length of the normal equal to 1</span>
         <span class="n">normal</span> <span class="o">=</span> <span class="n">normal</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">normal</span><span class="p">)</span>
+
+        <span class="c1"># Flip normal in case it is pointing towards the origin.</span>
+        <span class="k">if</span> <span class="n">utils</span><span class="o">.</span><span class="n">angle_between</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">center</span><span class="p">,</span> <span class="n">normal</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+            <span class="n">normal</span> <span class="o">=</span> <span class="o">-</span> <span class="n">normal</span>
 
         <span class="k">return</span> <span class="n">normal</span>
 
@@ -1381,10 +1527,28 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">cage</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+</ul>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
@@ -1395,14 +1559,24 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -1411,8 +1585,8 @@
       &copy;2017, Marnik Bercx.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 
