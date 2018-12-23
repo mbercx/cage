@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="Force TkAgg backend for analysis scripts">
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="Made the plot_landscape part of the analysis a seperate function.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/cli/commands/analyze.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/commands/analyze.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/scripts/dockingsetup.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/scripts/edgesetup.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/workflow.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/workflow.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,38 +14,56 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cage/core.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="557">
-              <caret line="107" lean-forward="true" selection-start-line="107" selection-end-line="107" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="655">
-              <caret line="702" column="29" lean-forward="true" selection-start-line="702" selection-start-column="29" selection-end-line="702" selection-end-column="29" />
-              <folding>
-                <element signature="e#19#29#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1808">
-              <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <splitter split-orientation="horizontal" split-proportion="0.5">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="713">
+                  <caret line="284" column="52" selection-start-line="284" selection-start-column="52" selection-end-line="284" selection-end-column="52" />
+                  <folding>
+                    <element signature="e#19#29#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="423">
+                  <caret line="77" selection-start-line="77" selection-end-line="77" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/cage/workflow.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="611">
+                  <caret line="197" column="36" lean-forward="true" selection-start-line="197" selection-start-column="36" selection-end-line="197" selection-end-column="36" />
+                  <folding>
+                    <element signature="e#120#129#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="-480" />
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -78,7 +98,6 @@
         <option value="$PROJECT_DIR$/facetsym.py" />
         <option value="$PROJECT_DIR$/enlandscape.py" />
         <option value="$PROJECT_DIR$/study.py" />
-        <option value="$PROJECT_DIR$/cage/landscape.py" />
         <option value="$PROJECT_DIR$/setupscript.py" />
         <option value="$PROJECT_DIR$/energyAnalysis.py" />
         <option value="$PROJECT_DIR$/scripts/setupscript.py" />
@@ -97,13 +116,15 @@
         <option value="$PROJECT_DIR$/cage/facetsym.py" />
         <option value="$USER_HOME$/python/cage/CageStudy/scripts/facetsetup.py" />
         <option value="$PROJECT_DIR$/cage/cli/commands/analyze.py" />
+        <option value="$PROJECT_DIR$/cage/landscape.py" />
+        <option value="$PROJECT_DIR$/cage/workflow.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
-    <option name="x" value="886" />
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="x" value="-122" />
     <option name="y" value="-1200" />
-    <option name="width" value="912" />
+    <option name="width" value="1920" />
     <option name="height" value="1200" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -131,6 +152,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -156,17 +178,27 @@
               <item name="cli" type="462c0819:PsiDirectoryNode" />
               <item name="commands" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="cage" type="462c0819:PsiDirectoryNode" />
+              <item name="cage" type="462c0819:PsiDirectoryNode" />
+              <item name="scripts" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="cage" type="462c0819:PsiDirectoryNode" />
+              <item name="docs" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="json&#9;null&#9;null&#10;zopen&#9;null&#9;null&#10;listdir&#9;null&#9;null&#10;equivalent_site&#9;null&#9;null&#10;equivalent_&#9;null&#9;null&#10;dataset&#9;null&#9;null&#10;symm_da&#9;FILE&#9;file:///Users/bercx1/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/symm_data.yaml" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -456,7 +488,28 @@
       <option name="project" value="LOCAL" />
       <updated>1544979556012</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Allow for automatic designation of contour levels in spherical analysis. Make set_contour_levels_automatically=False the default.">
+      <created>1544979759872</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1544979759872</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Made the plot_landscape part of the analysis a seperate function.">
+      <created>1545089871438</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1545089871438</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Docstring + docs work">
+      <created>1545577922923</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1545577922923</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TodoView">
@@ -469,11 +522,11 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="948" y="-1200" width="850" height="1200" extended-state="6" />
+    <frame x="-122" y="-1200" width="1920" height="1200" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20506634" />
-      <window_info id="Structure" order="1" weight="0.12470215" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.0895208" />
+      <window_info id="Structure" order="1" weight="0.12427594" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -483,9 +536,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.476017" weight="0.329927" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.48876745" weight="0.329927" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.48733413" visible="true" weight="0.28584072" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.51266587" side_tool="true" visible="true" weight="0.28584072" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.451946" weight="0.30145985" />
+      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.549763" side_tool="true" visible="true" weight="0.30088496" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5134281" side_tool="true" weight="0.27876106" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.45023698" visible="true" weight="0.30088496" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -513,10 +566,12 @@
     <MESSAGE value="Changes:&#10;#1 Large reorganisation of the facetsetup.py script. Also added&#10;functionality to study carbon containing cage molecules.&#10;#2 Changed the __init__.py for the cage and scripts module." />
     <MESSAGE value="Two fixes:&#10;1) Added defaults for cage.cli.commands.analyze.sphere_analysis.&#10;2) Fixed issue with axis.xyz; previously it had to be in the current directory, not the input argument directory of the script." />
     <MESSAGE value="Force TkAgg backend for analysis scripts" />
-    <option name="LAST_COMMIT_MESSAGE" value="Force TkAgg backend for analysis scripts" />
+    <MESSAGE value="Allow for automatic designation of contour levels in spherical analysis. Make set_contour_levels_automatically=False the default." />
+    <MESSAGE value="Made the plot_landscape part of the analysis a seperate function." />
+    <MESSAGE value="Docstring + docs work" />
+    <option name="LAST_COMMIT_MESSAGE" value="Docstring + docs work" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/groups.py" />
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/sqlalchemy/orm/mapper.py" />
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/spglib/spglib.py" />
@@ -564,26 +619,66 @@
     <entry file="file://$USER_HOME$/python/cage/cage/cage/facetsym.py" />
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/core/structure.py" />
     <entry file="file://$USER_HOME$/python/cage/cage/scripts/facetsetup.py" />
+    <entry file="file://$PROJECT_DIR$/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="1" lean-forward="true" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cage/core.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="557">
-          <caret line="107" lean-forward="true" selection-start-line="107" selection-end-line="107" />
+          <caret line="107" selection-start-line="107" selection-end-line="107" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1808">
-          <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
+          <caret line="135" selection-start-line="135" selection-end-line="135" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cage/path.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$USER_HOME$/miniconda3/envs/cage/lib/python3.7/site-packages/pymatgen/core/sites.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/scripts/dockingsetup.py" />
     <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="655">
-          <caret line="702" column="29" lean-forward="true" selection-start-line="702" selection-start-column="29" selection-end-line="702" selection-end-column="29" />
+        <state relative-caret-position="713">
+          <caret line="284" column="52" selection-start-line="284" selection-start-column="52" selection-end-line="284" selection-end-column="52" />
           <folding>
             <element signature="e#19#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="423">
+          <caret line="77" selection-start-line="77" selection-end-line="77" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-480" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="611">
+          <caret line="197" column="36" lean-forward="true" selection-start-line="197" selection-start-column="36" selection-end-line="197" selection-end-column="36" />
+          <folding>
+            <element signature="e#120#129#0" expanded="true" />
           </folding>
         </state>
       </provider>
