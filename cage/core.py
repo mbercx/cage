@@ -324,8 +324,6 @@ class Cage(Molecule):
             # If so, turn them into elements
             ignore = tuple([pmg.Element(item) for item in ignore])
 
-        print(ignore)
-
         # Find all the sites which should not be ignored
         valid_sites = []
         for site in self.sites:
