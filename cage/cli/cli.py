@@ -409,7 +409,7 @@ def sphere(filename, cation, radius, density):
 
 
 @workflow.command(context_settings=CONTEXT_SETTINGS,
-                  short_help="Initial anion geometric optimization.")
+                  short_help="Anion geometric optimization.")
 @click.argument('filename')
 @click.option('--charge', '-c', default=0)
 def optimize(filename, charge):

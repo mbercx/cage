@@ -315,8 +315,9 @@ class Cage(Molecule):
         sites which are in the plane of the site, as defined by 3 site points.
 
         Args:
-            ignore (Tuple of str/Element): The elements to ignore for the
-                surface facet determination. Can be
+            ignore (List/Tuple of str/Element): The elements to ignore for the
+                surface facet determination. Can be either a tuple or list of
+                Elements or strings describing those elements
         """
 
         # Check if the content of ignore contains strings
@@ -325,15 +326,11 @@ class Cage(Molecule):
             ignore = tuple([pmg.Element(item) for item in ignore])
 
         # Find all the sites which should not be ignored
-        valid_sites = []
-        for site in self.sites:
-            if site.specie not in ignore:
-                valid_sites.append(site)
+        valid_sites = [site for site in self.sites if site.specie not in ignore]
 
         # Find all of the Facets from combinations of three valid Sites
-        all_facets = []
-        for combination in combinations(valid_sites, 3):
-            all_facets.append(Facet(list(combination)))
+        all_facets = [Facet(list(combination)) for combination
+                      in combinations(valid_sites, 3)]
 
         # Flip the normal of the facets in case it points to the center of mass
         # of the Cage
