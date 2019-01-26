@@ -315,9 +315,16 @@ class Cage(Molecule):
         sites which are in the plane of the site, as defined by 3 site points.
 
         Args:
-            ignore (Tuple of Elements/Species): The elements to ignore for the
-                surface facet determination.
+            ignore (Tuple of str/Element): The elements to ignore for the
+                surface facet determination. Can be
         """
+
+        # Check if the content of ignore contains strings
+        if any([type(item) is str for item in ignore]):
+            # If so, turn them into elements
+            ignore = tuple([pmg.Element(item) for item in ignore])
+
+        print(ignore)
 
         # Find all the sites which should not be ignored
         valid_sites = []
@@ -489,6 +496,7 @@ class Cage(Molecule):
         """
         # TODO This method is very specific. We probably should find a more general way to do this.
         # TODO Fix bug for facets with more than three sites
+
         file = open(filename, "w")
 
         file.write("#VESTA_FORMAT_VERSION 3.3.0\n\n")
