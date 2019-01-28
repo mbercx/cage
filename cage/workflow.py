@@ -2,13 +2,13 @@
 # Copyright (c) Marnik Bercx, University of Antwerp
 # Distributed under the terms of the MIT License
 
-import os
+import os, subprocess
 
 from cage.cli.commands.setup import optimize, chainsetup, spheresetup
 from cage.core import Cage
 
 from fireworks import Firework, LaunchPad, PyTask, FWorker, \
-    Workflow, ScriptTask
+    Workflow, ScriptTask, FiretaskBase
 
 """
 Workflow setup for the cage calculations.
@@ -28,6 +28,23 @@ LAUNCHPAD = LaunchPad(host="ds221271.mlab.com", port=21271, name="cage",
 
 RUN_NWCHEM_SCRIPT = "/g/g91/bercx1/local/scripts/job_workflow.sh"
 RUN_NWCHEM_COMMAND = "srun -N1 -n36 /g/g91/bercx1/nwchem/nwchem-6.6/bin/LINUX64/nwchem"
+
+class NWChemTask(FiretaskBase):
+    """
+    Firetask that represents a NWChem calculation run.
+
+    Required parameters:
+        directory (str): Directory in which the NWChem calculation should be run.
+
+    """
+    required_params = ["directory"]
+    _fw_name = "{{cage.workflow.NWChemTask}}"
+
+    def run_task(self, fw_spec):
+
+        os.chdir(self["directory"])
+        subprocess.run(RUN_NWCHEM_COMMAND + " input > result.out", shell=True)
+
 
 
 def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
@@ -188,17 +205,10 @@ def optimize_workflow(filename, charge=0):
                 "calculation_dir": directory}
     )
 
-    # Create a ScriptTask that goes to the calculation directory
-    change_directory = ScriptTask.from_str("cd " + directory)
+    run_nwchem = NWChemTask(directory=directory)
 
-    optimize_command = RUN_NWCHEM_COMMAND + " " \
-                       + os.path.join(directory, "input") + " > " \
-                       + os.path.join(directory, "result.out")
-
-    run_nwchem = ScriptTask.from_str(optimize_command)
-
-    fw = Firework(tasks=[setup_task, change_directory, run_nwchem],
-                  name="Run Nwchem")
+    fw = Firework(tasks=[setup_task, run_nwchem],
+                  name="Optimize Geometry")
 
     LAUNCHPAD.add_wf(
         Workflow(fireworks=[fw],
