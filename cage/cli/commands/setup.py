@@ -103,7 +103,7 @@ def optimize(filename, charge=None, calculation_dir=None):
         pass
 
     nw_input = nwchem.NwInput(anion, tasks, geometry_options=GEO_SETUP)
-    nw_input.write_file(os.path.join('optimize', 'input'))
+    nw_input.write_file(os.path.join(calculation_dir, 'input'))
 
 
 def docksetup(filename, cation, distance, facets, verbose):

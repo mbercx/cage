@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="Code cleanup">
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="fixed issue with pybat setup optimize">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/cli/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/cli/commands/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/commands/setup.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -39,8 +39,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/workflow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="391">
-                  <caret line="190" column="49" lean-forward="true" selection-start-line="190" selection-start-column="49" selection-end-line="190" selection-end-column="49" />
+                <state relative-caret-position="436">
+                  <caret line="192" column="62" lean-forward="true" selection-start-line="192" selection-start-column="62" selection-end-line="192" selection-end-column="62" />
                   <folding>
                     <element signature="e#120#129#0" expanded="true" />
                   </folding>
@@ -73,24 +73,25 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="680">
-                  <caret line="84" lean-forward="true" selection-start-line="84" selection-end-line="84" />
+                <state relative-caret-position="481">
+                  <caret line="105" column="52" selection-start-line="105" selection-start-column="52" selection-end-line="105" selection-end-column="52" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="264">
-                  <caret line="36" column="48" selection-start-line="36" selection-start-column="48" selection-end-line="36" selection-end-column="48" />
+                <state relative-caret-position="450">
+                  <caret line="432" lean-forward="true" selection-start-line="432" selection-end-line="432" />
                   <folding>
                     <element signature="e#14#67#1" />
                     <element signature="e#265#373#0" />
                     <element signature="e#265#364#1" />
+                    <element signature="e#376#392#0" />
                     <element signature="e#1186#1310#0" />
                     <element signature="e#1524#2018#0" />
                     <element signature="e#1524#1788#1" />
@@ -100,16 +101,19 @@
                     <element signature="e#4134#4235#0" />
                     <element signature="e#4353#4705#0" />
                     <element signature="e#4967#5199#0" />
+                    <element signature="e#5249#5274#0" />
                     <element signature="e#5268#5435#0" />
                     <element signature="e#5268#5426#1" />
                     <element signature="e#5936#6263#0" />
                     <element signature="e#5936#6083#1" />
+                    <element signature="e#6354#6372#0" />
                     <element signature="e#6404#6521#0" />
                     <element signature="e#6404#6512#1" />
                     <element signature="e#7266#7910#0" />
                     <element signature="e#8422#8899#0" />
                     <element signature="e#9088#9181#0" />
                     <element signature="e#9720#10202#0" />
+                    <element signature="e#10319#10334#0" />
                     <element signature="e#10268#10339#0" />
                     <element signature="e#10268#10330#1" />
                     <element signature="e#10448#10596#0" />
@@ -183,9 +187,10 @@
         <option value="$USER_HOME$/python/cage/CageStudy/scripts/facetsetup.py" />
         <option value="$PROJECT_DIR$/cage/cli/commands/analyze.py" />
         <option value="$PROJECT_DIR$/cage/landscape.py" />
-        <option value="$PROJECT_DIR$/cage/workflow.py" />
         <option value="$PROJECT_DIR$/cage/core.py" />
         <option value="$PROJECT_DIR$/cage/cli/cli.py" />
+        <option value="$PROJECT_DIR$/cage/workflow.py" />
+        <option value="$PROJECT_DIR$/cage/cli/commands/setup.py" />
       </list>
     </option>
   </component>
@@ -605,7 +610,21 @@
       <option name="project" value="LOCAL" />
       <updated>1548507266964</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="fixed issue with pybat setup optimize">
+      <created>1548689466506</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1548689466506</updated>
+    </task>
+    <task id="LOCAL-00023" summary="fixed issue with pybat setup optimize">
+      <created>1548690592889</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1548690592890</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TodoView">
@@ -668,7 +687,8 @@
     <MESSAGE value="updated optimize command in setup" />
     <MESSAGE value="allow user to use string to definte elements to ignore in Cage.find_surface_facets" />
     <MESSAGE value="Code cleanup" />
-    <option name="LAST_COMMIT_MESSAGE" value="Code cleanup" />
+    <MESSAGE value="fixed issue with pybat setup optimize" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed issue with pybat setup optimize" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
@@ -769,31 +789,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="190" column="49" lean-forward="true" selection-start-line="190" selection-start-column="49" selection-end-line="190" selection-end-column="49" />
-          <folding>
-            <element signature="e#120#129#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="680">
-          <caret line="84" lean-forward="true" selection-start-line="84" selection-end-line="84" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="264">
-          <caret line="36" column="48" selection-start-line="36" selection-start-column="48" selection-end-line="36" selection-end-column="48" />
+        <state relative-caret-position="450">
+          <caret line="432" lean-forward="true" selection-start-line="432" selection-end-line="432" />
           <folding>
             <element signature="e#14#67#1" />
             <element signature="e#265#373#0" />
             <element signature="e#265#364#1" />
+            <element signature="e#376#392#0" />
             <element signature="e#1186#1310#0" />
             <element signature="e#1524#2018#0" />
             <element signature="e#1524#1788#1" />
@@ -803,16 +807,19 @@
             <element signature="e#4134#4235#0" />
             <element signature="e#4353#4705#0" />
             <element signature="e#4967#5199#0" />
+            <element signature="e#5249#5274#0" />
             <element signature="e#5268#5435#0" />
             <element signature="e#5268#5426#1" />
             <element signature="e#5936#6263#0" />
             <element signature="e#5936#6083#1" />
+            <element signature="e#6354#6372#0" />
             <element signature="e#6404#6521#0" />
             <element signature="e#6404#6512#1" />
             <element signature="e#7266#7910#0" />
             <element signature="e#8422#8899#0" />
             <element signature="e#9088#9181#0" />
             <element signature="e#9720#10202#0" />
+            <element signature="e#10319#10334#0" />
             <element signature="e#10268#10339#0" />
             <element signature="e#10268#10330#1" />
             <element signature="e#10448#10596#0" />
@@ -826,6 +833,23 @@
             <element signature="e#12394#12904#0" />
             <element signature="e#13169#13402#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="436">
+          <caret line="192" column="62" lean-forward="true" selection-start-line="192" selection-start-column="62" selection-end-line="192" selection-end-column="62" />
+          <folding>
+            <element signature="e#120#129#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="481">
+          <caret line="105" column="52" selection-start-line="105" selection-start-column="52" selection-end-line="105" selection-end-column="52" />
         </state>
       </provider>
     </entry>
