@@ -32,11 +32,11 @@ def setup():
                short_help="Initial anion geometric optimization.")
 @click.argument('filename')
 @click.option('--charge', '-c', default=0)
-def optimize(filename):
+def optimize(filename, charge):
     """ Set up the initial anion optimization. """
     from cage.cli.commands.setup import optimize
 
-    optimize(filename)
+    optimize(filename, charge)
 
 
 @setup.command(context_settings=CONTEXT_SETTINGS,
