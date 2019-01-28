@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="fixed issue with pybat setup optimize">
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="simplifying optimize workflow and having it run from proper directory.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cage/cli/commands/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/commands/setup.py" afterDir="false" />
     </list>
@@ -39,8 +39,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/workflow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="436">
-                  <caret line="192" column="62" lean-forward="true" selection-start-line="192" selection-start-column="62" selection-end-line="192" selection-end-column="62" />
+                <state relative-caret-position="531">
+                  <caret line="198" lean-forward="true" selection-start-line="198" selection-end-line="198" />
                   <folding>
                     <element signature="e#120#129#0" expanded="true" />
                   </folding>
@@ -76,8 +76,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="481">
-                  <caret line="105" column="52" selection-start-line="105" selection-start-column="52" selection-end-line="105" selection-end-column="52" />
+                <state relative-caret-position="454">
+                  <caret line="105" column="25" selection-start-line="105" selection-start-column="25" selection-end-line="105" selection-end-column="25" />
                 </state>
               </provider>
             </entry>
@@ -624,7 +624,21 @@
       <option name="project" value="LOCAL" />
       <updated>1548690592890</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="fixing optimize workflow directory naming">
+      <created>1548690732282</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1548690732282</updated>
+    </task>
+    <task id="LOCAL-00025" summary="simplifying optimize workflow and having it run from proper directory.">
+      <created>1548691275629</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1548691275629</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TodoView">
@@ -651,9 +665,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.476017" weight="0.329927" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.48876745" weight="0.329927" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.5518694" side_tool="true" visible="true" weight="0.32970297" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.5518694" side_tool="true" visible="true" weight="0.32970297" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5134281" side_tool="true" weight="0.27876106" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4481306" visible="true" weight="0.32970297" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4481306" visible="true" weight="0.32970297" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -688,7 +702,9 @@
     <MESSAGE value="allow user to use string to definte elements to ignore in Cage.find_surface_facets" />
     <MESSAGE value="Code cleanup" />
     <MESSAGE value="fixed issue with pybat setup optimize" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed issue with pybat setup optimize" />
+    <MESSAGE value="fixing optimize workflow directory naming" />
+    <MESSAGE value="simplifying optimize workflow and having it run from proper directory." />
+    <option name="LAST_COMMIT_MESSAGE" value="simplifying optimize workflow and having it run from proper directory." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
@@ -838,8 +854,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/workflow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="192" column="62" lean-forward="true" selection-start-line="192" selection-start-column="62" selection-end-line="192" selection-end-column="62" />
+        <state relative-caret-position="531">
+          <caret line="198" lean-forward="true" selection-start-line="198" selection-end-line="198" />
           <folding>
             <element signature="e#120#129#0" expanded="true" />
           </folding>
@@ -848,8 +864,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="481">
-          <caret line="105" column="52" selection-start-line="105" selection-start-column="52" selection-end-line="105" selection-end-column="52" />
+        <state relative-caret-position="454">
+          <caret line="105" column="25" selection-start-line="105" selection-start-column="25" selection-end-line="105" selection-end-column="25" />
         </state>
       </provider>
     </entry>

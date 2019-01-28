@@ -103,6 +103,7 @@ def optimize(filename, charge=None, calculation_dir=None):
         pass
 
     nw_input = nwchem.NwInput(anion, tasks, geometry_options=GEO_SETUP)
+    print(calculation_dir)
     nw_input.write_file(os.path.join(calculation_dir, 'input'))
 
 
