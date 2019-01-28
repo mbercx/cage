@@ -191,9 +191,9 @@ def optimize_workflow(filename, charge=0):
     # Create a ScriptTask that goes to the calculation directory
     change_directory = ScriptTask.from_str("cd " + directory)
 
-    optimize_command = RUN_NWCHEM_COMMAND + " input > result.out"
-                       # + os.path.join(directory, "input") + " > " \
-                       # + os.path.join(directory, "result.out")
+    optimize_command = RUN_NWCHEM_COMMAND + " " \
+                       + os.path.join(directory, "input") + " > " \
+                       + os.path.join(directory, "result.out")
 
     run_nwchem = ScriptTask.from_str(optimize_command)
 
