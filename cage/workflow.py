@@ -178,19 +178,19 @@ def optimize_workflow(filename, charge=0):
     """
     # Load the cage molecule from the filename provided
     molecule = Cage.from_file(filename)
+    directory = os.path.join(os.getcwd(), "optimize")
 
     # Create the PyTask that sets up the calculation
     setup_task = PyTask(
         func="cage.cli.commands.setup.optimize",
-        kwargs={"filename": filename,
-                "charge": charge}
+        kwargs={"filename": os.path.join(os.getcwd(), filename),
+                "charge": charge,
+                "calculation_dir": directory}
     )
 
-    optimize_dir = os.path.join(os.getcwd(), "optimize")
-
     optimize_command = RUN_NWCHEM_COMMAND + " " \
-                       + os.path.join(optimize_dir, "input") + " > " \
-                       + os.path.join(optimize_dir, "result.out")
+                       + os.path.join(directory, "input") + " > " \
+                       + os.path.join(directory, "result.out")
 
     run_nwchem = ScriptTask.from_str(optimize_command)
 

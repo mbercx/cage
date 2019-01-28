@@ -54,7 +54,7 @@ ALT_SETUP = {}
 DRIVER_SETUP = {'loose': '', 'maxiter': '100'}
 
 
-def optimize(filename, charge=None):
+def optimize(filename, charge=None, calculation_dir=None):
     """
     Set up a NwChem calculation to optimize the geometry of a molecule.
 
@@ -93,9 +93,12 @@ def optimize(filename, charge=None):
     # Set the driver settings for the optimization
     ALT_SETUP["driver"] = DRIVER_SETUP
 
+    if not calculation_dir:
+        calculation_dir = os.path.join(os.getcwd(), "optimize")
+
     # Set up input
     try:
-        os.mkdir('optimize')
+        os.mkdir(calculation_dir)
     except FileExistsError:
         pass
 

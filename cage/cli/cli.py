@@ -18,6 +18,7 @@ def main():
     pass
 
 
+# region * Setup
 @main.group(context_settings=CONTEXT_SETTINGS,
             short_help="Set up Nwchem calculations for the anion.")
 def setup():
@@ -159,6 +160,9 @@ def sphere(filename, cation, radius, density):
                 density=density)
 
 
+# endregion
+
+# region * Setup - Twocat
 @setup.group(context_settings=CONTEXT_SETTINGS)
 def twocat():
     """
@@ -191,6 +195,9 @@ def chain(dock_dir, cation, operation, endradii, nradii, adensity, tolerance,
                       tolerance, verbose)
 
 
+# endregion
+
+# region * Analyze
 @main.group(context_settings=CONTEXT_SETTINGS,
             short_help="Analyze the results from NwChem calculations.")
 def analyze():
@@ -276,7 +283,7 @@ def reference(reference_dir, coulomb_charge):
 @click.option("--reference_energy", "-r", default=0.0)
 @click.option("--interp_method", "-m", default="griddata")
 def sphere(lands_dir, cation, energy_range, interp_mesh, contour_levels,
-              reference_energy, interp_method):
+           reference_energy, interp_method):
     """ Analyze the landscape data. """
     from cage.cli.commands.analyze import sphere_analysis
 
@@ -292,6 +299,9 @@ def sphere(lands_dir, cation, energy_range, interp_mesh, contour_levels,
                     interp_method=interp_method)
 
 
+# endregion
+
+# region * Util
 @main.group(context_settings=CONTEXT_SETTINGS)
 def util():
     """
@@ -358,6 +368,9 @@ def visualize(filename):
     visualize_facets(filename=filename)
 
 
+# endregion
+
+# region * Workflow
 @main.group(context_settings=CONTEXT_SETTINGS)
 def workflow():
     """
@@ -430,3 +443,5 @@ def test():
     from cage.workflow import test_workflow
 
     test_workflow()
+
+# endregion workflow
