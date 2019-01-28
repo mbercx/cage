@@ -29,6 +29,7 @@ LAUNCHPAD = LaunchPad(host="ds221271.mlab.com", port=21271, name="cage",
 RUN_NWCHEM_SCRIPT = "/g/g91/bercx1/local/scripts/job_workflow.sh"
 RUN_NWCHEM_COMMAND = "srun -N1 -n36 /g/g91/bercx1/nwchem/nwchem-6.6/bin/LINUX64/nwchem"
 
+
 class NWChemTask(FiretaskBase):
     """
     Firetask that represents a NWChem calculation run.
@@ -41,10 +42,8 @@ class NWChemTask(FiretaskBase):
     _fw_name = "{{cage.workflow.NWChemTask}}"
 
     def run_task(self, fw_spec):
-
         os.chdir(self["directory"])
         subprocess.run(RUN_NWCHEM_COMMAND + " input > result.out", shell=True)
-
 
 
 def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
@@ -105,15 +104,14 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
         # Set up the list of FireTasks, i.e. energy calculations:
         for geo in [d for d in os.listdir(os.path.join(chain_dir, edge))
                     if "geo" in d]:
-
             dir = os.path.abspath(os.path.join(chain_dir, edge, geo))
             nwchem_command = RUN_NWCHEM_COMMAND + " " \
                              + os.path.join(dir, "input") + " > " \
                              + os.path.join(dir, "result.out")
 
             fws_list.append(
-                Firework(tasks= [ScriptTask.from_str(nwchem_command)],
-                         name= operation + " " + geo)
+                Firework(tasks=[ScriptTask.from_str(nwchem_command)],
+                         name=operation + " " + geo)
             )
 
         workflow_name = "Landscape: " + cation + " on " + molecule + " (" + \
@@ -124,6 +122,7 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
 
     # Set the workflows up to run from the launchpad
     LAUNCHPAD.bulk_add_wfs(wf_list)
+
 
 def sphere_workflow(filename, cation, radius, density):
     """
@@ -160,7 +159,6 @@ def sphere_workflow(filename, cation, radius, density):
 
     # Set up the list of FireTasks, i.e. energy calculations:
     for geo in [d for d in os.listdir(sphere_dir) if "geo" in d]:
-
         dir = os.path.abspath(os.path.join(sphere_dir, geo))
 
         nwchem_command = RUN_NWCHEM_COMMAND + " " \
@@ -168,12 +166,12 @@ def sphere_workflow(filename, cation, radius, density):
                          + os.path.join(dir, "result.out")
 
         fws_list.append(
-            Firework(tasks= [ScriptTask.from_str(nwchem_command)],
-                     name= "energy " + geo)
+            Firework(tasks=[ScriptTask.from_str(nwchem_command)],
+                     name="energy " + geo)
         )
 
     workflow_name = "Landscape: " + cation + " on " + molecule + " (" + \
-                     sphere_dir + ")"
+                    sphere_dir + ")"
 
     wf_list = [Workflow(fireworks=fws_list, name=workflow_name), ]
 
