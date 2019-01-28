@@ -188,13 +188,16 @@ def optimize_workflow(filename, charge=0):
                 "calculation_dir": directory}
     )
 
-    optimize_command = RUN_NWCHEM_COMMAND + " " \
-                       + os.path.join(directory, "input") + " > " \
-                       + os.path.join(directory, "result.out")
+    # Create a ScriptTask that goes to the calculation directory
+    change_directory = ScriptTask.from_str("cd " + directory)
+
+    optimize_command = RUN_NWCHEM_COMMAND + " input > result.out"
+                       # + os.path.join(directory, "input") + " > " \
+                       # + os.path.join(directory, "result.out")
 
     run_nwchem = ScriptTask.from_str(optimize_command)
 
-    fw = Firework(tasks=[setup_task, run_nwchem],
+    fw = Firework(tasks=[setup_task, change_directory, run_nwchem],
                   name="Run Nwchem")
 
     LAUNCHPAD.add_wf(
