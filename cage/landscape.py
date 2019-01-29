@@ -43,8 +43,6 @@ class Landscape(MSONable):
                 in the landscape.
         """
 
-        pdb.set_trace()
-
         if type(points) is list:
             self._points = points
         elif type(points) is tuple:
@@ -230,7 +228,6 @@ class Landscape(MSONable):
         if len(vertices) == 1:
             raise IOError("Number of vertices must be at least two.")
         elif len(vertices) == 2:
-            pdb.set_trace()
             if np.linalg.norm(vertices[1] - vertices[0]) < 1e-3:
                 raise IOError("Vertices are too close to each other.")
             else:
