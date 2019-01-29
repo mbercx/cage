@@ -42,6 +42,7 @@ class Landscape(MSONable):
             list: List of 3x1 numpy.array coordinates of the points
                 in the landscape.
         """
+        print(type(points))
 
         if type(points) is list:
             self._points = points
