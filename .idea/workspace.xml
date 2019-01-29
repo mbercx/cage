@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="debugging">
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="remove pdb traces">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/landscape.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/landscape.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -27,19 +26,19 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="433">
-                  <caret line="48" column="33" lean-forward="true" selection-start-line="48" selection-start-column="33" selection-end-line="48" selection-end-column="33" />
+                <state relative-caret-position="292">
+                  <caret line="229" column="32" selection-start-line="229" selection-start-column="32" selection-end-line="229" selection-end-column="32" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/workflow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-52">
+                <state relative-caret-position="-76">
                   <caret line="43" column="32" lean-forward="true" selection-start-line="43" selection-start-column="32" selection-end-line="43" selection-end-column="32" />
                   <folding>
                     <element signature="e#120#129#0" expanded="true" />
@@ -73,16 +72,16 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="278">
-                  <caret line="837" column="7" lean-forward="true" selection-start-line="837" selection-start-column="7" selection-end-line="837" selection-end-column="7" />
+                <state relative-caret-position="368">
+                  <caret line="843" column="5" lean-forward="true" selection-start-line="843" selection-start-column="5" selection-end-line="843" selection-end-column="5" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="450">
@@ -195,8 +194,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="width" value="1680" />
-    <option name="height" value="1050" />
+    <option name="x" value="-1033" />
+    <option name="y" value="-1080" />
+    <option name="width" value="1920" />
+    <option name="height" value="1080" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -678,7 +679,21 @@
       <option name="project" value="LOCAL" />
       <updated>1548743812426</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="fixed it! (I think) Was a silly error">
+      <created>1548744580122</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1548744580122</updated>
+    </task>
+    <task id="LOCAL-00033" summary="remove pdb traces">
+      <created>1548744626225</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1548744626225</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TodoView">
@@ -691,11 +706,11 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
+    <frame x="-1033" y="-1080" width="1920" height="1080" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.10247137" />
-      <window_info id="Structure" order="1" visible="true" weight="0.12417119" />
+      <window_info id="Structure" order="1" visible="true" weight="0.108478144" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -705,9 +720,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.476017" weight="0.329927" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.48876745" weight="0.329927" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.5521398" side_tool="true" visible="true" weight="0.33979592" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.5518694" side_tool="true" visible="true" weight="0.32970297" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5134281" side_tool="true" weight="0.27876106" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.44786015" visible="true" weight="0.33979592" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4481306" visible="true" weight="0.32970297" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -721,8 +736,6 @@
       <path value="$PROJECT_DIR$/../git/facetsym" />
       <path value="$PROJECT_DIR$/cage" />
     </ignored-roots>
-    <MESSAGE value="Initial VCS commmit" />
-    <MESSAGE value="Study: Catch FileExistsError for method set_up_input" />
     <MESSAGE value="Various changes of which I was too lazy to record them." />
     <MESSAGE value="Initial git commit. Code is still messy." />
     <MESSAGE value="#1 Added argument 'sort_comp' to Study.set_up_input, which allows the user to sort the directories by composition.&#10;#2 Changed the facetsetup.py to make use of this.&#10;#3 Changed the facetsetup.py so that it needs a command line argument to the POSCAR file which is to be used for setting up the calculations." />
@@ -746,7 +759,9 @@
     <MESSAGE value="simplifying optimize workflow and having it run from proper directory." />
     <MESSAGE value="fix that sorts of seems unnecessary, but lets try it" />
     <MESSAGE value="debugging" />
-    <option name="LAST_COMMIT_MESSAGE" value="debugging" />
+    <MESSAGE value="fixed it! (I think) Was a silly error" />
+    <MESSAGE value="remove pdb traces" />
+    <option name="LAST_COMMIT_MESSAGE" value="remove pdb traces" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
@@ -840,6 +855,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="292">
+          <caret line="229" column="32" selection-start-line="229" selection-start-column="32" selection-end-line="229" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-76">
+          <caret line="43" column="32" lean-forward="true" selection-start-line="43" selection-start-column="32" selection-end-line="43" selection-end-column="32" />
+          <folding>
+            <element signature="e#120#129#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="368">
+          <caret line="843" column="5" lean-forward="true" selection-start-line="843" selection-start-column="5" selection-end-line="843" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
@@ -884,30 +923,6 @@
             <element signature="e#12394#12904#0" />
             <element signature="e#13169#13402#0" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-52">
-          <caret line="43" column="32" lean-forward="true" selection-start-line="43" selection-start-column="32" selection-end-line="43" selection-end-column="32" />
-          <folding>
-            <element signature="e#120#129#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="837" column="7" lean-forward="true" selection-start-line="837" selection-start-column="7" selection-end-line="837" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="433">
-          <caret line="48" column="33" lean-forward="true" selection-start-line="48" selection-start-column="33" selection-end-line="48" selection-end-column="33" />
         </state>
       </provider>
     </entry>
