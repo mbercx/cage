@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="simplifying optimize workflow and having it run from proper directory.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/workflow.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/workflow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/landscape.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/landscape.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -27,20 +27,20 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="945">
-                  <caret line="77" selection-start-line="77" selection-end-line="77" />
+                <state relative-caret-position="490">
+                  <caret line="243" lean-forward="true" selection-start-line="243" selection-end-line="243" />
                 </state>
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/workflow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="491">
-                  <caret line="210" column="41" selection-start-line="210" selection-start-column="41" selection-end-line="210" selection-end-column="41" />
+                <state relative-caret-position="-52">
+                  <caret line="43" column="32" lean-forward="true" selection-start-line="43" selection-start-column="32" selection-end-line="43" selection-end-column="32" />
                   <folding>
                     <element signature="e#120#129#0" expanded="true" />
                   </folding>
@@ -186,19 +186,17 @@
         <option value="$PROJECT_DIR$/cage/facetsym.py" />
         <option value="$USER_HOME$/python/cage/CageStudy/scripts/facetsetup.py" />
         <option value="$PROJECT_DIR$/cage/cli/commands/analyze.py" />
-        <option value="$PROJECT_DIR$/cage/landscape.py" />
         <option value="$PROJECT_DIR$/cage/core.py" />
         <option value="$PROJECT_DIR$/cage/cli/cli.py" />
         <option value="$PROJECT_DIR$/cage/cli/commands/setup.py" />
         <option value="$PROJECT_DIR$/cage/workflow.py" />
+        <option value="$PROJECT_DIR$/cage/landscape.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6" fullScreen="true">
-    <option name="x" value="-135" />
-    <option name="y" value="-1200" />
-    <option name="width" value="1920" />
-    <option name="height" value="1200" />
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="width" value="1680" />
+    <option name="height" value="1050" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -652,7 +650,21 @@
       <option name="project" value="LOCAL" />
       <updated>1548692012880</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="simplifying optimize workflow and having it run from proper directory.">
+      <created>1548692463608</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1548692463608</updated>
+    </task>
+    <task id="LOCAL-00029" summary="simplifying optimize workflow and having it run from proper directory.">
+      <created>1548692877741</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1548692877741</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TodoView">
@@ -665,10 +677,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1033" y="-1080" width="1920" height="1080" extended-state="6" />
+    <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.0895208" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10247137" />
       <window_info id="Structure" order="1" weight="0.12427594" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -679,9 +691,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.476017" weight="0.329927" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.48876745" weight="0.329927" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.5518694" side_tool="true" visible="true" weight="0.32970297" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.5521398" side_tool="true" visible="true" weight="0.33979592" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5134281" side_tool="true" weight="0.27876106" />
-      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.4481306" visible="true" weight="0.32970297" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.44786015" visible="true" weight="0.33979592" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -795,13 +807,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="945">
-          <caret line="77" selection-start-line="77" selection-end-line="77" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cage/core.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4365">
@@ -875,11 +880,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/workflow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="491">
-          <caret line="210" column="41" selection-start-line="210" selection-start-column="41" selection-end-line="210" selection-end-column="41" />
+        <state relative-caret-position="-52">
+          <caret line="43" column="32" lean-forward="true" selection-start-line="43" selection-start-column="32" selection-end-line="43" selection-end-column="32" />
           <folding>
             <element signature="e#120#129#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="490">
+          <caret line="243" lean-forward="true" selection-start-line="243" selection-end-line="243" />
         </state>
       </provider>
     </entry>

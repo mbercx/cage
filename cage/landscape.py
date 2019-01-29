@@ -242,7 +242,7 @@ class Landscape(MSONable):
         else:
             raise NotImplementedError("Higher dimensions than 1 not implemented yet.")
 
-        return Landscape(points)
+        return Landscape(list(points))
 
     @classmethod
     def create_sphere(cls, radius, center=np.array([0, 0, 0]),
