@@ -42,11 +42,12 @@ class Landscape(MSONable):
             list: List of 3x1 numpy.array coordinates of the points
                 in the landscape.
         """
-        print(type(points))
+
+        pdb.set_trace()
 
         if type(points) is list:
             self._points = points
-        if type(points) is tuple:
+        elif type(points) is tuple:
             self._points = list(points)
         else:
             raise TypeError("Provided points are not formatted in a List or Tuple.")
@@ -229,6 +230,7 @@ class Landscape(MSONable):
         if len(vertices) == 1:
             raise IOError("Number of vertices must be at least two.")
         elif len(vertices) == 2:
+            pdb.set_trace()
             if np.linalg.norm(vertices[1] - vertices[0]) < 1e-3:
                 raise IOError("Vertices are too close to each other.")
             else:
@@ -243,7 +245,7 @@ class Landscape(MSONable):
         else:
             raise NotImplementedError("Higher dimensions than 1 not implemented yet.")
 
-        return Landscape(list(points))
+        return Landscape(points)
 
     @classmethod
     def create_sphere(cls, radius, center=np.array([0, 0, 0]),

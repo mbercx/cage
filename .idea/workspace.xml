@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="simplifying optimize workflow and having it run from proper directory.">
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="debugging">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cage/landscape.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/landscape.py" afterDir="false" />
     </list>
@@ -30,8 +30,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="490">
-                  <caret line="243" lean-forward="true" selection-start-line="243" selection-end-line="243" />
+                <state relative-caret-position="433">
+                  <caret line="48" column="33" lean-forward="true" selection-start-line="48" selection-start-column="33" selection-end-line="48" selection-end-column="33" />
                 </state>
               </provider>
             </entry>
@@ -76,8 +76,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="454">
-                  <caret line="105" column="25" selection-start-line="105" selection-start-column="25" selection-end-line="105" selection-end-column="25" />
+                <state relative-caret-position="278">
+                  <caret line="837" column="7" lean-forward="true" selection-start-line="837" selection-start-column="7" selection-end-line="837" selection-end-column="7" />
                 </state>
               </provider>
             </entry>
@@ -664,7 +664,21 @@
       <option name="project" value="LOCAL" />
       <updated>1548692877741</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="fix that sorts of seems unnecessary, but lets try it">
+      <created>1548743714695</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1548743714695</updated>
+    </task>
+    <task id="LOCAL-00031" summary="debugging">
+      <created>1548743812426</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1548743812426</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TodoView">
@@ -680,8 +694,8 @@
     <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10247137" />
-      <window_info id="Structure" order="1" weight="0.12427594" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.10247137" />
+      <window_info id="Structure" order="1" visible="true" weight="0.12417119" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -730,7 +744,9 @@
     <MESSAGE value="fixed issue with pybat setup optimize" />
     <MESSAGE value="fixing optimize workflow directory naming" />
     <MESSAGE value="simplifying optimize workflow and having it run from proper directory." />
-    <option name="LAST_COMMIT_MESSAGE" value="simplifying optimize workflow and having it run from proper directory." />
+    <MESSAGE value="fix that sorts of seems unnecessary, but lets try it" />
+    <MESSAGE value="debugging" />
+    <option name="LAST_COMMIT_MESSAGE" value="debugging" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
@@ -871,13 +887,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="454">
-          <caret line="105" column="25" selection-start-line="105" selection-start-column="25" selection-end-line="105" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cage/workflow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-52">
@@ -888,10 +897,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="278">
+          <caret line="837" column="7" lean-forward="true" selection-start-line="837" selection-start-column="7" selection-end-line="837" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cage/landscape.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="490">
-          <caret line="243" lean-forward="true" selection-start-line="243" selection-end-line="243" />
+        <state relative-caret-position="433">
+          <caret line="48" column="33" lean-forward="true" selection-start-line="48" selection-start-column="33" selection-end-line="48" selection-end-column="33" />
         </state>
       </provider>
     </entry>
