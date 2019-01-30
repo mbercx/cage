@@ -94,7 +94,7 @@ def landscape_workflow(filename, cation, facets, operation, end_radii, nradii,
                adensity)
     chain_dir = "chain" + "_" + operation
 
-    wf_list = [] # Add commem
+    wf_list = []
 
     # For each edge
     for edge in [d for d in os.listdir(chain_dir) if "edge" in d]:
