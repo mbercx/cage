@@ -275,10 +275,12 @@ def chainsetup(filename, cation, facets, operation, end_radii, nradii,
 
         # Set up the edge directory
         edge_dir = os.path.join(chain_dir, "edge" + str(edge_number))
-        try:
-            os.mkdir(edge_dir)
-        except FileExistsError:
-            pass
+
+        while os.path.exists(edge_dir):
+            edge_number += 1
+            edge_dir = os.path.join(chain_dir, "edge" + str(edge_number))
+
+        os.mkdir(edge_dir)
 
         # Write out the molecule and path facets to the edge directory
         anion.to(fmt="json", filename=os.path.join(edge_dir, "molecule.json"))
