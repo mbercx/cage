@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="remove pdb traces">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/cli/commands/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/commands/setup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/workflow.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/workflow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jupyter/.ipynb_checkpoints/cb11h12_b11h_14-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/jupyter/.ipynb_checkpoints/cb11h12_b11h_14-checkpoint.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jupyter/cb11h12_b11h_14.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/jupyter/cb11h12_b11h_14.ipynb" afterDir="false" />
-    </list>
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="cleanup" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +24,7 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="328">
@@ -39,11 +33,11 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/workflow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="535">
-                  <caret line="106" column="69" lean-forward="true" selection-start-line="106" selection-start-column="69" selection-end-line="106" selection-end-column="69" />
+                <state relative-caret-position="109">
+                  <caret line="89" column="41" selection-start-line="89" selection-start-column="41" selection-end-line="89" selection-end-column="41" />
                 </state>
               </provider>
             </entry>
@@ -76,8 +70,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="258">
-                  <caret line="300" lean-forward="true" selection-start-line="300" selection-end-line="300" />
+                <state relative-caret-position="423">
+                  <caret line="309" column="49" lean-forward="true" selection-start-line="309" selection-start-column="49" selection-end-line="309" selection-end-column="49" />
                   <folding>
                     <element signature="n#!!doc" />
                     <element signature="e#299#564#1" />
@@ -264,10 +258,10 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="x" value="-1033" />
-    <option name="y" value="-1080" />
-    <option name="width" value="1920" />
-    <option name="height" value="1080" />
+    <option name="x" value="887" />
+    <option name="y" value="-1024" />
+    <option name="width" value="1280" />
+    <option name="height" value="1024" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -293,49 +287,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="cli" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="cli" type="462c0819:PsiDirectoryNode" />
-              <item name="commands" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="scripts" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="cage" type="462c0819:PsiDirectoryNode" />
-              <item name="docs" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="json&#9;null&#9;null&#10;zopen&#9;null&#9;null&#10;listdir&#9;null&#9;null&#10;equivalent_site&#9;null&#9;null&#10;equivalent_&#9;null&#9;null&#10;dataset&#9;null&#9;null&#10;symm_da&#9;FILE&#9;file:///Users/bercx1/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/symm_data.yaml" />
@@ -770,7 +722,21 @@
       <option name="project" value="LOCAL" />
       <updated>1548763753529</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Chain setup script now simply adds another edge directory when one already exists.">
+      <created>1548868757606</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1548868757606</updated>
+    </task>
+    <task id="LOCAL-00036" summary="cleanup">
+      <created>1548868784915</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1548868784915</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TodoView">
@@ -783,11 +749,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1033" y="-1080" width="1920" height="1080" extended-state="0" />
-    <editor active="true" />
+    <frame x="887" y="-1024" width="1280" height="1024" extended-state="0" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.10247137" />
-      <window_info id="Structure" order="1" visible="true" weight="0.07161664" />
+      <window_info id="Structure" order="1" visible="true" weight="0.10802224" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -797,9 +762,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.476017" weight="0.329927" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.48876745" weight="0.329927" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.552396" side_tool="true" visible="true" weight="0.3108911" />
+      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.55281967" side_tool="true" visible="true" weight="0.32914045" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5134281" side_tool="true" weight="0.27876106" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.447604" visible="true" weight="0.3108911" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.4471803" visible="true" weight="0.32914045" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -813,8 +778,6 @@
       <path value="$PROJECT_DIR$/../git/facetsym" />
       <path value="$PROJECT_DIR$/cage" />
     </ignored-roots>
-    <MESSAGE value="Various changes of which I was too lazy to record them." />
-    <MESSAGE value="Initial git commit. Code is still messy." />
     <MESSAGE value="#1 Added argument 'sort_comp' to Study.set_up_input, which allows the user to sort the directories by composition.&#10;#2 Changed the facetsetup.py to make use of this.&#10;#3 Changed the facetsetup.py so that it needs a command line argument to the POSCAR file which is to be used for setting up the calculations." />
     <MESSAGE value="#1 Added path.py, but with a barebone structure. Might not even use it if I can use the pymatgen NEBanalysis module.&#10;#2 Changed some small things in facetsym.py, facetsetup.py and study.py. Mainly format-related and TODO's." />
     <MESSAGE value="#1 Removed currently unused method 'add_restraint' on study.&#10;#2 Added symmops as a property to the Cage class.&#10;#3 Added the append method to the Cage class, to overwrite the one from&#10;Molecule. The idea is that the symmops need to be calculated again.&#10;#4 Implemented the 'find_facet_paths' method of the Cage class." />
@@ -838,7 +801,9 @@
     <MESSAGE value="debugging" />
     <MESSAGE value="fixed it! (I think) Was a silly error" />
     <MESSAGE value="remove pdb traces" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove pdb traces" />
+    <MESSAGE value="Chain setup script now simply adds another edge directory when one already exists." />
+    <MESSAGE value="cleanup" />
+    <option name="LAST_COMMIT_MESSAGE" value="cleanup" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
@@ -932,13 +897,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="535">
-          <caret line="106" column="69" lean-forward="true" selection-start-line="106" selection-start-column="69" selection-end-line="106" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
@@ -960,10 +918,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="89" column="41" selection-start-line="89" selection-start-column="41" selection-end-line="89" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="258">
-          <caret line="300" lean-forward="true" selection-start-line="300" selection-end-line="300" />
+        <state relative-caret-position="423">
+          <caret line="309" column="49" lean-forward="true" selection-start-line="309" selection-start-column="49" selection-end-line="309" selection-end-column="49" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#299#564#1" />
