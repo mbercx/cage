@@ -456,7 +456,6 @@ class LandscapeAnalyzer(MSONable):
                 theta = angle_between(facet.center, cation_coords)
 
                 if theta > math.pi / 2:
-                    print("GOTCHA")
                     theta = math.pi - theta
 
                 coordinate = [r, theta]

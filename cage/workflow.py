@@ -128,7 +128,7 @@ def sphere_workflow(filename, cation, radius, density):
     """
     Set up a spherical landscape calculation of a specified radius.
 
-    Args: #LALA
+    Args:
         filename (str): Path to the structure file of the cage molecule.
         Json formats with charge assigned are preferred, as the program
         currently has no recourse for determining the charge.
