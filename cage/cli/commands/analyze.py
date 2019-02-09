@@ -35,17 +35,19 @@ START_FACET = 1  # 0 or 1 -> determines facet to start chain from
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 
-def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
-                       contour_levels, verbose, coulomb_charge,
-                       reference_energy=None, interp_method="griddata"):
-    lands_dir = os.path.abspath(lands_dir)
+def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
+                       interp_mesh=(0.0, 0.0), end_radii=(0.0, 0.0),
+                       contour_levels=0.1, verbose=False, coulomb_charge=0,
+                       reference_energy=None, interp_method="griddata",
+                       set_contour_levels_manually=False):
+    directory = os.path.abspath(directory)
 
-    dir_list = [os.path.abspath(os.path.join(lands_dir, file))
-                for file in os.listdir(lands_dir)
-                if os.path.isdir(os.path.join(lands_dir, file))]
+    dir_list = [os.path.abspath(os.path.join(directory, file))
+                for file in os.listdir(directory)
+                if os.path.isdir(os.path.join(directory, file))]
 
     if verbose:
-        print("Extracting Landscape data from " + lands_dir + "...")
+        print("Extracting Landscape data from " + directory + "...")
 
     # Extract the data from the subdirectories of the landscape directory
     chain = {}
@@ -82,7 +84,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
     if len(chain.keys()) == 0:
         raise FileNotFoundError("No landscape data found in subdirectories of "
-                                + lands_dir)
+                                + directory)
 
     for data in chain.keys():
         # Extract the total energies from the calculations, and assign their
@@ -239,7 +241,7 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
 
         elif interp_method == "spline":
             tck = interpolate.bisplrep(
-                total_angles, total_radii, total_energy, s=1
+                total_angles, total_radii, total_energy, s=0.1
             )
 
             new_energy = interpolate.bisplev(
@@ -288,7 +290,8 @@ def landscape_analysis(lands_dir, cation, energy_range, interp_mesh, end_radii,
     plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
     plt.xticks(facet_angles, xlabel, size='x-large')
     plt.yticks(size="x-large")
-    plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f', manual=True)
+    plt.clabel(cs, fontsize=10, inline_spacing=5, fmt='%1.1f',
+               manual=set_contour_levels_manually)
     plt.show()
 
 
@@ -567,8 +570,6 @@ def reference(reference_dir, coulomb_charge=0):
 
 
 def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
-                    energy_range=(0.0, 0.0), contour_levels=0.1,
-                    set_contour_levels_manually=False, reference_energy=None,
                     interp_method="griddata"):
     # Load the landscape data
     if os.path.isfile(os.path.join(directory, 'landscape.json')):
@@ -599,7 +600,7 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
                                       cation=cation)
 
     # Interpolate the data
-    if interp_mesh == (0.0, 0.0):
+    if interp_mesh == (0.0, 0.0) or interp_method is None:
 
         # No interpolation, simply sort the data
         data = landscape.datapoints
@@ -608,19 +609,34 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
         data['Phi'] = np.round(data['Phi'], 5)
         data = np.sort(data, order=['Theta', 'Phi'])
 
-        pdb.set_trace()
-
         # Find the number of radii and angles
-        theta_init = data['Theta'][0]
         n_phi = 1
-        while abs(data['Theta'][n_phi] - theta_init) < 1e-5:
+        while abs(data['Theta'][n_phi + 1] - data['Theta'][n_phi]) < 1e-5:
             n_phi += 1
         n_theta = int(len(data) / n_phi)
 
+        d_old = data["Theta"][0]
+        for i, d in enumerate(data["Theta"]):
+            if d != d_old:
+                print(i)
+            d_old = d
+
+        pdb.set_trace()
+
         # Get the right format for the data
-        theta = data['Theta'].reshape(n_theta, n_phi)
-        phi = data['Phi'].reshape(n_theta, n_phi)
-        energy = data['Energy'].reshape(n_theta, n_phi)
+        theta = np.concatenate(
+            ((n_phi - 1) * [0], data["Theta"])
+        ).reshape(n_theta, n_phi)
+        phi = np.concatenate(
+            (data["Phi"][1:n_phi + 1], data["Phi"][1:])
+        ).reshape(n_theta, n_phi)
+        energy = np.concatenate(
+            ((n_phi - 1) * data["Energy"][0], data["Theta"])
+        ).reshape(n_theta, n_phi)
+        #
+        # theta = data['Theta'].reshape(n_theta, n_phi)
+        # phi = data['Phi'].reshape(n_theta, n_phi)
+        # energy = data['Energy'].reshape(n_theta, n_phi)
 
         new_theta = theta.transpose()
         new_phi = phi.transpose()
@@ -747,8 +763,10 @@ def plot_landscape(landscape_data, reference_energy=None, energy_range=None,
         plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f')
 
     plt.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
+    plt.savefig("landscape.png", dpi=300)
 
     plt.show()
+
 
 ###########
 # METHODS #

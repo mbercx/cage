@@ -228,7 +228,7 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
     if reference_energy == 0.0:
         reference_energy = None
 
-    landscape_analysis(lands_dir=lands_dir,
+    landscape_analysis(directory=lands_dir,
                        cation=cation,
                        energy_range=energy_range,
                        interp_mesh=interp_mesh,
@@ -237,7 +237,8 @@ def landscape(lands_dir, cation, energy_range, interp_mesh, end_radii,
                        verbose=verbose,
                        coulomb_charge=coulomb_charge,
                        reference_energy=reference_energy,
-                       interp_method=interp_method)
+                       interp_method=interp_method,
+                       set_contour_levels_manually=True)
 
 
 @analyze.command(context_settings=CONTEXT_SETTINGS)

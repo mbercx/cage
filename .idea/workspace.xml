@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="cleanup">
+    <list default="true" id="1f70b54f-a5dd-45fa-b12b-7582c0473e33" name="Default" comment="removed naughty print">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/landscape.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/landscape.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cage/workflow.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/workflow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/cli/cli.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/cli.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cage/cli/commands/analyze.py" beforeDir="false" afterPath="$PROJECT_DIR$/cage/cli/commands/analyze.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -16,23 +16,11 @@
     <splitter split-orientation="horizontal" split-proportion="0.4909335">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="4037">
-                  <caret line="273" column="25" lean-forward="true" selection-start-line="273" selection-start-column="25" selection-end-line="273" selection-end-column="25" />
-                  <folding>
-                    <element signature="e#19#29#0" expanded="true" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/cage/landscape.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="440">
-                  <caret line="457" column="39" selection-start-line="457" selection-start-column="39" selection-end-line="457" selection-end-column="39" />
+                <state relative-caret-position="590">
+                  <caret line="528" lean-forward="true" selection-start-line="528" selection-end-line="528" />
                 </state>
               </provider>
             </entry>
@@ -40,7 +28,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/workflow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="397">
+                <state relative-caret-position="1860">
                   <caret line="130" column="9" selection-start-line="130" selection-start-column="9" selection-end-line="130" selection-end-column="9" />
                 </state>
               </provider>
@@ -74,13 +62,12 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="423">
-                  <caret line="309" column="49" selection-start-line="309" selection-start-column="49" selection-end-line="309" selection-end-column="49" />
+                <state relative-caret-position="1020">
+                  <caret line="280" column="50" selection-start-line="280" selection-start-column="50" selection-end-line="280" selection-end-column="50" />
                   <folding>
                     <element signature="n#!!doc" />
                     <element signature="e#299#564#1" />
                     <element signature="e#566#586#0" />
-                    <element signature="e#697#864#0" />
                     <element signature="e#963#1269#0" />
                     <element signature="e#1498#3096#0" />
                     <element signature="e#1498#1695#1" />
@@ -109,17 +96,175 @@
               </provider>
             </entry>
           </file>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="192">
-                  <caret line="406" selection-start-line="406" selection-end-line="406" />
+                <state relative-caret-position="630">
+                  <caret line="230" column="43" lean-forward="true" selection-start-line="230" selection-start-column="43" selection-end-line="230" selection-end-column="43" />
                   <folding>
                     <element signature="e#14#67#1" />
                     <element signature="e#265#373#0" />
                     <element signature="e#265#364#1" />
                     <element signature="e#376#392#0" />
+                    <element signature="e#525#668#0" />
+                    <element signature="e#525#659#1" />
+                    <element signature="e#895#1022#0" />
+                    <element signature="e#1219#1343#0" />
+                    <element signature="e#1557#2051#0" />
+                    <element signature="e#1557#1821#1" />
+                    <element signature="e#2504#2960#0" />
+                    <element signature="e#3287#3575#0" />
+                    <element signature="e#3735#3869#0" />
+                    <element signature="e#4167#4268#0" />
+                    <element signature="e#4386#4738#0" />
+                    <element signature="e#5000#5232#0" />
+                    <element signature="e#5248#5273#0" />
+                    <element signature="e#5340#5507#0" />
+                    <element signature="e#5340#5498#1" />
+                    <element signature="e#6008#6335#0" />
+                    <element signature="e#6008#6155#1" />
+                    <element signature="e#6508#6625#0" />
+                    <element signature="e#6508#6616#1" />
+                    <element signature="e#8526#9003#0" />
+                    <element signature="e#9192#9285#0" />
+                    <element signature="e#9821#10303#0" />
                     <element signature="e#10319#10334#0" />
+                    <element signature="e#10398#10469#0" />
+                    <element signature="e#10398#10460#1" />
+                    <element signature="e#10578#10726#0" />
+                    <element signature="e#10838#10916#0" />
+                    <element signature="e#11027#11169#0" />
+                    <element signature="e#11282#11420#0" />
+                    <element signature="e#11528#11682#0" />
+                    <element signature="e#11791#11932#0" />
+                    <element signature="e#11948#11967#0" />
+                    <element signature="e#12035#12083#0" />
+                    <element signature="e#12035#12074#1" />
+                    <element signature="e#12557#13067#0" />
+                    <element signature="e#13332#13565#0" />
+                    <element signature="e#13790#13925#0" />
+                    <element signature="e#13997#14144#0" />
+                    <element signature="e#13997#14079#1" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="372">
+                  <caret line="745" column="36" selection-start-line="745" selection-start-column="36" selection-end-line="745" selection-end-column="36" />
+                  <folding>
+                    <element signature="e#443#558#1" />
+                    <element signature="e#560#636#0" />
+                    <element signature="e#1200#10477#0" />
+                    <element signature="e#1099#1261#0" />
+                    <element signature="e#1479#2508#0" />
+                    <element signature="e#1553#2427#0" />
+                    <element signature="e#1770#2302#0" />
+                    <element signature="e#1880#2302#0" />
+                    <element signature="e#2040#2284#0" />
+                    <element signature="e#2338#2427#0" />
+                    <element signature="e#2534#2689#0" />
+                    <element signature="e#2730#2846#0" />
+                    <element signature="e#2886#3151#0" />
+                    <element signature="e#2886#2954#0" />
+                    <element signature="e#3344#3428#0" />
+                    <element signature="e#3459#3590#0" />
+                    <element signature="e#3609#3863#0" />
+                    <element signature="e#3940#4012#0" />
+                    <element signature="e#4086#4493#0" />
+                    <element signature="e#4238#4493#0" />
+                    <element signature="e#4512#4624#0" />
+                    <element signature="e#4650#4790#0" />
+                    <element signature="e#4941#5211#0" />
+                    <element signature="e#5237#5305#0" />
+                    <element signature="e#5410#6954#0" />
+                    <element signature="e#5458#6745#0" />
+                    <element signature="e#5908#6072#0" />
+                    <element signature="e#6346#6632#0" />
+                    <element signature="e#6975#8638#0" />
+                    <element signature="e#7067#7233#0" />
+                    <element signature="e#7775#8055#0" />
+                    <element signature="e#8133#8286#0" />
+                    <element signature="e#8340#8558#0" />
+                    <element signature="e#8732#8910#0" />
+                    <element signature="e#8758#8872#0" />
+                    <element signature="e#8759#8850#0" />
+                    <element signature="e#9808#9924#0" />
+                    <element signature="e#10462#18621#0" />
+                    <element signature="e#10517#10679#0" />
+                    <element signature="e#10897#11926#0" />
+                    <element signature="e#10971#11845#0" />
+                    <element signature="e#11188#11720#0" />
+                    <element signature="e#11298#11720#0" />
+                    <element signature="e#11458#11702#0" />
+                    <element signature="e#11756#11845#0" />
+                    <element signature="e#11952#12107#0" />
+                    <element signature="e#12148#12264#0" />
+                    <element signature="e#12304#12532#0" />
+                    <element signature="e#12304#12372#0" />
+                    <element signature="e#12725#12809#0" />
+                    <element signature="e#12840#12971#0" />
+                    <element signature="e#12990#13244#0" />
+                    <element signature="e#13321#13393#0" />
+                    <element signature="e#13467#13874#0" />
+                    <element signature="e#13619#13874#0" />
+                    <element signature="e#13893#14005#0" />
+                    <element signature="e#14031#14171#0" />
+                    <element signature="e#14322#14592#0" />
+                    <element signature="e#14618#14686#0" />
+                    <element signature="e#14692#14758#0" />
+                    <element signature="e#15087#15149#0" />
+                    <element signature="e#15231#17556#0" />
+                    <element signature="e#15641#15793#0" />
+                    <element signature="e#16043#16313#0" />
+                    <element signature="e#16365#16488#0" />
+                    <element signature="e#16515#17443#0" />
+                    <element signature="e#16946#17242#0" />
+                    <element signature="e#17756#17938#0" />
+                    <element signature="e#17782#17898#0" />
+                    <element signature="e#17783#17874#0" />
+                    <element signature="e#18179#18326#0" />
+                    <element signature="e#18676#20063#0" />
+                    <element signature="e#18739#18913#0" />
+                    <element signature="e#18989#19425#0" />
+                    <element signature="e#19170#19261#0" />
+                    <element signature="e#20426#20530#0" />
+                    <element signature="e#20550#20735#0" />
+                    <element signature="e#20806#20945#0" />
+                    <element signature="e#20879#20945#0" />
+                    <element signature="e#20965#21200#0" />
+                    <element signature="e#21060#21199#0" />
+                    <element signature="e#21991#22052#0" />
+                    <element signature="e#22340#22342#0" />
+                    <element signature="e#24061#24255#0" />
+                    <element signature="e#23932#24054#0" />
+                    <element signature="e#24240#24459#1" />
+                    <element signature="e#24933#25091#0" />
+                    <element signature="e#25585#25780#0" />
+                    <element signature="e#25870#25961#0" />
+                    <element signature="e#26273#29549#0" />
+                    <element signature="e#26453#26782#0" />
+                    <element signature="e#26500#26782#0" />
+                    <element signature="e#26808#26937#0" />
+                    <element signature="e#27101#27151#0" />
+                    <element signature="e#27284#27392#0" />
+                    <element signature="e#27466#27516#0" />
+                    <element signature="e#27575#29150#0" />
+                    <element signature="e#27637#27692#0" />
+                    <element signature="e#27820#29107#0" />
+                    <element signature="e#27940#29107#0" />
+                    <element signature="e#28172#28237#0" />
+                    <element signature="e#28304#28362#0" />
+                    <element signature="e#28470#28984#0" />
+                    <element signature="e#28506#28655#0" />
+                    <element signature="e#28764#28912#0" />
+                    <element signature="e#29176#29505#0" />
+                    <element signature="e#29404#29505#0" />
+                    <element signature="e#29588#30139#0" />
+                    <element signature="e#29588#29839#1" />
                   </folding>
                 </state>
               </provider>
@@ -146,6 +291,7 @@
       <find>TODO</find>
       <find>dump</find>
       <find>set</find>
+      <find>set_</find>
     </findStrings>
     <replaceStrings>
       <replace />
@@ -179,18 +325,20 @@
         <option value="$PROJECT_DIR$/scripts/facetsetup.py" />
         <option value="$PROJECT_DIR$/cage/facetsym.py" />
         <option value="$USER_HOME$/python/cage/CageStudy/scripts/facetsetup.py" />
-        <option value="$PROJECT_DIR$/cage/cli/commands/analyze.py" />
         <option value="$PROJECT_DIR$/cage/core.py" />
-        <option value="$PROJECT_DIR$/cage/cli/cli.py" />
         <option value="$PROJECT_DIR$/cage/cli/commands/setup.py" />
         <option value="$PROJECT_DIR$/cage/workflow.py" />
         <option value="$PROJECT_DIR$/cage/landscape.py" />
+        <option value="$PROJECT_DIR$/cage/cli/cli.py" />
+        <option value="$PROJECT_DIR$/cage/cli/commands/analyze.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" fullScreen="true">
-    <option name="width" value="1680" />
-    <option name="height" value="1050" />
+    <option name="x" value="-135" />
+    <option name="y" value="-1200" />
+    <option name="width" value="1920" />
+    <option name="height" value="1200" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -216,7 +364,25 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="cage" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CageStudy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="cage" type="462c0819:PsiDirectoryNode" />
+              <item name="cage" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="json&#9;null&#9;null&#10;zopen&#9;null&#9;null&#10;listdir&#9;null&#9;null&#10;equivalent_site&#9;null&#9;null&#10;equivalent_&#9;null&#9;null&#10;dataset&#9;null&#9;null&#10;symm_da&#9;FILE&#9;file:///Users/bercx1/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/symm_data.yaml" />
@@ -339,7 +505,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <method v="2" />
     </configuration>
-    <configuration name="Nosetests in testsuite.py" type="tests" factoryName="Nosetests" temporary="true" nameIsGenerated="true">
+    <configuration name="Nosetests in /Users/mbercx/python/cage/cage/scripts/testsuite.py" type="tests" factoryName="Nosetests" temporary="true" nameIsGenerated="true">
       <module name="FacetSym" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -391,12 +557,12 @@
       <item itemvalue="Python.facetsym" />
       <item itemvalue="Python.setupscript" />
       <item itemvalue="Python.testsuite" />
-      <item itemvalue="Python tests.Nosetests in testsuite.py" />
+      <item itemvalue="Python tests.Nosetests in /Users/mbercx/python/cage/cage/scripts/testsuite.py" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.testsuite" />
-        <item itemvalue="Python tests.Nosetests in testsuite.py" />
+        <item itemvalue="Python tests.Nosetests in /Users/mbercx/python/cage/cage/scripts/testsuite.py" />
         <item itemvalue="Python.setupscript" />
         <item itemvalue="Python.facetsym" />
       </list>
@@ -672,7 +838,14 @@
       <option name="project" value="LOCAL" />
       <updated>1548949638129</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="removed naughty print">
+      <created>1549243168437</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1549243168437</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TodoView">
@@ -685,11 +858,11 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
+    <frame x="-135" y="-1200" width="1920" height="1200" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" weight="0.10247137" />
-      <window_info id="Structure" order="1" visible="true" weight="0.10789632" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.0674039" />
+      <window_info id="Structure" order="1" weight="0.10742496" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -699,9 +872,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.476017" weight="0.329927" />
       <window_info anchor="bottom" id="Version Control" order="7" sideWeight="0.48876745" weight="0.329927" />
-      <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.55455095" side_tool="true" visible="true" weight="0.32857144" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" sideWeight="0.5560821" side_tool="true" visible="true" weight="0.32920355" />
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5134281" side_tool="true" weight="0.27876106" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" sideWeight="0.44544905" visible="true" weight="0.32857144" />
+      <window_info anchor="bottom" id="Python Console" order="10" sideWeight="0.44391784" visible="true" weight="0.32920355" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -715,7 +888,6 @@
       <path value="$PROJECT_DIR$/../git/facetsym" />
       <path value="$PROJECT_DIR$/cage" />
     </ignored-roots>
-    <MESSAGE value="#1 Added argument 'sort_comp' to Study.set_up_input, which allows the user to sort the directories by composition.&#10;#2 Changed the facetsetup.py to make use of this.&#10;#3 Changed the facetsetup.py so that it needs a command line argument to the POSCAR file which is to be used for setting up the calculations." />
     <MESSAGE value="#1 Added path.py, but with a barebone structure. Might not even use it if I can use the pymatgen NEBanalysis module.&#10;#2 Changed some small things in facetsym.py, facetsetup.py and study.py. Mainly format-related and TODO's." />
     <MESSAGE value="#1 Removed currently unused method 'add_restraint' on study.&#10;#2 Added symmops as a property to the Cage class.&#10;#3 Added the append method to the Cage class, to overwrite the one from&#10;Molecule. The idea is that the symmops need to be calculated again.&#10;#4 Implemented the 'find_facet_paths' method of the Cage class." />
     <MESSAGE value="&#10;#1 Added the pathsetup.py script, which we will use to setup the pathway&#10;NEB calculations to study the energy barriers of Li on the cage&#10;molecules. NOTE: This is still only a very rough framework&#10;&#10;#2 Added a TODO to the facetsym script" />
@@ -740,7 +912,8 @@
     <MESSAGE value="remove pdb traces" />
     <MESSAGE value="Chain setup script now simply adds another edge directory when one already exists." />
     <MESSAGE value="cleanup" />
-    <option name="LAST_COMMIT_MESSAGE" value="cleanup" />
+    <MESSAGE value="removed naughty print" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed naughty print" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$USER_HOME$/anaconda3/lib/python3.6/site-packages/pymatgen/symmetry/structure.py" />
@@ -807,6 +980,13 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/scripts/dockingsetup.py" />
+    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1860">
+          <caret line="130" column="9" selection-start-line="130" selection-start-column="9" selection-end-line="130" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cage/core.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4170">
@@ -824,22 +1004,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/workflow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="397">
-          <caret line="130" column="9" selection-start-line="130" selection-start-column="9" selection-end-line="130" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/commands/setup.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="423">
-          <caret line="309" column="49" selection-start-line="309" selection-start-column="49" selection-end-line="309" selection-end-column="49" />
+        <state relative-caret-position="1020">
+          <caret line="280" column="50" selection-start-line="280" selection-start-column="50" selection-end-line="280" selection-end-column="50" />
           <folding>
             <element signature="n#!!doc" />
             <element signature="e#299#564#1" />
             <element signature="e#566#586#0" />
-            <element signature="e#697#864#0" />
             <element signature="e#963#1269#0" />
             <element signature="e#1498#3096#0" />
             <element signature="e#1498#1695#1" />
@@ -867,34 +1039,180 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
+    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4037">
-          <caret line="273" column="25" lean-forward="true" selection-start-line="273" selection-start-column="25" selection-end-line="273" selection-end-column="25" />
-          <folding>
-            <element signature="e#19#29#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="590">
+          <caret line="528" lean-forward="true" selection-start-line="528" selection-end-line="528" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cage/cli/cli.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="406" selection-start-line="406" selection-end-line="406" />
+        <state relative-caret-position="630">
+          <caret line="230" column="43" lean-forward="true" selection-start-line="230" selection-start-column="43" selection-end-line="230" selection-end-column="43" />
           <folding>
             <element signature="e#14#67#1" />
             <element signature="e#265#373#0" />
             <element signature="e#265#364#1" />
             <element signature="e#376#392#0" />
+            <element signature="e#525#668#0" />
+            <element signature="e#525#659#1" />
+            <element signature="e#895#1022#0" />
+            <element signature="e#1219#1343#0" />
+            <element signature="e#1557#2051#0" />
+            <element signature="e#1557#1821#1" />
+            <element signature="e#2504#2960#0" />
+            <element signature="e#3287#3575#0" />
+            <element signature="e#3735#3869#0" />
+            <element signature="e#4167#4268#0" />
+            <element signature="e#4386#4738#0" />
+            <element signature="e#5000#5232#0" />
+            <element signature="e#5248#5273#0" />
+            <element signature="e#5340#5507#0" />
+            <element signature="e#5340#5498#1" />
+            <element signature="e#6008#6335#0" />
+            <element signature="e#6008#6155#1" />
+            <element signature="e#6508#6625#0" />
+            <element signature="e#6508#6616#1" />
+            <element signature="e#8526#9003#0" />
+            <element signature="e#9192#9285#0" />
+            <element signature="e#9821#10303#0" />
             <element signature="e#10319#10334#0" />
+            <element signature="e#10398#10469#0" />
+            <element signature="e#10398#10460#1" />
+            <element signature="e#10578#10726#0" />
+            <element signature="e#10838#10916#0" />
+            <element signature="e#11027#11169#0" />
+            <element signature="e#11282#11420#0" />
+            <element signature="e#11528#11682#0" />
+            <element signature="e#11791#11932#0" />
+            <element signature="e#11948#11967#0" />
+            <element signature="e#12035#12083#0" />
+            <element signature="e#12035#12074#1" />
+            <element signature="e#12557#13067#0" />
+            <element signature="e#13332#13565#0" />
+            <element signature="e#13790#13925#0" />
+            <element signature="e#13997#14144#0" />
+            <element signature="e#13997#14079#1" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cage/landscape.py">
+    <entry file="file://$PROJECT_DIR$/cage/cli/commands/analyze.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="440">
-          <caret line="457" column="39" selection-start-line="457" selection-start-column="39" selection-end-line="457" selection-end-column="39" />
+        <state relative-caret-position="372">
+          <caret line="745" column="36" selection-start-line="745" selection-start-column="36" selection-end-line="745" selection-end-column="36" />
+          <folding>
+            <element signature="e#443#558#1" />
+            <element signature="e#560#636#0" />
+            <element signature="e#1200#10477#0" />
+            <element signature="e#1099#1261#0" />
+            <element signature="e#1479#2508#0" />
+            <element signature="e#1553#2427#0" />
+            <element signature="e#1770#2302#0" />
+            <element signature="e#1880#2302#0" />
+            <element signature="e#2040#2284#0" />
+            <element signature="e#2338#2427#0" />
+            <element signature="e#2534#2689#0" />
+            <element signature="e#2730#2846#0" />
+            <element signature="e#2886#3151#0" />
+            <element signature="e#2886#2954#0" />
+            <element signature="e#3344#3428#0" />
+            <element signature="e#3459#3590#0" />
+            <element signature="e#3609#3863#0" />
+            <element signature="e#3940#4012#0" />
+            <element signature="e#4086#4493#0" />
+            <element signature="e#4238#4493#0" />
+            <element signature="e#4512#4624#0" />
+            <element signature="e#4650#4790#0" />
+            <element signature="e#4941#5211#0" />
+            <element signature="e#5237#5305#0" />
+            <element signature="e#5410#6954#0" />
+            <element signature="e#5458#6745#0" />
+            <element signature="e#5908#6072#0" />
+            <element signature="e#6346#6632#0" />
+            <element signature="e#6975#8638#0" />
+            <element signature="e#7067#7233#0" />
+            <element signature="e#7775#8055#0" />
+            <element signature="e#8133#8286#0" />
+            <element signature="e#8340#8558#0" />
+            <element signature="e#8732#8910#0" />
+            <element signature="e#8758#8872#0" />
+            <element signature="e#8759#8850#0" />
+            <element signature="e#9808#9924#0" />
+            <element signature="e#10462#18621#0" />
+            <element signature="e#10517#10679#0" />
+            <element signature="e#10897#11926#0" />
+            <element signature="e#10971#11845#0" />
+            <element signature="e#11188#11720#0" />
+            <element signature="e#11298#11720#0" />
+            <element signature="e#11458#11702#0" />
+            <element signature="e#11756#11845#0" />
+            <element signature="e#11952#12107#0" />
+            <element signature="e#12148#12264#0" />
+            <element signature="e#12304#12532#0" />
+            <element signature="e#12304#12372#0" />
+            <element signature="e#12725#12809#0" />
+            <element signature="e#12840#12971#0" />
+            <element signature="e#12990#13244#0" />
+            <element signature="e#13321#13393#0" />
+            <element signature="e#13467#13874#0" />
+            <element signature="e#13619#13874#0" />
+            <element signature="e#13893#14005#0" />
+            <element signature="e#14031#14171#0" />
+            <element signature="e#14322#14592#0" />
+            <element signature="e#14618#14686#0" />
+            <element signature="e#14692#14758#0" />
+            <element signature="e#15087#15149#0" />
+            <element signature="e#15231#17556#0" />
+            <element signature="e#15641#15793#0" />
+            <element signature="e#16043#16313#0" />
+            <element signature="e#16365#16488#0" />
+            <element signature="e#16515#17443#0" />
+            <element signature="e#16946#17242#0" />
+            <element signature="e#17756#17938#0" />
+            <element signature="e#17782#17898#0" />
+            <element signature="e#17783#17874#0" />
+            <element signature="e#18179#18326#0" />
+            <element signature="e#18676#20063#0" />
+            <element signature="e#18739#18913#0" />
+            <element signature="e#18989#19425#0" />
+            <element signature="e#19170#19261#0" />
+            <element signature="e#20426#20530#0" />
+            <element signature="e#20550#20735#0" />
+            <element signature="e#20806#20945#0" />
+            <element signature="e#20879#20945#0" />
+            <element signature="e#20965#21200#0" />
+            <element signature="e#21060#21199#0" />
+            <element signature="e#21991#22052#0" />
+            <element signature="e#22340#22342#0" />
+            <element signature="e#24061#24255#0" />
+            <element signature="e#23932#24054#0" />
+            <element signature="e#24240#24459#1" />
+            <element signature="e#24933#25091#0" />
+            <element signature="e#25585#25780#0" />
+            <element signature="e#25870#25961#0" />
+            <element signature="e#26273#29549#0" />
+            <element signature="e#26453#26782#0" />
+            <element signature="e#26500#26782#0" />
+            <element signature="e#26808#26937#0" />
+            <element signature="e#27101#27151#0" />
+            <element signature="e#27284#27392#0" />
+            <element signature="e#27466#27516#0" />
+            <element signature="e#27575#29150#0" />
+            <element signature="e#27637#27692#0" />
+            <element signature="e#27820#29107#0" />
+            <element signature="e#27940#29107#0" />
+            <element signature="e#28172#28237#0" />
+            <element signature="e#28304#28362#0" />
+            <element signature="e#28470#28984#0" />
+            <element signature="e#28506#28655#0" />
+            <element signature="e#28764#28912#0" />
+            <element signature="e#29176#29505#0" />
+            <element signature="e#29404#29505#0" />
+            <element signature="e#29588#30139#0" />
+            <element signature="e#29588#29839#1" />
+          </folding>
         </state>
       </provider>
     </entry>
