@@ -23,9 +23,7 @@ cage/cli/commands/util.py
 cage/scripts/__init__.py
 cage/scripts/chainsetup.py
 cage/scripts/checkCalc.py
-cage/scripts/dockingsetup.py
 cage/scripts/edgelandscape.py
-cage/scripts/edgesetup.py
 cage/scripts/energyAnalysis.py
 cage/scripts/facetLandscape.py
 cage/scripts/facetsetup.py
