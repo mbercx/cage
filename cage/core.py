@@ -17,6 +17,7 @@ from pymatgen.core.operations import SymmOp
 
 """
 Core tools of the cage package. Defines the Cage, OccupiedCage and Facet class.
+
 """
 
 __author__ = "Marnik Bercx"
@@ -26,14 +27,13 @@ __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "14 JUN 2017"
 
-
 SYMMETRY_TOLERANCE = 1e-2
 # This is a tolerance value to determine the symmetry operations of the Cage.
 # It is also used to determine which facets are equivalent. The standard value
 # of 1E-2 is usually pretty good. In case the right non-equivalent facets are
 # not found, it might be worth trying to tweaking this value.
 
-ANGLE_TOLERANCE = math.pi/20
+ANGLE_TOLERANCE = math.pi / 20
 # This value is important when determining whether or not a new site is a part
 # of the facet. In principle, the site should be in the plane of the facet,
 # i.e. the angle between the line connecting the center of the facet and the
@@ -45,6 +45,7 @@ class Cage(Molecule):
     """
     A Cage is a pymatgen.Molecule-based object for molecules shaped similar
     to fullerenes.
+
     """
 
     def __init__(self, species, coords, charge=0, spin_multiplicity=None,
@@ -117,11 +118,11 @@ class Cage(Molecule):
         if not self._symmops:
             # Set up the point group analyzer
             pgan = syman.PointGroupAnalyzer(self)
-    
+
             # Find the full set of symmetry operations
             self._symmops = syman.generate_full_symmops(pgan.symmops,
                                                         SYMMETRY_TOLERANCE)
-        
+
         return self._symmops
 
     @property
@@ -130,7 +131,7 @@ class Cage(Molecule):
                         if site.specie not in OccupiedCage.CATIONS]
 
         return sum(anion_coords) / len(anion_coords)
-        
+
     @classmethod
     def from_poscar(cls, filename):
         """
@@ -311,9 +312,6 @@ class Cage(Molecule):
         defined as a facet for which all atoms of non-ignored species are on
         one side of the surface defined by the facet.
 
-        Currently does not expand the facets to 4 sites in case it finds other
-        sites which are in the plane of the site, as defined by 3 site points.
-
         Args:
             ignore (List/Tuple of str/Element): The elements to ignore for the
                 surface facet determination. Can be either a tuple or list of
@@ -335,7 +333,7 @@ class Cage(Molecule):
         # Flip the normal of the facets in case it points to the center of mass
         # of the Cage
         for facet in all_facets:
-            if facet.angle_to_normal(self.center_of_mass) < math.pi/2:
+            if facet.angle_to_normal(self.center_of_mass) < math.pi / 2:
                 facet.flip_normal()
 
         # Find all the facets that are "on the surface"
@@ -356,10 +354,10 @@ class Cage(Molecule):
 
                 # For angles sufficiently close to pi/2, add the site to the
                 # facet
-                if abs(angle - math.pi/2) < ANGLE_TOLERANCE:
+                if abs(angle - math.pi / 2) < ANGLE_TOLERANCE:
                     facet.add_site(site)
 
-                elif angle - math.pi/2 < -ANGLE_TOLERANCE:
+                elif angle - math.pi / 2 < -ANGLE_TOLERANCE:
                     all_angles_smaller = False
 
             # Now check if the facet isn't already part of the surface facets
@@ -401,7 +399,7 @@ class Cage(Molecule):
             for facet_noneq in facets_noneq:
                 for symm in self.symmops:
                     symm_facet_center = symm.operate(facet.center.tolist())
-                    if np.linalg.norm(symm_facet_center - facet_noneq.center)\
+                    if np.linalg.norm(symm_facet_center - facet_noneq.center) \
                             < tol:
                         facet_is_nonequivalent = False
             if facet_is_nonequivalent:
@@ -506,7 +504,7 @@ class Cage(Molecule):
         for site in self.sites:
 
             file.write(str(site_number) + "\t" + str(site.specie) + "\t" +
-                       str(site.specie) + str(specie_number) + "\t1.000" )
+                       str(site.specie) + str(specie_number) + "\t1.000")
 
             for coord in site.coords:
                 file.write("\t" + str(coord))
@@ -557,7 +555,7 @@ class Cage(Molecule):
 
         for element in self.composition:
             if element not in ignore:
-                file.write(str(bond_number) + "\tFa" + "\t"+ str(element) +
+                file.write(str(bond_number) + "\tFa" + "\t" + str(element) +
                            "\t0.00000\t1.85\t0\t1\t1\t0\t1\t0.250\t2.000"
                            "\t210\t50\t20\n")
             bond_number += 1
@@ -631,7 +629,7 @@ class Cage(Molecule):
 
         """
 
-        #TODO This code needs cleanup and serious testing
+        # TODO This code needs cleanup and serious testing
 
         if verbose:
             print("")
@@ -675,11 +673,10 @@ class Cage(Molecule):
                             # Check if the facet shares an edge and is not
                             # related to one of the non-equivalent facets in
                             # the chain
-                            if len(set(facet.sites) & set(chain_facet.sites))\
+                            if len(set(facet.sites) & set(chain_facet.sites)) \
                                     == 2 and \
                                     (facet_dict[facet][0]
                                      not in chain_list_noneq_facets):
-
                                 chain_facets.append(facet)
                                 chain_list_noneq_facets.append(
                                     facet_dict[facet][0]
@@ -747,7 +744,7 @@ class Cage(Molecule):
                     number_links = 0
                     for leftover_facet in leftover_facets:
                         if len(set(facet.sites) & set(leftover_facet.sites)) \
-                                                            == 2:
+                                == 2:
                             number_links += 1
 
                     options.append((facet, number_links))
@@ -773,8 +770,7 @@ class Cage(Molecule):
         molecule. The facets can be connected by sharing an edge, or a site.
 
         Args:
-            share_edge (bool): Only return links between facets that
-            share an edge.
+            share_edge (bool): Only return links between facets that share an edge.
 
         Returns:
             (List of (cage.Facet, cage.Facet) Tuples) - The
@@ -808,9 +804,9 @@ class Cage(Molecule):
             nonequivalent = True
             for noneq_link in noneq_links:
                 for symm in self.symmops:
-                    link_center = (link[0].center + link[1].center)/2
+                    link_center = (link[0].center + link[1].center) / 2
                     noneq_link_center = sum((noneq_link[0].center,
-                                             noneq_link[1].center))/2
+                                             noneq_link[1].center)) / 2
                     symm_link_center = symm.operate(link_center)
                     connection_vector = symm_link_center - noneq_link_center
                     if np.linalg.norm(connection_vector) < 1e-2:
@@ -847,7 +843,7 @@ class Cage(Molecule):
                                                   verbose=verbose)
 
         chain_links = []
-        for index in range(len(facet_chain)-1):
+        for index in range(len(facet_chain) - 1):
             chain_links.append((facet_chain[index], facet_chain[index + 1]))
 
         return chain_links
@@ -873,7 +869,7 @@ class Cage(Molecule):
                 distance = newdistance
 
         return furthest_facet
-    
+
     def find_closest_facet(self, point):
         """
         Find the Facet of the Molecule that is the closest to the point 
@@ -1073,7 +1069,7 @@ class OccupiedCage(Cage):
         Returns:
 
         """
-        pass  #TODO
+        pass  # TODO
 
     # @classmethod
     # def from_file(cls, filename):
@@ -1116,7 +1112,7 @@ class OccupiedCage(Cage):
         anion = [site.coords for site in mol.sites
                  if site.specie not in OccupiedCage.CATIONS]
 
-        mol.center(sum(anion)/len(anion))
+        mol.center(sum(anion) / len(anion))
 
         super(OccupiedCage, mol).find_surface_facets(ignore=ignore)
 
@@ -1164,15 +1160,15 @@ class Facet(SiteCollection, MSONable):
             normal = np.cross(self._sites[0].coords - self._sites[1].coords,
                               self._sites[0].coords - self._sites[2].coords)
         else:
-            #TODO Make an average of possible normals
+            # TODO Make an average of possible normals
             normal = np.cross(self._sites[0].coords - self._sites[1].coords,
                               self._sites[0].coords - self._sites[2].coords)
 
         # Make length of the normal equal to 1
-        normal = normal/np.linalg.norm(normal)
+        normal = normal / np.linalg.norm(normal)
 
         # Flip normal in case it is pointing towards the origin.
-        if utils.angle_between(-self.center, normal) < math.pi/2:
+        if utils.angle_between(-self.center, normal) < math.pi / 2:
             normal = - normal
 
         return normal
@@ -1199,7 +1195,7 @@ class Facet(SiteCollection, MSONable):
         Returns:
             (*bool*) - Whether or not the facets are equal.
         """
-        #TODO Check method for facets with more than 3 vertices
+        # TODO Check method for facets with more than 3 vertices
 
         if (len(set(self.sites) & set(other.sites)) == len(self.sites)) and \
                 np.allclose(self.normal, other.normal, atol=1e-3):
@@ -1360,7 +1356,7 @@ class Facet(SiteCollection, MSONable):
 
         # Check if the site is in the surface defined by the facet
         angle = self.angle_to_normal(site.coords)
-        if abs(angle - math.pi/2) > ANGLE_TOLERANCE:
+        if abs(angle - math.pi / 2) > ANGLE_TOLERANCE:
             raise ValueError("Angle to facet normal deviates too much from "
                              "pi/2. A site cannot be added to the facet if "
                              "it is not in the same plane.")
@@ -1370,7 +1366,7 @@ class Facet(SiteCollection, MSONable):
 
         self._center = utils.site_center(tuple(self.sites))
 
-        #TODO Find the new normal, but make sure it doesn't flip direction
+        # TODO Find the new normal, but make sure it doesn't flip direction
 
     def get_normal_intersection(self, other):
         """
@@ -1388,7 +1384,7 @@ class Facet(SiteCollection, MSONable):
                 coordinates.
         """
 
-        #TODO This method needs improvement, i.e. to be made more general
+        # TODO This method needs improvement, i.e. to be made more general
 
         edge = set(self.sites) & set(other.sites)
         if len(edge) != 2:
@@ -1413,7 +1409,7 @@ class Facet(SiteCollection, MSONable):
         else:
             print('Could not find perfect intersection. Returned average '
                   'between two best results on the respective normal lines.')
-            return (intersection1 + intersection2)/2
+            return (intersection1 + intersection2) / 2
 
     def redefine_origin(self, origin):
         """
@@ -1449,7 +1445,7 @@ class Facet(SiteCollection, MSONable):
         Returns:
 
         """
-        pass  #TODO
+        pass  # TODO
 
     def is_equivalent(self, other, symmops, tol=SYMMETRY_TOLERANCE):
         """

@@ -8,8 +8,7 @@ from matplotlib.pyplot import subplots
 import json
 import math
 import os
-
-import pdb
+import warnings
 
 import matplotlib.pyplot as plt
 import pymatgen as pmg
@@ -33,14 +32,17 @@ __date__ = "16 JUN 2017"
 class Landscape(MSONable):
     """
     A selection of points representing a line, area or volume.
+
     """
+
     def __init__(self, points):
         """
         Initializes a Landscape from the points that it consists of.
 
         Args:
-            list: List of 3x1 numpy.array coordinates of the points
-                in the landscape.
+            points (list): List of (3,) numpy.ndarray cartesian coordinates of the
+                points in the landscape.
+
         """
 
         if type(points) is list:
@@ -48,7 +50,7 @@ class Landscape(MSONable):
         elif type(points) is tuple:
             self._points = list(points)
         else:
-            raise TypeError("Provided points are not formatted in a List or Tuple.")
+            raise TypeError("Provided points are not formatted as a List or Tuple.")
 
     def __add__(self, other):
         """
@@ -73,7 +75,7 @@ class Landscape(MSONable):
         All of the points of the Landscape.
 
         Returns:
-            list: List of 3x1 numpy.array coordinates of the points
+            list: List of (3,) numpy.ndarray coordinates of the points
             in the landscape.
 
         """
@@ -85,10 +87,11 @@ class Landscape(MSONable):
         Center of the points of the Landscape.
 
         Returns:
-            numpy.array: (3,) shaped array of the coordinates of the mathematical
+            numpy.ndarray: (3,) shaped array of the coordinates of the mathematical
                 center of the points of the landscape.
+
         """
-        return sum(self.points)/len(self.points)
+        return sum(self.points) / len(self.points)
 
     def change_center(self, center):
         """
@@ -97,7 +100,8 @@ class Landscape(MSONable):
         the user.
 
         Args:
-            numpy.array: New center of the landscape.
+            center (numpy.ndarray): (3,) shaped array that is the new center of
+                the landscape.
 
         """
         new_points = []
@@ -115,15 +119,15 @@ class Landscape(MSONable):
         by the axis vector.
 
         Args:
-            axis (numpy.ndarray): Axis around which the landscape is rotated.
-                The length of the vector determines the total rotation angle in
-                radians.
-            density (float): Density of grid points along the rotation
-            angle. Defined in #grid points per radians.
-            remove_endline (bool): Include the final rotation angle grid
-            points.
+            axis (numpy.ndarray): (3,) shaped array that represents the axis around
+                which the landscape is rotated. The length of the vector is equal
+                to the total rotation angle in radians.
+            density (float): Density of grid points along the rotation angle.
+                Defined in #grid points per radians.
+            remove_endline (bool): Do not include the final rotation angle grid
+                points.
             distance_tol (float): Minimum distance between two points in
-            the landscape.
+                the landscape.
 
         Returns:
             None
@@ -135,15 +139,15 @@ class Landscape(MSONable):
         # Find the rotation matrices
         rotation_matrices = []
         total_angle = np.linalg.norm(axis)
-        npoints = int(total_angle / np.pi * density )
+        npoints = int(total_angle / np.pi * density)
 
         if remove_endline:
-            for i in range(npoints-1):
-                angle = (i+1)/npoints*total_angle
+            for i in range(npoints - 1):
+                angle = (i + 1) / npoints * total_angle
                 rotation_matrices.append(rotation_matrix(axis, angle))
         else:
             for i in range(npoints):
-                angle = (i+1)/npoints*total_angle
+                angle = (i + 1) / npoints * total_angle
                 rotation_matrices.append(rotation_matrix(axis, angle))
 
         # Add all the points TODO This might be done more quickly
@@ -162,13 +166,11 @@ class Landscape(MSONable):
         Extends the Landscape by translating the points along a certain vector.
 
         Args:
-            vector (3x1 numpy.array): Translation vector of the extension.
+            vector (numpy.ndarray): Translation vector of the extension.
             density (float): Density of the grid.
 
-        Returns:
-
         """
-        pass #TODO
+        pass  # TODO
 
     def extend_from_point(self, point, extension, density=10):
         """
@@ -180,10 +182,8 @@ class Landscape(MSONable):
             extension:
             density:
 
-        Returns:
-
         """
-        pass #TODO
+        pass  # TODO
 
     def as_dict(self):
         """
@@ -217,10 +217,13 @@ class Landscape(MSONable):
         a line).
 
         Args:
-            vertices:
-            num:
+            vertices (list): List of (3,) shaped numpy arrays that are the
+                vertices of the Landscape.
+            num (int): Number of points in the landscape.
+            # TODO switch to density?
 
         Returns:
+            Landscape: Landscape defined by the vertices.
 
         """
         # Calculate the points of the Landscape depending on the number of
@@ -240,7 +243,8 @@ class Landscape(MSONable):
                 for i in range(npoints):
                     points.append(vertices[0] + i * mesh_distance * unitvector)
         else:
-            raise NotImplementedError("Higher dimensions than 1 not implemented yet.")
+            raise NotImplementedError(
+                "Higher dimensions than 1 not implemented yet.")
 
         return Landscape(points)
 
@@ -277,7 +281,7 @@ class Landscape(MSONable):
             )
 
         sphere_landscape.extend_by_rotation(
-            axis=phi_axis*math.pi,
+            axis=phi_axis * math.pi,
             density=density)
 
         sphere_landscape.extend_by_rotation(
@@ -293,7 +297,9 @@ class Landscape(MSONable):
 class LandscapeAnalyzer(MSONable):
     """
     An analyzer class for interpreting data from calculations on a landscape.
+
     """
+
     def __init__(self, data, datapoints=(), software="nwchem"):
         """
         Initialize an instance of LandscapeAnalyzer. This method is rarely
@@ -317,17 +323,19 @@ class LandscapeAnalyzer(MSONable):
         return self._datapoints
 
     @classmethod
-    def from_data(cls, data_dir, output_file='result.out', software='nwchem'):
+    def from_data(cls, directory, output_file='result.out', software='nwchem'):
         """
         Looks through all subdirectories of the provided directory and
         extracts all output.
 
         Args:
-            directory:
-            output_file:
-            software:
+            directory (str): Path to the directory in which the data is stored.
+            output_file (str): Filename of the output file.
+            software (str): Software package that was used for the DFT
+                calculations. Currently only supports nwchem.
 
         Returns:
+            LandscapeAnalyzer
 
         """
 
@@ -339,12 +347,12 @@ class LandscapeAnalyzer(MSONable):
         # the same directory.
 
         # Check if the directory exists
-        if not os.path.isdir(data_dir):
-            raise IOError("Directory " + data_dir + " not found.")
+        if not os.path.isdir(directory):
+            raise IOError("Directory " + directory + " not found.")
 
         # Find all the subdirectories in the specified directory
-        dir_list = [d for d in os.listdir(data_dir)
-                    if os.path.isdir(os.path.join(data_dir, d))]
+        dir_list = [d for d in os.listdir(directory)
+                    if os.path.isdir(os.path.join(directory, d))]
 
         # Get all of the output of the calculations in the directory
 
@@ -354,7 +362,7 @@ class LandscapeAnalyzer(MSONable):
             for directory in dir_list:
                 try:
                     out = nw.NwOutput(
-                        os.path.join(data_dir, directory, output_file)
+                        os.path.join(directory, directory, output_file)
                     )
 
                 except FileNotFoundError:
@@ -392,13 +400,21 @@ class LandscapeAnalyzer(MSONable):
         them with the proper coordinates. Currently supports the following
         landscapes for analysis:
 
-        Interfacet wedges: 2D landscapes that connect two Facets via a
-        wedge. Polar coordinates are used to plot this landscape, and the
-        program needs a reference axis to determine an appropriate angle.
+        Interfacet wedges: 2D landscapes that connect two Facets via a wedge.
+            Polar coordinates are used to plot this landscape, and the program
+            needs a reference facet to determine an appropriate angle. In case the
+            reference is not provided, the method will attempt to find the closest
+            facet to the cation in the first data point.
 
-        Spherical landscapes:
+        Spherical landscapes: 2D landscapes that correspond to spheres around the
+            cage. Spherical coordinates are used to plot this landscape,
+            and the program needs a reference axis to determine the angles
+            properly. This axis corresponds to the one used to construct the
+            landscape, using the Landscape.create_sphere() method.
 
-        :return:
+        Args:
+            coordinates (str): Type of coordinates to use for reconstructing the
+                landscape coordinates of each datapoint.
         """
 
         datapoints = []
@@ -414,7 +430,7 @@ class LandscapeAnalyzer(MSONable):
             # first ion coordinate data point. This might not always work.
             if reference is None:
 
-                print(
+                warnings.warn(
                     "No Facet was provided. Since the facet is important for "
                     "defining the coordinates of the landscape, the program "
                     "will automatically determine the closest facet to the "
@@ -472,7 +488,6 @@ class LandscapeAnalyzer(MSONable):
             dtype = [('Theta', float), ('Phi', float), ('Energy', float)]
 
             if reference is None:
-
                 raise IOError("No reference axis was provided for the "
                               "analysis of the landscape energies. The "
                               "program currently has no recourse for "
@@ -515,10 +530,10 @@ class LandscapeAnalyzer(MSONable):
                 phi = angle_between(
                     perpendicular_part(cation_coords, axis), phi_axis
                 )
-                if angle_between(np.cross(phi_axis, axis), cation_coords)\
+                if angle_between(np.cross(phi_axis, axis), cation_coords) \
                         > \
-                        math.pi/2:
-                    phi = 2*math.pi - phi
+                        math.pi / 2:
+                    phi = 2 * math.pi - phi
 
                 coordinate = [theta, phi]
 
@@ -703,9 +718,10 @@ class LandscapeAnalyzer(MSONable):
                                       "supported.")
         # TODO Add support for .yaml
 
+
 def perpendicular_part(v1, v2):
     """ Returns the projection of v1 on the plane perpendicular to v2. """
-    return v1 - v1.dot(v2) * v2 / np.linalg.norm(v2)**2
+    return v1 - v1.dot(v2) * v2 / np.linalg.norm(v2) ** 2
 
 
 # Functions stolen from SO
@@ -730,11 +746,11 @@ def rotation_matrix(axis, theta):
     the given axis by theta radians.
     """
     axis = np.asarray(axis)
-    axis = axis/math.sqrt(np.dot(axis, axis))
-    a = math.cos(theta/2.0)
-    b, c, d = axis*math.sin(theta/2.0)
-    aa, bb, cc, dd = a*a, b*b, c*c, d*d
-    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
-    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
-                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
-                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+    axis = axis / math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta / 2.0)
+    b, c, d = axis * math.sin(theta / 2.0)
+    aa, bb, cc, dd = a * a, b * b, c * c, d * d
+    bc, ad, ac, ab, bd, cd = b * c, a * d, a * c, a * b, b * d, c * d
+    return np.array([[aa + bb - cc - dd, 2 * (bc + ad), 2 * (bd - ac)],
+                     [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
+                     [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])

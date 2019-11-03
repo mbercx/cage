@@ -129,7 +129,7 @@ def gather_landscape(directory):
             that describe the landscape.
     """
 
-    lands_analyzer = LandscapeAnalyzer.from_data(data_dir=directory)
+    lands_analyzer = LandscapeAnalyzer.from_data(directory=directory)
     lands_analyzer.to(os.path.join(directory, "landscape.json"))
 
 

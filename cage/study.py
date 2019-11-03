@@ -12,6 +12,7 @@ import os
 Defines a Study class, that contains all the information for a study of a
 selection of structures. It allows the user to easily set up a lot of
 calculations in a systematic way.
+
 """
 
 # TODO Check what went wrong with the B12 calculations, and add it to custodian
@@ -22,6 +23,7 @@ __maintainer__ = ""
 __email__ = "marnik.bercx@uantwerpen.be"
 __status__ = "alpha"
 __date__ = "16 JUN 2017"
+
 
 class Study(MSONable):
     """
@@ -63,7 +65,7 @@ class Study(MSONable):
         should be set up.
         :return:
         """
-        #TODO Let the script set up the directory in case it does not exist
+        # TODO Let the script set up the directory in case it does not exist
 
         # Get the absolute path to the directory
         abs_dir = os.path.abspath(directory)
@@ -78,10 +80,10 @@ class Study(MSONable):
             for comp in self._comp_dict.keys():
 
                 if sort_comp:
-                    comp_dir = str(comp).replace(' ','')
+                    comp_dir = str(comp).replace(' ', '')
 
                     try:
-                        os.mkdir(os.path.join(abs_dir,comp_dir))
+                        os.mkdir(os.path.join(abs_dir, comp_dir))
                     except FileExistsError:
                         print(comp_dir + ' exists, skipping...')
                 else:
@@ -115,7 +117,7 @@ class Study(MSONable):
         #   VASP   #
         ############
 
-        #TODO Add functionality for VASP studies
+        # TODO Add functionality for VASP studies
 
         elif self.software == 'vasp':
             raise IOError("Currently, vasp inputs are not implemented yet.")
@@ -151,8 +153,8 @@ def classify_by_composition(structures):
     """
     comp_dic = {}
     for structure in structures:
-        if comp_dic.get(str(structure.composition),False):
+        if comp_dic.get(str(structure.composition), False):
             comp_dic[str(structure.composition)].append(structure)
         else:
-            comp_dic[str(structure.composition)] = [structure,]
+            comp_dic[str(structure.composition)] = [structure, ]
     return comp_dic
