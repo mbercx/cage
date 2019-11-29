@@ -5,7 +5,9 @@ import pymatgen.io.nwchem as nw
 
 """
 A collection of utility methods for other modules.
+
 """
+
 
 def distance(coord1, coord2):
     """
@@ -30,13 +32,15 @@ def angle_between(v1, v2):
     v2_u = unit_vector(v2)
     return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
 
+
 def site_center(sites):
     """
     Find the geometric center of a collection of sites.
     :param sites: Tuple of Site objects
     :return: Array of the cartesian coordinates of the center of the sites
     """
-    return sum([site.coords for site in sites])/len(sites)
+    return sum([site.coords for site in sites]) / len(sites)
+
 
 def schoenflies_to_hm():
     """

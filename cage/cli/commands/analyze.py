@@ -35,11 +35,28 @@ START_FACET = 1  # 0 or 1 -> determines facet to start chain from
 CATIONS = {Element("Li"), Element("Na"), Element("Mg")}
 
 
-def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
-                       interp_mesh=(0.0, 0.0), end_radii=(0.0, 0.0),
-                       contour_levels=0.1, verbose=False, coulomb_charge=0,
-                       reference_energy=None, interp_method="griddata",
-                       set_contour_levels_manually=False):
+def landscape_analysis(directory, cation="Li", interp_mesh=(0.03, 0.01),
+                       end_radii=None, chain_range=None, verbose=False,
+                       interp_method=("griddata", {"method": "cubic"})):
+    """
+    Gather the results from a wedge-chain landscape and perform a suitable interpolation.
+
+    Args:
+        directory (str): Directory in which the
+        cation (str): Element used as a cation in the landscape. Defaults to "Li".
+        interp_mesh (tuple): Tuple that indicates the distances between two grid points
+            in the interpolation mesh. The first value corresponds to the x-coordinate
+            (the angle along the wedges), the second to the y-coordinate (the radius).
+        end_radii (tuple): Minimum and maximum radius of the landscape.
+        verbose (bool): Verbose output. Was mainly used for debugging, but might be
+            useful in case we want more output.
+        interp_method (tuple): Method to be used for the interpolation.
+
+    Returns:
+        (dict): Dictionary with the landscape data.
+
+    """
+
     directory = os.path.abspath(directory)
 
     dir_list = [os.path.abspath(os.path.join(directory, file))
@@ -70,9 +87,7 @@ def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
                                  os.path.join(directory, 'final_facet.json'))]
                 }
             else:
-
-                if verbose:
-                    print("No facet information found in " + directory + ".")
+                print("No facet information found in " + directory + ".")
         else:
             print("No landscape data found in " + directory + ".")
 
@@ -113,6 +128,12 @@ def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
             facet_chain.append(link[1])
         chain_landscapes = [chain[data]['landscape'] for data in chain.keys()]
 
+    if chain_range:
+        facet_range = list(chain_range)
+        facet_range.append(len(chain_range))
+        facet_chain = [facet_chain[i] for i in facet_range]
+        chain_landscapes = [chain_landscapes[i] for i in chain_range]
+
     # Interpolate the landscapes to a uniform mesh
     if verbose:
         print('-----------')
@@ -141,15 +162,14 @@ def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
         print('Smallest maximal radius = ' + str(min_max_radius))
 
     # Adjust the angles to set up one angle coordinate for all edges
-
     facet_angles = [0, ]
 
     for index in range(1, len(facet_chain)):
         chain_landscapes[index - 1].datapoints['Angle'] += facet_angles[-1]
-
-        facet_angles.append(facet_angles[-1] +
-                            utils.angle_between(facet_chain[index - 1].center,
-                                                facet_chain[index].center))
+        facet_angles.append(
+            facet_angles[-1] + utils.angle_between(facet_chain[index - 1].center,
+                                                   facet_chain[index].center)
+        )
 
     if verbose:
         print("")
@@ -160,8 +180,10 @@ def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
     all_angles = []
     all_energy = []
 
+    # Perform the interpolation
     if interp_mesh == (0.0, 0.0):
 
+        # For no interpolation, we have to gather the data in one array and reshape it
         for landscape in chain_landscapes:
 
             data = landscape.datapoints
@@ -233,15 +255,15 @@ def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
             print("New Maximum Angle = " + str(new_angles.max()))
 
         # Interpolation
-        if interp_method == "griddata":
+        if interp_method[0] == "griddata":
             new_energy = interpolate.griddata(
                 total_coordinates, total_energy, (new_radii, new_angles),
-                method="cubic"
+                **interp_method[1]
             )
 
-        elif interp_method == "spline":
+        elif interp_method[0] == "bisplrep":
             tck = interpolate.bisplrep(
-                total_angles, total_radii, total_energy, s=0.1
+                total_angles, total_radii, total_energy, **interp_method[1]
             )
 
             new_energy = interpolate.bisplev(
@@ -250,49 +272,15 @@ def landscape_analysis(directory, cation="Li", energy_range=(0.0, 0.0),
         else:
             raise IOError("Interpolation method not recognized.")
 
-    # Add the Coulomb reference energy if requested
-    if coulomb_charge is not 0:
-        coulomb_energy = np.array([[coulomb_potential(-coulomb_charge, 1, r)
-                                    for r in row] for row in new_radii])
-        new_energy -= coulomb_energy
+    landscape_data = {
+        "type": "chain",
+        "facet_angles": facet_angles,
+        "energy": new_energy,
+        "x_coords": new_angles,
+        "y_coords": new_radii
+    }
 
-    # Compare the energies versus an reference energy if provided
-    if reference_energy is None:
-        new_energy -= np.nanmin(new_energy)
-    else:
-        new_energy -= reference_energy
-
-    # If no energy range is specified by the user, take (min, max)
-    if energy_range == (0.0, 0.0):
-        energy_range = (np.nanmin(new_energy), np.nanmax(new_energy))
-
-    contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
-
-    # Plot the landscape
-    plt.figure()
-    plt.pcolor(new_angles, new_radii, new_energy,
-               vmin=energy_range[0],
-               vmax=energy_range[1], cmap='viridis')
-    cbar = plt.colorbar()
-    cbar.set_label('Energy (eV)', size='x-large')
-    cs = plt.contour(new_angles, new_radii, new_energy,
-                     colors='black',
-                     levels=contour_levels, linewidths=0.6)
-
-    for angle in facet_angles:
-        plt.plot([angle, angle], [new_radii.min(), new_radii.max()],
-                 color='k', linestyle='-', linewidth=1)
-    xlabel = []
-    for i in range(len(facet_angles)):
-        xlabel.append('$\Omega_' + str(i + 1) + '$')
-
-    plt.xlabel('Angle', size='large')
-    plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
-    plt.xticks(facet_angles, xlabel, size='x-large')
-    plt.yticks(size="x-large")
-    plt.clabel(cs, fontsize=10, inline_spacing=5, fmt='%1.1f',
-               manual=set_contour_levels_manually)
-    plt.show()
+    return landscape_data
 
 
 def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
@@ -397,7 +385,6 @@ def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
         print('Smallest maximal radius = ' + str(min_max_radius))
 
     # Adjust the angles to set up one angle coordinate for all edges
-
     facet_angles = [0, ]
 
     for index in range(1, len(facet_chain)):
@@ -411,16 +398,6 @@ def barrier_analysis(lands_dir, cation, interp_mesh, end_radii,
         print("")
         print("Facet Angles:")
         print(facet_angles)
-
-    # facet_angles = [0, landscape_chain[0].datapoints['Angle'].max()]
-    #
-    # for lands in landscape_chain[1:]:
-    #
-    #     if verbose:
-    #         print('Maximum angle = ' + str(facet_angles[-1]))
-    #
-    #     lands.datapoints['Angle'] += facet_angles[-1]
-    #     facet_angles.append(lands.datapoints['Angle'].max())
 
     all_radii = []
     all_angles = []
@@ -703,7 +680,8 @@ def sphere_analysis(directory, cation, interp_mesh=(0.01, 0.01),
 
 
 def plot_landscape(landscape_data, reference_energy=None, energy_range=None,
-                   contour_levels=0.1, set_contour_levels_manually=False):
+                   contour_levels=0.1, set_contour_levels_manually=False,
+                   colormap="viridis", add_min_path=None):
     """
     Plot a landscape based on the data provided.
 
@@ -719,8 +697,8 @@ def plot_landscape(landscape_data, reference_energy=None, energy_range=None,
     """
     landscape_type = landscape_data["type"]
     energy = landscape_data["energy"].copy()
-    x_coords = landscape_data["x_coords"].copy()
-    y_coords = landscape_data["y_coords"].copy()
+    x = landscape_data["x_coords"].copy()
+    y = landscape_data["y_coords"].copy()
 
     # Compare the energies versus an reference energy if provided
     if reference_energy is None:
@@ -739,33 +717,105 @@ def plot_landscape(landscape_data, reference_energy=None, energy_range=None,
 
     # Plot the landscape
     plt.figure()
-    plt.pcolormesh(x_coords, y_coords, energy, vmin=energy_range[0],
-                   vmax=energy_range[1], cmap='viridis')
+    plt.pcolormesh(x, y, energy, vmin=energy_range[0],
+                   vmax=energy_range[1], cmap=colormap)
     cbar = plt.colorbar()
     cbar.set_label('Energy (eV)', size='x-large')
-    cs = plt.contour(x_coords, y_coords, energy, colors='black',
+    cs = plt.contour(x, y, energy, colors='black',
                      levels=contour_levels, linewidths=0.6)
 
     if landscape_type == "sphere":
+
         plt.xlabel('$\\phi$', size='x-large', fontname='Georgia')
         plt.ylabel('$\\theta$', size='x-large', fontname='Georgia')
         plt.xticks(size="x-large")
         plt.yticks(size="x-large")
+
+    elif landscape_type == "chain":
+
+        xlabel = []
+        facet_angles = landscape_data.get("facet_angles", [])
+
+        for i, angle in enumerate(facet_angles):
+            plt.plot([angle, angle], [y.min(), y.max()],
+                     color='k', linestyle='-', linewidth=1)
+            xlabel.append('$\Omega_' + str(i + 1) + '$')
+
+        plt.xlabel('Angle', size='large')
+        plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
+        plt.xticks(facet_angles, xlabel, size='x-large', fontname='Georgia')
+        plt.yticks(size="x-large")
+
+        if add_min_path:
+            path = np.array(
+                [[x[i, j], y[i, j], energy[i, j]]
+                 for i, j in zip(range(x.shape[0]), np.argmin(energy, 1))
+                 if add_min_path[0] < x[i, j] < add_min_path[1]]
+            )
+
+            plt.plot(path[:, 0], path[:, 1], "w--")
+
     else:
         raise NotImplementedError
 
     if set_contour_levels_manually:
-        plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f',
+        plt.clabel(cs, fontsize=10, inline_spacing=5, fmt='%1.1f',
                    manual=True)
     elif set_contour_levels_manually is None:
         pass
     else:
-        plt.clabel(cs, fontsize=10, inline_spacing=25, fmt='%1.1f')
+        plt.clabel(cs, fontsize=10, inline_spacing=5, fmt='%1.1f')
 
     plt.subplots_adjust(left=0.15, right=0.95, top=0.95, bottom=0.15)
-    plt.savefig("landscape.png", dpi=300)
+    #plt.savefig("landscape.png", dpi=300)
 
     plt.show()
+
+    # Old piece of code from original landscape_analysis script
+    #
+    # # Add the Coulomb reference energy if requested
+    # if coulomb_charge is not 0:
+    #     coulomb_energy = np.array([[coulomb_potential(-coulomb_charge, 1, r)
+    #                                 for r in row] for row in new_radii])
+    #     new_energy -= coulomb_energy
+    #
+    # # Compare the energies versus an reference energy if provided
+    # if reference_energy is None:
+    #     new_energy -= np.nanmin(new_energy)
+    # else:
+    #     new_energy -= reference_energy
+    #
+    # # If no energy range is specified by the user, take (min, max)
+    # if energy_range == (0.0, 0.0):
+    #     energy_range = (np.nanmin(new_energy), np.nanmax(new_energy))
+    #
+    # contour_levels = np.mgrid[energy_range[0]:energy_range[1]:contour_levels]
+    #
+    # # Plot the landscape
+    # plt.figure()
+    # plt.pcolor(new_angles, new_radii, new_energy,
+    #            vmin=energy_range[0],
+    #            vmax=energy_range[1], cmap='viridis')
+    # cbar = plt.colorbar()
+    # cbar.set_label('Energy (eV)', size='x-large')
+    # cs = plt.contour(new_angles, new_radii, new_energy,
+    #                  colors='black',
+    #                  levels=contour_levels, linewidths=0.6)
+    #
+    # for angle in facet_angles:
+    #     plt.plot([angle, angle], [new_radii.min(), new_radii.max()],
+    #              color='k', linestyle='-', linewidth=1)
+    # xlabel = []
+    # for i in range(len(facet_angles)):
+    #     xlabel.append('$\Omega_' + str(i + 1) + '$')
+    #
+    # plt.xlabel('Angle', size='large')
+    # plt.ylabel('$r$ ($\mathrm{\AA}$)', size='x-large', fontname='Georgia')
+    # plt.xticks(facet_angles, xlabel, size='x-large')
+    # plt.yticks(size="x-large")
+    # plt.clabel(cs, fontsize=10, inline_spacing=5, fmt='%1.1f',
+    #            manual=set_contour_levels_manually)
+    # plt.show()
 
 
 ###########
@@ -905,3 +955,10 @@ def coulomb_potential(Q, q, r):
     coulomb_pot = k_e * Q * q / distance
 
     return coulomb_pot.to("eV")
+
+
+def distance(c1, c2, type="polar"):
+
+    if type == "polar":
+        return np.sqrt(c1[0] ** 2 + c2[0] ** 2
+                       - 2 * c1[0] * c2[0] * np.cos(c1[1] - c2[1]))
